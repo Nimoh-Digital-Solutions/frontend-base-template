@@ -38,14 +38,14 @@ export function initPWA() {
       if (showUpdatePrompt) {
         showUpdatePrompt();
       } else {
-        // Fallback to basic prompt
-        if (window.confirm('A new version is available. Update now?')) {
-          updateSW(true);
-        }
+        // No prompt handler registered yet — apply the update silently.
+        // Wire up setUpdatePromptHandler() in your app root to show a proper
+        // non-blocking notification to the user before triggering the update.
+        updateSW(true);
       }
     },
     onOfflineReady() {
-      console.log('App is ready for offline use');
+      console.info('[PWA] App is ready for offline use.');
     },
   });
 }

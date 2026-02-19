@@ -16,6 +16,9 @@
     "isolatedModules": true,
     // Type Checking
     "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitReturns": true,
+    "exactOptionalPropertyTypes": true,
     "skipLibCheck": true,
     // Path Aliases (must match vite.config.ts)
     "baseUrl": "src",

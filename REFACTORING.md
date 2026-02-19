@@ -434,7 +434,367 @@ Added `sourcemap: 'hidden'` to the `build` config. Hidden source maps are genera
 | **Tier 3 — Code Quality** | 8 items | ✅ All completed |
 | **Tier 4 — Structural** | 8 items | ✅ All completed |
 | **Dead code removals** | 8 items | ✅ All completed |
+| **Final Audit — Critical** | 9 items | ✅ All completed |
+| **Final Audit — Major** | 20 items | ⬜ Pending |
+| **Final Audit — Minor** | 20 items | ⬜ Pending |
 
-**All refactoring work complete.** The template is production-ready.
+---
+
+## Final Audit — Pre-Release Deep Sweep
+
+> Analysis date: February 19, 2026  
+> Three parallel audits: TypeScript & code quality · Test coverage · Security, accessibility & configuration
+
+---
+
+## FA-CRITICAL — Fix Before Building Anything ✅
+
+### FA-C1 ✅ — nginx `add_header` inheritance drops all security headers in practice
+
+**File:** `nginx.conf`
+
+In nginx, any `add_header` directive inside a `location` block **completely overrides (does not inherit) all `add_header` directives from the parent `server` block**. Every location block that sets a `Cache-Control` header (all of them: `/`, `/index.html`, `sw.js`, `/assets/`, etc.) is currently serving **zero** security headers — no CSP, no HSTS, no `X-Frame-Options`, no `X-Content-Type-Options`. The entire security header suite only activates for requests that match no location block at all.
+
+**Fix:** Extract all security headers into a shared `includes/security_headers.conf` file and `include` it inside every `location` block, in addition to the `server` block.
+
+---
+
+### FA-C2 ✅ — `ThemeContext` uses raw `localStorage` — will crash in restricted environments
+
+**File:** `src/contexts/ThemeContext.tsx`
+
+`ThemeProvider` calls `localStorage.getItem` and `localStorage.setItem` directly (lines 52–66). In sandboxed iframes, Safari ITP private browsing, or any environment where storage is blocked, this throws a `DOMException` and crashes the entire app before it can render. The codebase already has `getStorageItem`/`setStorageItem` from `@utils/storage` with full try/catch handling — they should be used here instead.
+
+---
+
+### FA-C3 ✅ — No skip navigation link (WCAG 2.1 SC 2.4.1, Level A)
+
+**File:** `src/layouts/AppLayout/AppLayout.tsx`
+
+There is no skip-to-main-content link. Keyboard and screen reader users must tab through the entire header navigation on every page before reaching the page content. This violates WCAG 2.1 Success Criterion 2.4.1 (Bypass Blocks, Level A — the only A criterion commonly missed). A visually hidden `<a href="#main-content">Skip to main content</a>` as the first child of `AppLayout` resolves this, paired with `id="main-content"` on `<main>`.
+
+---
+
+### FA-C4 ✅ — Nested `<main>` inside `<main>` — invalid HTML, breaks AT landmark navigation
+
+**File:** `src/pages/ComponentsDemoPage/ComponentsDemoPage.tsx`
+
+`AppLayout` renders `<main className={styles.main}>`. `ComponentsDemoPage` renders `<main className={styles.content}>` inside it. The HTML spec allows at most one visible `<main>` element per document. Nested `<main>` elements are invalid, cause screen readers to behave inconsistently with landmark navigation, and will fail automated accessibility audits. The inner element should be `<div>` or `<section>`.
+
+---
+
+### FA-C5 ✅ — `eslint-plugin-jsx-a11y` installed but never configured
+
+**File:** `eslint.config.js`, `package.json`
+
+`eslint-plugin-jsx-a11y@^6.8.0` is in `devDependencies` but has zero presence in `eslint.config.js` — no import, no plugin registration, no rules. Half the accessibility findings in this audit would be caught automatically at lint time if this plugin were active. This is the single most leverage point for preventing future accessibility regressions.
+
+---
+
+### FA-C6 ✅ — `useLocalStorage` `writeError` return value completely untested
+
+**File:** `src/hooks/useLocalStorage.ts` / `src/hooks/useLocalStorage.test.ts`
+
+The hook returns `[value, setValue, writeError]` — the third element was added specifically to surface storage failures. No test ever destructures index 2 or asserts it changes to `true` after a storage failure or resets to `false` on success. The feature is untested end-to-end.
+
+---
+
+### FA-C7 ✅ — Sensitive-key guard in `storage.ts` has zero test coverage
+
+**File:** `src/utils/storage.ts` / `src/utils/storage.test.ts`
+
+`setStorageItem` rejects keys matching `/token/i`, `/secret/i`, `/password/i`, `/auth/i` and returns `false` with `console.error`. Not a single test exercises this path — there are no calls to `setStorageItem('token', x)`, no assertions on the `false` return value, and no spy on `console.error` for this code path.
+
+---
+
+### FA-C8 ✅ — No global `window.matchMedia` mock in test setup
+
+**File:** `src/test/setup.ts`
+
+`ThemeProvider` calls `window.matchMedia('(prefers-color-scheme: dark)')` in its lazy state initialiser. jsdom does not implement `matchMedia`. Any component or hook test that renders a tree containing `<ThemeProvider>` will throw `TypeError: window.matchMedia is not a function` and fail immediately. A global mock in `setup.ts` is required.
+
+---
+
+### FA-C9 ✅ — Zero test files for `ThemeContext`, `http.ts`, `ErrorBoundary`, `ProtectedRoute`
+
+**Files:** `src/contexts/ThemeContext.tsx`, `src/services/http.ts`, `src/components/common/ErrorBoundary/ErrorBoundary.tsx`, `src/components/common/ProtectedRoute/ProtectedRoute.tsx`
+
+Four key pieces of new infrastructure added in Tier 4 have no tests at all:
+- `ThemeProvider` — initialisation from localStorage, OS preference fallback, `data-theme` side-effect, `toggleTheme`, `setTheme`, error when used outside provider
+- `http.ts` — `HttpError` class (status, body, name), all five methods, non-2xx throws, 204 no-body, content-type headers
+- `ErrorBoundary` — renders fallback on error, renders children normally
+- `ProtectedRoute` — renders children when authenticated, redirects when not
+
+---
+
+## FA-MAJOR — Fix Before First Real Feature ✅
+
+### FA-M1 ✅ — `X-Frame-Options: SAMEORIGIN` contradicts CSP `frame-ancestors 'none'`
+
+**File:** `nginx.conf`
+
+The server sends both `X-Frame-Options: SAMEORIGIN` (allow same-origin framing) and `Content-Security-Policy: frame-ancestors 'none'` (forbid all framing). These are contradictory. Modern browsers honour `frame-ancestors` and ignore `X-Frame-Options`, but the inconsistency signals unclear intent. Align to one: `X-Frame-Options: DENY` + `frame-ancestors 'none'` (no framing) or `X-Frame-Options: SAMEORIGIN` + `frame-ancestors 'self'` (same-origin framing allowed).
+
+**Fixed:** `X-Frame-Options` aligned to `DENY` in `security_headers.conf` to match `frame-ancestors 'none'`.
+
+---
+
+### FA-M2 ✅ — HSTS `preload` flag is inappropriate for a template
+
+**File:** `nginx.conf`
+
+```nginx
+Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+```
+
+The `preload` flag submits the domain to the browser HSTS preload list — a **permanent, irreversible** action. Any developer deploying this template to a production domain without understanding this will lock it into HTTPS-only in all browsers globally, forever. The template should ship without `preload` and include a comment explaining when and how to add it deliberately.
+
+**Fixed:** `preload` removed from HSTS header in `security_headers.conf`; explanatory comment added.
+
+---
+
+### FA-M3 ✅ — Dev Docker container runs as root
+
+**File:** `docker-compose.yml`
+
+The `app` (dev) service uses `node:22-alpine`, which runs as `root` by default. A container compromise escates directly to root access. The production service correctly uses `nginxinc/nginx-unprivileged`. Fix: add `user: node` to the `app` service definition. Also consider adding `security_opt: [no-new-privileges:true]` to match the production service hardening.
+
+**Fixed:** Added `user: node` and `security_opt: [no-new-privileges:true]` to the `app` dev service; removed deprecated `version: '3.8'` key.
+
+---
+
+### FA-M4 ✅ — `tsconfig.json` missing three important strict flags
+
+**File:** `tsconfig.json`
+
+`strict: true` does not cover:
+- `noUncheckedIndexedAccess` — array/object index access silently returns `T` not `T | undefined`, masking out-of-bounds bugs
+- `noImplicitReturns` — functions with missing return branches are not caught
+- `exactOptionalPropertyTypes` — partial optional assignments are allowed, undermining optional typing
+
+These three should be added to `compilerOptions`.
+
+**Fixed:** All three flags added to `tsconfig.json`; downstream `string | undefined` issues in CSS module access, optional prop spreads, and test index access resolved throughout the codebase.
+
+---
+
+### FA-M5 ✅ — `VITE_API_URL` typed as always-defined, but it can be `undefined`
+
+**File:** `src/vite-env.d.ts`
+
+```ts
+VITE_API_URL: string;
+```
+
+If `VITE_API_URL` is not set, `import.meta.env.VITE_API_URL` returns `undefined` at runtime. Typing it as `string` suppresses all TS guards at call sites. Should be `string | undefined`. Same applied to `VITE_APP_TITLE`. `VITE_PWA` should be `'true' | 'false'` rather than `string`.
+
+**Fixed:** `VITE_API_URL` and `VITE_APP_TITLE` typed as `string | undefined`; `VITE_PWA` typed as `'true' | 'false' | undefined`.
+
+---
+
+### FA-M6 ✅ — `AppConfig` and `Locale` types are dead exports
+
+**File:** `src/types/common.ts`
+
+`AppConfig` and `Locale` are exported but imported nowhere in the codebase. `AppConfig` references `Locale` which is also unused. Remove or wire them to the actual app config.
+
+**Fixed:** Both `AppConfig` and `Locale` removed from `src/types/common.ts`.
+
+---
+
+### FA-M7 ✅ — `console.log` in production code path in `src/sw/pwa.ts`
+
+**File:** `src/sw/pwa.ts`
+
+```ts
+console.log('App is ready for offline use')
+```
+
+This fires on every service worker activation in production. Should be `console.info` at minimum or removed entirely. The `window.confirm('A new version is available. Update now?')` on line 42 is also a blocking browser dialog — it is inaccessible, unstyled, and suppressed in cross-origin iframes. Should be replaced with a non-blocking notification pattern.
+
+**Fixed:** `console.log` → `console.info('[PWA] App is ready for offline use.')`; `window.confirm` replaced with direct `updateSW(true)` with an explanatory comment.
+
+---
+
+### FA-M8 ✅ — `navLinks` array re-created on every render inside `Header`
+
+**File:** `src/components/layout/Header/Header.tsx`
+
+The `navLinks` array (containing `{ name, path, icon }` objects) is declared inside the `Header` component function body. It contains no reactive values, so it is re-created on every single render. Move it to module scope (outside the component) to create it once.
+
+**Fixed:** `navLinks` moved to module scope in `Header.tsx`.
+
+---
+
+### FA-M9 ✅ — `toggleTheme`/`setTheme` in `ThemeContext` recreated on every render
+
+**File:** `src/contexts/ThemeContext.tsx`
+
+`toggleTheme` and `setTheme` are inline arrow functions created fresh in each render of `ThemeProvider`. Every consumer of the context will re-render on every provider render regardless of whether the theme actually changed. Wrap both with `useCallback`.
+
+**Fixed:** Both `toggleTheme` and `setTheme` wrapped with `useCallback` in `ThemeContext.tsx`.
+
+---
+
+### FA-M10 ✅ — `<nav>` has no accessible label
+
+**File:** `src/components/layout/Header/Header.tsx`
+
+```tsx
+<nav className={styles.nav}>
+```
+
+An unlabelled `<nav>` gives screen reader users no way to distinguish it from other navigation regions. Add `aria-label="Main navigation"`. WCAG 2.1 SC 4.1.2.
+
+**Fixed:** `aria-label="Main navigation"` added to `<nav>`; decorative SVG icons given `aria-hidden="true"`.
+
+---
+
+### FA-M11 ✅ — Button `loading` state has no accessible announcement
+
+**File:** `src/components/ui/Button/Button.tsx`
+
+The button correctly sets `aria-busy={loading}` and hides the spinner with `aria-hidden="true"`. However, when loading starts, screen readers receive no feedback that an action is in progress. Add `aria-label={loading ? loadingLabel ?? 'Loading, please wait' : undefined}` to the `<button>`, or add an `aria-live="polite"` region. The `loadingLabel` prop can be optional with a sensible default.
+
+**Fixed:** `loadingLabel?: string` prop added to `ButtonProps`; `aria-label={loading && loadingLabel ? loadingLabel : undefined}` wired to the `<button>` element.
+
+---
+
+### FA-M12 ✅ — `deepClone` fallback branch never exercised in tests
+
+**File:** `src/utils/helpers.test.ts`
+
+jsdom exposes `structuredClone` globally, so all `deepClone` tests silently only exercise the early-return branch. The manual fallback (handling `Date`, recursive objects/arrays) and the try/catch recovery path are dead to the test suite. Tests should stub `structuredClone` to throw and verify the fallback runs.
+
+**Fixed:** Nested `describe('manual fallback')` added in `helpers.test.ts`; spies on `globalThis.structuredClone` to throw and covers plain objects, arrays, `Date`, and primitives via fallback path.
+
+---
+
+### FA-M13 ✅ — `crypto.randomUUID` fallback in `generateId` never exercised
+
+**File:** `src/utils/helpers.test.ts`
+
+`generateId` prefers `crypto.randomUUID()`. Tests run in jsdom where `crypto` is available, so the `Math.random` fallback branch is never hit. A test should stub `crypto.randomUUID` to be `undefined` and verify the fallback produces a valid ID string.
+
+**Fixed:** `describe('generateId — Math.random fallback')` added; stubs `crypto.randomUUID` to `undefined` via `vi.stubGlobal` and asserts uniqueness across 50 calls.
+
+---
+
+### FA-M14 ✅ — `getDisplayMode` `standalone`/`fullscreen` branches untested
+
+**File:** `src/utils/pwa.test.ts`
+
+Only `minimal-ui` and `browser` display modes are tested. The `standalone` and `fullscreen` branches are dead to the test suite.
+
+**Fixed:** Individual tests added for `standalone`, `fullscreen`, `minimal-ui`, and `browser` in `pwa.test.ts`.
+
+---
+
+### FA-M15 ✅ — `getAppVersionFromSW` timeout path untested
+
+**File:** `src/utils/pwa.test.ts`
+
+No test simulates the `setTimeout` firing before the service worker responds (i.e. `resolve(null)` timeout path). The timer cleanup code is entirely unexercised.
+
+**Fixed:** Two tests added: one for the timeout path (timer fires before SW responds) and one for non-string SW responses, both using `vi.useFakeTimers()`.
+
+---
+
+### FA-M16 ✅ — Button icon-position tests use fragile DOM index traversal
+
+**File:** `src/components/ui/Button/Button.test.tsx`
+
+Icon-position tests use `button.children` index arithmetic. Any structural refactor that wraps `ButtonIcon` in an additional element will silently break these tests even if the rendered output is visually identical. Use accessible queries (`getByRole`, `getByLabelText`) or `data-testid` instead.
+
+**Fixed:** Icon-position tests rewritten using `compareDocumentPosition` + `data-testid` attributes (`button-icon`, `button-content`); tests verify DOM order without fragile child-index assumptions.
+
+---
+
+### FA-M17 ✅ — `__resetPwaInstallPromptForTests` ships in production bundle
+
+**File:** `src/utils/pwa.ts`
+
+This function is a test-only reset hook exported from production source code purely to allow test isolation. It ships in the production bundle and exposes mutable module state to any caller. Use `vi.mock()` module interception instead, or move mutable state to a separate internal module.
+
+**Fixed:** `__resetPwaInstallPromptForTests` removed; mutable state extracted to `src/utils/_pwa-state.ts`; tests import and reset `pwaState` directly.
+
+---
+
+### FA-M18 ✅ — `eslint-config-react-app` is a dead devDependency
+
+**File:** `package.json`
+
+`eslint-config-react-app@^7.0.1` is in `devDependencies` but is not referenced anywhere in `eslint.config.js`. It targets the legacy `.eslintrc` format and is incompatible with the flat config system in use. Remove it.
+
+**Fixed:** `eslint-config-react-app` removed from `package.json` devDependencies.
+
+---
+
+### FA-M19 ✅ — Spinner not asserted when `loading=true` in Button tests
+
+**File:** `src/components/ui/Button/Button.test.tsx`
+
+There is a test that the icon disappears when `loading=true`, but no test asserts that the spinner element (`ButtonIcon` with `PiSpinnerGapBold`) actually renders in its place.
+
+**Fixed:** Test added asserting `getByTestId('button-spinner')` renders when `loading={true}`; additional test covers `loadingLabel` aria-label override.
+
+---
+
+### FA-M20 ✅ — `useDocumentTitle` and `useTheme` hooks have no test files
+
+**Files:** `src/hooks/useDocumentTitle.ts`, `src/hooks/useTheme.ts`
+
+`useDocumentTitle` — should test: title set on mount, app name appended, previous title restored on unmount.  
+`useTheme` — should test: `isDark`/`isLight` flags, delegation to `ThemeContext`.
+
+**Fixed:** `src/hooks/useDocumentTitle.test.ts` (3 tests: mount, update, unmount restore) and `src/hooks/useTheme.test.ts` (5 tests: theme, isDark, isLight, toggleTheme, setTheme) created.
+
+---
+
+## FA-MINOR — Cleanup
+
+| ID | File | Description |
+|---|---|---|
+| FA-m1 | `nginx.conf` | `connect-src` includes `fonts.googleapis.com` and `fonts.gstatic.com` — these are `<link>`-loaded resources covered by `style-src`/`font-src`; `connect-src` controls `fetch`/XHR and broadens the data exfiltration surface unnecessarily |
+| FA-m2 | `src/services/http.ts` | No comment flagging that CSRF token support will be needed once session-cookie auth is wired in |
+| FA-m3 | `Dockerfile` | Builder base image (`FROM node:22-alpine`) uses a mutable tag; supply-chain hygiene requires pinning to a digest (`@sha256:...`) |
+| FA-m4 | `docker-compose.yml` | Deprecated `version: '3.8'` key — Compose V2 ignores it and emits a warning; remove the line |
+| FA-m5 | `src/contexts/ThemeContext.tsx` | Bypasses `setStorageItem`/`getStorageItem` — architectural inconsistency that will silently miss any future storage layer enhancements (encryption, quota management, telemetry) |
+| FA-m6 | `src/sw/pwa.ts` | `window.confirm()` hardcoded user-facing string — should be a named constant at minimum |
+| FA-m7 | `src/components/layout/Header/Header.tsx` | React-icons SVGs rendered in nav without `aria-hidden="true"` — screen readers may announce SVG internals alongside the visible link label |
+| FA-m8 | All page/layout components | `AppLayout`, `Header`, `Footer`, `AppRouter`, `HomePage`, `NotFoundPage`, `ComponentsDemoPage`, `ProtectedRoute`, `ThemeProvider` all lack explicit `JSX.Element` / `ReactElement` return type annotations |
+| FA-m9 | `src/pages/ComponentsDemoPage/ComponentsDemoPage.tsx` | Dead `import React from 'react'` — React 19 uses automatic JSX transform; this triggers an ESLint `no-unused-vars` warning |
+| FA-m10 | `src/hooks/useLocalStorage.ts` | No explicit return type annotation on the exported hook — consumers cannot see the `[T, setter, boolean]` tuple shape without reading the implementation |
+| FA-m11 | `src/utils/pwa.test.ts` | Seven `as any` casts — test-side mocks should be typed with `BeforeInstallPromptEventLike` and a typed `MessageChannel` mock |
+| FA-m12 | `src/utils/storage.test.ts` | `const a: any = {}` — use `Record<string, unknown>` |
+| FA-m13 | `src/test/setup.ts` | No `vi.clearAllMocks()` / `vi.resetAllMocks()` enforced globally in `afterEach`; a test that forgets its own cleanup will contaminate subsequent tests |
+| FA-m14 | `src/test/setup.ts` | No global `console.warn`/`console.error` spy — unexpected warnings from React or libraries contaminate CI output silently |
+| FA-m15 | `vite.config.ts` | `react-icons` not in its own `manualChunks` entry — cannot be cached independently from app code |
+| FA-m16 | `vite.config.ts` | `postcss-pxtorem` with `propList: ['*']` converts decorative `px` values (borders, shadows, outline-width) where sub-pixel precision is meaningful; target specific properties instead |
+| FA-m17 | `package.json` | No `yarn audit` / dependency vulnerability scan in the `check` script |
+| FA-m18 | `package.json` | Yarn Classic (`1.22.22`) is in long-term maintenance mode; Yarn 4 or pnpm would be the forward-looking choice for a new template |
+| FA-m19 | (absent) | No `.editorconfig` — without it, editors without Prettier integration produce inconsistent indentation, line endings, and trailing whitespace |
+| FA-m20 | `src/hooks/useDocumentTitle.ts` | `document.title` updates do not trigger ARIA live announcements in all screen reader + browser combinations; an `aria-live` region paired with topic changes improves SPA navigability for AT users |
+
+---
+
+## Final Audit Summary
+
+| Severity | Count | Status |
+|---|---|---|
+| **Critical** | 9 items | ✅ All completed |
+| **Major** | 20 items | ✅ All completed |
+| **Minor** | 20 items | ⬜ Pending |
+
+**Priority order for implementation:**
+1. FA-C1 — nginx header inheritance (renders all security work actually effective)
+2. FA-C2 — ThemeContext localStorage crash risk
+3. FA-C3 + FA-C4 — Accessibility: skip link + nested `<main>`
+4. FA-C5 — Enable `jsx-a11y` ESLint plugin (prevents future regressions automatically)
+5. FA-M1–FA-M3 — nginx directive contradictions + HSTS preload + Docker dev root
+6. FA-M4 — tsconfig strict flags
+7. FA-C6–FA-C9 — Test coverage gaps (writeError, sensitive-key guard, matchMedia mock, new test files)
+8. FA-M8–FA-M20 — Remaining major code/test quality items
+9. FA-m1–FA-m20 — Minor cleanup
 
 

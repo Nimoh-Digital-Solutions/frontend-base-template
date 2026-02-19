@@ -32,6 +32,9 @@ RUN rm /etc/nginx/conf.d/default.conf
 # Copy custom nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+# Copy shared security headers include (referenced by every location block in default.conf)
+COPY nginx/security_headers.conf /etc/nginx/conf.d/security_headers.conf
+
 # Copy built application from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 

@@ -48,7 +48,10 @@ async function request<T>(
       Accept: 'application/json',
       ...init?.headers,
     },
-    body: body != null ? JSON.stringify(body) : undefined,
+    // Conditional spread avoids setting `body: undefined` which violates
+    // exactOptionalPropertyTypes (RequestInit.body is `BodyInit | null`, not
+    // `BodyInit | null | undefined`).
+    ...(body != null ? { body: JSON.stringify(body) } : {}),
     ...init,
   });
 

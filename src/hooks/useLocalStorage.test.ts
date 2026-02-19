@@ -84,7 +84,7 @@ describe('useLocalStorage', () => {
     });
 
     expect(result.current[0]).toEqual({ a: 2, b: 'x' });
-    expect(JSON.parse(store['obj'])).toEqual({ a: 2, b: 'x' });
+    expect(JSON.parse(store['obj']!)).toEqual({ a: 2, b: 'x' });
   });
 
   it('still updates state even if localStorage.setItem throws', () => {
@@ -105,5 +105,56 @@ describe('useLocalStorage', () => {
     // State updates regardless of storage failure
     expect(result.current[0]).toBe('new value');
     expect(warnSpy).toHaveBeenCalled();
+  });
+
+  // -------------------------------------------------------------------------
+  // writeError (third tuple element)
+  // -------------------------------------------------------------------------
+  it('writeError is false initially', () => {
+    const { result } = renderHook(() => useLocalStorage('test-key', 'initial'));
+    expect(result.current[2]).toBe(false);
+  });
+
+  it('writeError becomes true when localStorage.setItem throws', () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    (globalThis.localStorage.setItem as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+      () => {
+        throw new Error('QuotaExceededError');
+      }
+    );
+
+    const { result } = renderHook(() => useLocalStorage('test-key', 'initial'));
+
+    act(() => {
+      result.current[1]('value that fails to persist');
+    });
+
+    expect(result.current[2]).toBe(true);
+  });
+
+  it('writeError resets to false after a successful write following a failure', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const setItemMock = globalThis.localStorage.setItem as unknown as ReturnType<typeof vi.fn>;
+
+    // First call throws
+    setItemMock.mockImplementationOnce(() => {
+      throw new Error('QuotaExceededError');
+    });
+
+    const { result } = renderHook(() => useLocalStorage('test-key', 'initial'));
+
+    // Trigger failure
+    act(() => {
+      result.current[1]('failing value');
+    });
+    expect(result.current[2]).toBe(true);
+    expect(warnSpy).toHaveBeenCalled();
+
+    // Now let storage succeed again
+    act(() => {
+      result.current[1]('recovering value');
+    });
+    expect(result.current[2]).toBe(false);
   });
 });

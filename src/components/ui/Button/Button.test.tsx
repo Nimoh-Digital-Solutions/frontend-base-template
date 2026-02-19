@@ -76,50 +76,59 @@ describe('Button', () => {
       render(<Button>Not loading</Button>);
       expect(screen.getByRole('button', { name: /not loading/i })).not.toHaveAttribute('aria-busy');
     });
+
+    it('uses loadingLabel as accessible name while loading (FA-M11)', () => {
+      render(
+        <Button loading loadingLabel="Saving changes…">
+          Save
+        </Button>
+      );
+      expect(screen.getByRole('button', { name: 'Saving changes…' })).toBeInTheDocument();
+    });
+
+    it('does not set aria-label when not loading, even if loadingLabel is provided', () => {
+      render(
+        <Button loadingLabel="Saving…">
+          Save
+        </Button>
+      );
+      expect(screen.getByRole('button', { name: /save/i })).not.toHaveAttribute('aria-label');
+    });
   });
 
   describe('Icons', () => {
     const TestIcon = () => <span data-testid="test-icon">Icon</span>;
 
-    it('renders icon on the left when iconPosition="left"', () => {
+    it('renders icon before content when iconPosition="left"', () => {
       render(
         <Button icon={<TestIcon />} iconPosition="left">
           With Icon
         </Button>
       );
 
-      const button = screen.getByRole('button', { name: /with icon/i });
-      const icon = screen.getByTestId('test-icon');
+      const iconWrapper = screen.getByTestId('button-icon');
+      const content     = screen.getByTestId('button-content');
 
-      expect(button).toContainElement(icon);
-
-      // children order: [icon?, content, icon?]
-      const children = Array.from(button.children);
-      const iconIndex = children.findIndex(c => c.contains(icon));
-      const contentIndex = children.findIndex(c => c.textContent?.includes('With Icon'));
-
-      expect(iconIndex).toBeGreaterThanOrEqual(0);
-      expect(contentIndex).toBeGreaterThanOrEqual(0);
-      expect(iconIndex).toBeLessThan(contentIndex);
+      // DOCUMENT_POSITION_FOLLOWING (4) on content means it comes after iconWrapper
+      expect(
+        iconWrapper.compareDocumentPosition(content) & Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
     });
 
-    it('renders icon on the right when iconPosition="right"', () => {
+    it('renders icon after content when iconPosition="right"', () => {
       render(
         <Button icon={<TestIcon />} iconPosition="right">
           With Icon
         </Button>
       );
 
-      const button = screen.getByRole('button', { name: /with icon/i });
-      const icon = screen.getByTestId('test-icon');
+      const iconWrapper = screen.getByTestId('button-icon');
+      const content     = screen.getByTestId('button-content');
 
-      expect(button).toContainElement(icon);
-
-      const children = Array.from(button.children);
-      const iconIndex = children.findIndex(c => c.contains(icon));
-      const contentIndex = children.findIndex(c => c.textContent?.includes('With Icon'));
-
-      expect(iconIndex).toBeGreaterThan(contentIndex);
+      // DOCUMENT_POSITION_PRECEDING (2) on content means it comes before iconWrapper
+      expect(
+        iconWrapper.compareDocumentPosition(content) & Node.DOCUMENT_POSITION_PRECEDING
+      ).toBeTruthy();
     });
 
     it('does not render the provided icon when loading', () => {
@@ -130,6 +139,12 @@ describe('Button', () => {
       );
 
       expect(screen.queryByTestId('test-icon')).not.toBeInTheDocument();
+    });
+
+    it('renders the loading spinner when loading is true (FA-M19)', () => {
+      render(<Button loading>Saving</Button>);
+
+      expect(screen.getByTestId('button-spinner')).toBeInTheDocument();
     });
   });
 

@@ -50,7 +50,7 @@ export const ComponentsDemoPage = () => {
         <p>A comprehensive showcase of all reusable components in the project.</p>
       </header>
 
-      <main className={styles.content}>
+      <section className={styles.content}>
         {/* Button Component Section */}
         <section className={styles.section}>
           <h2>Button Component</h2>
@@ -148,7 +148,7 @@ export const ComponentsDemoPage = () => {
                 <h4>Loading</h4>
                 <Button
                   variant="primary"
-                  loading={loadingStates['loading-demo']}
+                  loading={loadingStates['loading-demo'] ?? false}
                   onClick={() => handleLoadingClick('loading-demo')}
                 >
                   {loadingStates['loading-demo'] ? 'Loading...' : 'Click to Load'}
@@ -159,7 +159,7 @@ export const ComponentsDemoPage = () => {
                 <h4>Loading with Icon</h4>
                 <Button
                   variant="outline"
-                  loading={loadingStates['loading-icon']}
+                  loading={loadingStates['loading-icon'] ?? false}
                   onClick={() => handleLoadingClick('loading-icon')}
                 >
                   {loadingStates['loading-icon'] ? 'Processing...' : 'Process Data'}
@@ -201,7 +201,7 @@ export const ComponentsDemoPage = () => {
                 <Button
                   variant="success"
                   icon={<LuCheck size={18} />}
-                  loading={loadingStates['form-submit']}
+                  loading={loadingStates['form-submit'] ?? false}
                   onClick={() => handleLoadingClick('form-submit')}
                 >
                   {loadingStates['form-submit'] ? 'Submitting...' : 'Submit Form'}
@@ -220,7 +220,7 @@ export const ComponentsDemoPage = () => {
                 <Button
                   variant="danger"
                   icon={<LuTrash2 size={18} />}
-                  loading={loadingStates['danger-action']}
+                  loading={loadingStates['danger-action'] ?? false}
                   onClick={() => handleLoadingClick('danger-action')}
                 >
                   {loadingStates['danger-action'] ? 'Deleting...' : 'Delete Item'}
@@ -244,7 +244,7 @@ export const ComponentsDemoPage = () => {
             </ul>
           </div>
         </section>
-      </main>
+      </section>
     </div>
   );
 };

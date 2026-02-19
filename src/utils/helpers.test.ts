@@ -238,5 +238,82 @@ describe('helpers', () => {
       expect(cloned.metadata).not.toBe(original.metadata);
       expect(cloned.metadata.created).not.toBe(original.metadata.created);
     });
+
+    // -------------------------------------------------------------------------
+    // Manual fallback branch (FA-M12)
+    // The default path uses structuredClone (available in jsdom). These tests
+    // stub it to throw, forcing the manual recursive clone path to run.
+    // -------------------------------------------------------------------------
+    describe('manual fallback (when structuredClone throws)', () => {
+      beforeEach(() => {
+        vi.spyOn(globalThis, 'structuredClone').mockImplementation(() => {
+          throw new Error('not supported in this environment');
+        });
+        vi.spyOn(console, 'warn').mockImplementation(() => {});
+      });
+
+      afterEach(() => {
+        vi.restoreAllMocks();
+      });
+
+      it('clones plain objects via fallback', () => {
+        const original = { a: 1, b: { c: 2 } };
+        const cloned = deepClone(original);
+
+        expect(cloned).toEqual(original);
+        expect(cloned).not.toBe(original);
+        expect(cloned.b).not.toBe(original.b);
+        expect(console.warn).toHaveBeenCalled();
+      });
+
+      it('clones arrays via fallback', () => {
+        const original = [1, 2, { x: 3 }];
+        const cloned = deepClone(original);
+
+        expect(cloned).toEqual(original);
+        expect(cloned).not.toBe(original);
+      });
+
+      it('clones Date objects via fallback', () => {
+        const original = new Date('2024-06-01');
+        const cloned = deepClone(original);
+
+        expect(cloned).toEqual(original);
+        expect(cloned).not.toBe(original);
+        expect(cloned.getTime()).toBe(original.getTime());
+      });
+
+      it('returns primitives unchanged via fallback', () => {
+        expect(deepClone(42)).toBe(42);
+        expect(deepClone('hello')).toBe('hello');
+        expect(deepClone(null)).toBe(null);
+      });
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // generateId — crypto.randomUUID fallback (FA-M13)
+  // ---------------------------------------------------------------------------
+  describe('generateId — Math.random fallback', () => {
+    it('falls back to Math.random when crypto.randomUUID is not available', () => {
+      vi.stubGlobal('crypto', { randomUUID: undefined });
+
+      const id = generateId(9);
+
+      expect(typeof id).toBe('string');
+      expect(id.length).toBeGreaterThan(0);
+
+      vi.unstubAllGlobals();
+    });
+
+    it('fallback IDs are unique across multiple calls', () => {
+      vi.stubGlobal('crypto', { randomUUID: undefined });
+
+      const ids = Array.from({ length: 50 }, () => generateId());
+      const unique = new Set(ids);
+      expect(unique.size).toBe(ids.length);
+
+      vi.unstubAllGlobals();
+    });
   });
 });

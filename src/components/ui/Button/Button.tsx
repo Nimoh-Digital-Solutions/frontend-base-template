@@ -6,8 +6,8 @@ import { ButtonProps } from './Button.interface';
 import styles from './Button.module.scss';
 
 /** Internal helper — renders the icon/spinner span without repetition */
-const ButtonIcon = ({ children }: { children: ReactNode }) => (
-  <span className={styles.icon} aria-hidden="true">
+const ButtonIcon = ({ children, 'data-testid': testId }: { children: ReactNode; 'data-testid'?: string }) => (
+  <span className={styles.icon} aria-hidden="true" data-testid={testId}>
     {children}
   </span>
 );
@@ -35,6 +35,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       fullWidth = false,
       className,
       type = 'button',
+      loadingLabel,
       children,
       ...props
     },
@@ -47,9 +48,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       styles[`root--${variant}`],
       styles[`root--${size}`],
       {
-        [styles.loading]: loading,
-        [styles.disabled]: isDisabled,
-        [styles.fullWidth]: fullWidth,
+        [styles.loading!]: loading,
+        [styles.disabled!]: isDisabled,
+        [styles.fullWidth!]: fullWidth,
       },
       className
     );
@@ -61,22 +62,23 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         className={buttonClasses}
         disabled={isDisabled}
         aria-busy={loading || undefined}
+        aria-label={loading && loadingLabel ? loadingLabel : undefined}
         {...props}
       >
         {loading && (
-          <ButtonIcon>
+          <ButtonIcon data-testid="button-spinner">
             <PiSpinnerGapBold />
           </ButtonIcon>
         )}
 
         {!loading && icon && iconPosition === 'left' && (
-          <ButtonIcon>{icon}</ButtonIcon>
+          <ButtonIcon data-testid="button-icon">{icon}</ButtonIcon>
         )}
 
-        <span className={styles.content}>{children}</span>
+        <span className={styles.content} data-testid="button-content">{children}</span>
 
         {!loading && icon && iconPosition === 'right' && (
-          <ButtonIcon>{icon}</ButtonIcon>
+          <ButtonIcon data-testid="button-icon">{icon}</ButtonIcon>
         )}
       </button>
     );

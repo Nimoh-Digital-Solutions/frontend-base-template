@@ -7,10 +7,3 @@ export interface ApiResponse<T = unknown> {
 }
 
 export type Theme = 'light' | 'dark';
-export type Locale = 'en' | 'es' | 'fr';
-
-export interface AppConfig {
-  theme: Theme;
-  locale: Locale;
-  debug: boolean;
-}

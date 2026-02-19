@@ -5,6 +5,7 @@ import tsparser from '@typescript-eslint/parser';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
+import jsxA11y from 'eslint-plugin-jsx-a11y';
 
 export default [
   // Ignore build outputs
@@ -30,6 +31,7 @@ export default [
       react,
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
+      'jsx-a11y': jsxA11y,
     },
     settings: {
       react: { version: 'detect' },
@@ -53,6 +55,9 @@ export default [
       'react/prop-types': 'off',
       'react/no-unescaped-entities': 'off', // Allow apostrophes in JSX
       'react-refresh/only-export-components': 'off', // Too strict for config files
+
+      // Accessibility
+      ...jsxA11y.configs.recommended.rules,
 
       // General
       'prefer-const': 'error',

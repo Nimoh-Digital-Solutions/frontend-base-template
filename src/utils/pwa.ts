@@ -2,6 +2,7 @@
 // Using relative path: '@types/*' conflicts with TypeScript's reserved @types/ namespace
 export type { DisplayMode, ConnectionType, BeforeInstallPromptEventLike } from '../types/pwa';
 import type { DisplayMode, ConnectionType, BeforeInstallPromptEventLike } from '../types/pwa';
+import { pwaState } from './_pwa-state';
 
 // ---------------------------------------------------------------------------
 // Typed navigator extension — replaces (navigator as any) casts
@@ -15,9 +16,6 @@ interface NavigatorExtended extends Navigator {
   connection?: { effectiveType: ConnectionType };
 }
 
-let deferredInstallPrompt: BeforeInstallPromptEventLike | null = null;
-let listenersRegistered = false;
-
 /**
  * Register a listener that captures the `beforeinstallprompt` event.
  * Call once on app startup (e.g. in App.tsx).
@@ -25,14 +23,14 @@ let listenersRegistered = false;
  * This is the most reliable way to know whether install is possible.
  */
 export function registerPWAInstallPromptListener(): void {
-  if (listenersRegistered) return;
-  listenersRegistered = true;
+  if (pwaState.listenersRegistered) return;
+  pwaState.listenersRegistered = true;
 
   window.addEventListener('beforeinstallprompt', (event: Event) => {
     // Chrome/Edge fires this; prevent default so you can show your own UI.
     event.preventDefault?.();
 
-    deferredInstallPrompt = event as BeforeInstallPromptEventLike;
+    pwaState.deferredInstallPrompt = event as BeforeInstallPromptEventLike;
   });
 }
 
@@ -40,7 +38,7 @@ export function registerPWAInstallPromptListener(): void {
  * Returns true if the browser has fired `beforeinstallprompt` and we captured it.
  */
 export function canPromptPWAInstall(): boolean {
-  return deferredInstallPrompt !== null;
+  return pwaState.deferredInstallPrompt !== null;
 }
 
 /**
@@ -50,19 +48,19 @@ export function canPromptPWAInstall(): boolean {
  * - null if prompting isn't available
  */
 export async function promptPWAInstall(): Promise<'accepted' | 'dismissed' | null> {
-  if (!deferredInstallPrompt) return null;
+  if (!pwaState.deferredInstallPrompt) return null;
 
   try {
-    await deferredInstallPrompt.prompt();
-    const choice = await deferredInstallPrompt.userChoice;
+    await pwaState.deferredInstallPrompt.prompt();
+    const choice = await pwaState.deferredInstallPrompt.userChoice;
 
     // After prompting, browsers generally won't allow reusing the same event.
-    deferredInstallPrompt = null;
+    pwaState.deferredInstallPrompt = null;
 
     return choice?.outcome ?? null;
   } catch (error) {
     console.warn('Failed to prompt PWA install:', error);
-    deferredInstallPrompt = null;
+    pwaState.deferredInstallPrompt = null;
     return null;
   }
 }
@@ -157,12 +155,4 @@ export async function getAppVersionFromSW(timeoutMs = 1500): Promise<string | nu
     console.warn('Failed to get app version from service worker:', error);
     return null;
   }
-}
-
-/**
- * Test helper: reset the captured installation prompt (useful in unit tests).
- */
-export function __resetPwaInstallPromptForTests(): void {
-  deferredInstallPrompt = null;
-  listenersRegistered = false;
 }

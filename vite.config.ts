@@ -16,6 +16,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_');
 
   const isProd = mode === 'production';
+  const isTest = mode === 'test' || process.env['VITEST'] === 'true';
   // DOCKER is not a VITE_ var — read it directly from process.env
   const isDocker = process.env['DOCKER'] === 'true'; // Automatically set in docker-compose.
 
@@ -40,7 +41,8 @@ export default defineConfig(({ mode }) => {
       checker({
         enableBuild: false,
         overlay: { initialIsOpen: false },
-        stylelint: {
+        // Stylelint checker disabled during tests — no vite dev server needed for vitest
+        stylelint: isTest ? false : {
           lintCommand: 'stylelint "./src/**/*.scss"',
         },
         typescript: true,

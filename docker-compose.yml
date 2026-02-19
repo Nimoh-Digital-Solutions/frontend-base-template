@@ -1,10 +1,11 @@
-version: '3.8'
-
 services:
   # Development environment with hot-reload
   app:
     image: node:22-alpine
     container_name: react-starter-kit-dev
+    # Run as the non-root 'node' user that ships with the official node image.
+    # This prevents a container compromise from having root access on the host.
+    user: node
     working_dir: /app
     volumes:
       - .:/app
@@ -26,6 +27,8 @@ services:
     command: sh -c "yarn install && yarn dev"
     stdin_open: true
     tty: true
+    security_opt:
+      - no-new-privileges:true
 
   # Production preview (multi-stage build -> nginx)
   app-prod:

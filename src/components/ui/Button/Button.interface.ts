@@ -19,6 +19,13 @@ export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
   size?: ButtonSize;
   /** Shows a loading spinner and disables the button - default false */
   loading?: boolean;
+  /**
+   * Accessible label announced by screen readers while loading.
+   * When provided, overrides the button's computed name with a descriptive
+   * in-progress message (e.g. "Saving changes…").
+   * When omitted, the existing button text + aria-busy convey loading state.
+   */
+  loadingLabel?: string;
   /** Optional icon element */
   icon?: ReactNode;
   /** Position of the icon relative to the label - default 'left' */

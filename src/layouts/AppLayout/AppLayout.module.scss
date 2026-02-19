@@ -24,3 +24,24 @@
 .main {
     flex: 1;
 }
+
+// Skip navigation link — visually hidden until focused.
+// Satisfies WCAG 2.1 SC 2.4.1 (Bypass Blocks, Level A).
+.skipLink {
+    position: absolute;
+    top: -100%;
+    left: 0;
+    z-index: 9999;
+    padding: func.spacing('2') func.spacing('3');
+    background-color: var(--color-background);
+    color: var(--color-text);
+    font-weight: 600;
+    text-decoration: none;
+    border: 2px solid var(--color-primary);
+    border-radius: 0 0 4px 0;
+    transition: top 0.1s ease;
+
+    &:focus {
+        top: 0;
+    }
+}

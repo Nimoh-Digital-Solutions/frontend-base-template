@@ -7,13 +7,18 @@ import styles from './AppLayout.module.scss';
 const AppLayout = () => {
   return (
     <div className={styles.root}>
-      <Header className={styles.header} />
+      {/* Skip navigation — satisfies WCAG 2.1 SC 2.4.1 (Bypass Blocks, Level A) */}
+      <a href="#main-content" className={styles.skipLink}>
+        Skip to main content
+      </a>
 
-      <main className={styles.main}>
+      <Header className={styles.header!} />
+
+      <main id="main-content" className={styles.main}>
         <Outlet />
       </main>
 
-      <Footer className={styles.footer} />
+      <Footer className={styles.footer!} />
     </div>
   );
 };

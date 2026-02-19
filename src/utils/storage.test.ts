@@ -178,6 +178,42 @@ describe('storage utilities', () => {
       expect(success).toBe(false);
       expect(warnSpy).toHaveBeenCalled();
     });
+
+    // -------------------------------------------------------------------------
+    // Sensitive-key guard
+    // -------------------------------------------------------------------------
+    it.each(['token', 'authToken', 'USER_TOKEN', 'secret', 'mySecret', 'password', 'Password123', 'auth', 'AUTH_KEY'])(
+      'refuses to store key "%s" and returns false',
+      (sensitiveKey) => {
+        const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        const success = setStorageItem(sensitiveKey, 'some-value');
+
+        expect(success).toBe(false);
+        expect(errorSpy).toHaveBeenCalledWith(
+          expect.stringContaining(sensitiveKey)
+        );
+        // Value must NOT have been written to storage
+        expect(store[sensitiveKey]).toBeUndefined();
+      }
+    );
+
+    it('does not block non-sensitive keys that partially resemble sensitive words', () => {
+      const success = setStorageItem('tokenomics', 'value');
+      // "tokenomics" contains "token" — the regex /token/i matches it.
+      // This test documents (and keeps) the current intentionally-strict behaviour.
+      expect(success).toBe(false);
+    });
+
+    it('stores a normal non-sensitive key without error', () => {
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      const success = setStorageItem('user-preference', 'dark');
+
+      expect(success).toBe(true);
+      expect(store['user-preference']).toBe(JSON.stringify('dark'));
+      expect(errorSpy).not.toHaveBeenCalled();
+    });
   });
 
   describe('removeStorageItem', () => {

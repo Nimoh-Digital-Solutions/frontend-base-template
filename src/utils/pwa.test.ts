@@ -11,8 +11,8 @@ import {
   getConnectionType,
   isSlowConnection,
   getAppVersionFromSW,
-  __resetPwaInstallPromptForTests,
 } from './pwa';
+import { pwaState } from './_pwa-state';
 
 type MatchMediaMock = (query: string) => MediaQueryList;
 
@@ -35,7 +35,10 @@ describe('pwa utils', () => {
   const originalMaxTouchPoints = (navigator as any).maxTouchPoints;
 
   beforeEach(() => {
-    __resetPwaInstallPromptForTests();
+    // Reset internal state directly via the exported state object —
+    // no test-only export needed in the production bundle.
+    pwaState.deferredInstallPrompt = null;
+    pwaState.listenersRegistered   = false;
 
     vi.stubGlobal('matchMedia', createMatchMediaMock({}));
 
@@ -152,7 +155,19 @@ describe('pwa utils', () => {
   });
 
   describe('getDisplayMode', () => {
-    it('returns standalone/fullscreen/minimal-ui based on media queries', () => {
+    it('returns standalone when display-mode is standalone', () => {
+      vi.stubGlobal('matchMedia', createMatchMediaMock({ '(display-mode: standalone)': true }));
+
+      expect(getDisplayMode()).toBe('standalone');
+    });
+
+    it('returns fullscreen when display-mode is fullscreen', () => {
+      vi.stubGlobal('matchMedia', createMatchMediaMock({ '(display-mode: fullscreen)': true }));
+
+      expect(getDisplayMode()).toBe('fullscreen');
+    });
+
+    it('returns minimal-ui when display-mode is minimal-ui', () => {
       vi.stubGlobal(
         'matchMedia',
         createMatchMediaMock({
@@ -305,6 +320,70 @@ describe('pwa utils', () => {
       createdChannel.port1.onmessage({ data: '1.2.3' });
 
       await expect(promise).resolves.toBe('1.2.3');
+
+      vi.useRealTimers();
+    });
+
+    it('resolves to null when the timeout fires before SW responds (FA-M15)', async () => {
+      vi.useFakeTimers();
+
+      const postMessage = vi.fn();
+      Object.defineProperty(navigator, 'serviceWorker', {
+        value: {
+          getRegistration: vi.fn().mockResolvedValue({ active: { postMessage } }),
+        },
+        configurable: true,
+      });
+
+      vi.stubGlobal('MessageChannel', function MessageChannelMock(this: any) {
+        return {
+          port1: { onmessage: null },
+          port2: {},
+        };
+      } as any);
+
+      const promise = getAppVersionFromSW(1000);
+
+      // Let getRegistration() settle
+      await Promise.resolve();
+      await Promise.resolve();
+
+      // Advance past the timeout
+      vi.advanceTimersByTime(1001);
+
+      await expect(promise).resolves.toBeNull();
+
+      vi.useRealTimers();
+    });
+
+    it('resolves to null when the SW sends a non-string response (FA-M15)', async () => {
+      vi.useFakeTimers();
+
+      const postMessage = vi.fn();
+      Object.defineProperty(navigator, 'serviceWorker', {
+        value: {
+          getRegistration: vi.fn().mockResolvedValue({ active: { postMessage } }),
+        },
+        configurable: true,
+      });
+
+      let createdChannel: any;
+      vi.stubGlobal('MessageChannel', function MessageChannelMock(this: any) {
+        createdChannel = {
+          port1: { onmessage: null as null | ((e: any) => void) },
+          port2: {},
+        };
+        return createdChannel;
+      } as any);
+
+      const promise = getAppVersionFromSW(1000);
+
+      await Promise.resolve();
+
+      // Send a non-string value (e.g. an object)
+      createdChannel.port1.onmessage({ data: { version: '1.2.3' } });
+
+      await expect(promise).resolves.toBeNull();
 
       vi.useRealTimers();
     });
