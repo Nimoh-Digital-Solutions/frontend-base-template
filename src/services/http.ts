@@ -72,6 +72,11 @@ async function request<T>(
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
+// CSRF NOTE: Once session-cookie authentication is wired in, every mutating
+// request (POST / PUT / PATCH / DELETE) must include a CSRF token header,
+// e.g. 'X-CSRF-Token': getCsrfToken().  The `init` spread in `request()`
+// already supports custom headers, but the token extraction helper and the
+// cookie-to-header wiring are intentionally left out of this template.
 /**
  * http — lightweight typed fetch wrapper.
  *

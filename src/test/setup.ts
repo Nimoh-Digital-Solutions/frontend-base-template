@@ -21,12 +21,18 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
-// Reset localStorage before each test to prevent state leaking between tests
+// Reset localStorage before each test to prevent state leaking between tests.
+// Spy on console.warn and console.error so individual tests can assert against
+// unexpected output and CI logs are not contaminated by library warnings.
 beforeEach(() => {
   localStorage.clear();
+  vi.spyOn(console, 'warn');
+  vi.spyOn(console, 'error');
 });
 
-// Cleanup React tree after each test case
+// Cleanup React tree and clear all mock state after each test case.
+// Clearing mocks prevents call-count/implementation bleed between tests.
 afterEach(() => {
   cleanup();
+  vi.clearAllMocks();
 });

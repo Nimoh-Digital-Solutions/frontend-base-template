@@ -12,7 +12,19 @@ import {
   isSlowConnection,
   getAppVersionFromSW,
 } from './pwa';
+import type { BeforeInstallPromptEventLike } from './pwa';
 import { pwaState } from './_pwa-state';
+
+// ---------------------------------------------------------------------------
+// Test-only types for message-channel mocks
+// ---------------------------------------------------------------------------
+interface MockMessagePort {
+  onmessage: null | ((e: Pick<MessageEvent<unknown>, 'data'>) => void);
+}
+interface MockMessageChannel {
+  port1: MockMessagePort;
+  port2: Record<string, never>;
+}
 
 type MatchMediaMock = (query: string) => MediaQueryList;
 
@@ -32,7 +44,7 @@ function createMatchMediaMock(matchesFor: Record<string, boolean>): MatchMediaMo
 
 describe('pwa utils', () => {
   const originalUserAgent = navigator.userAgent;
-  const originalMaxTouchPoints = (navigator as any).maxTouchPoints;
+  const originalMaxTouchPoints = (navigator as Navigator & { maxTouchPoints?: number }).maxTouchPoints;
 
   beforeEach(() => {
     // Reset internal state directly via the exported state object —
@@ -92,10 +104,11 @@ describe('pwa utils', () => {
         platform: 'web',
       });
 
-      const event = new Event('beforeinstallprompt') as any;
-      event.preventDefault = vi.fn();
-      event.prompt = prompt;
-      event.userChoice = userChoice;
+      const event = Object.assign(new Event('beforeinstallprompt'), {
+        preventDefault: vi.fn(),
+        prompt,
+        userChoice,
+      }) as unknown as BeforeInstallPromptEventLike;
 
       window.dispatchEvent(event);
 
@@ -117,13 +130,14 @@ describe('pwa utils', () => {
 
       const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-      const event = new Event('beforeinstallprompt') as any;
-      event.preventDefault = vi.fn();
-      event.prompt = vi.fn().mockRejectedValue(new Error('boom'));
-      event.userChoice = Promise.resolve({
-        outcome: 'dismissed' as const,
-        platform: 'web',
-      });
+      const event = Object.assign(new Event('beforeinstallprompt'), {
+        preventDefault: vi.fn(),
+        prompt: vi.fn().mockRejectedValue(new Error('boom')),
+        userChoice: Promise.resolve({
+          outcome: 'dismissed' as const,
+          platform: 'web',
+        }),
+      }) as unknown as BeforeInstallPromptEventLike;
 
       window.dispatchEvent(event);
 
@@ -297,15 +311,16 @@ describe('pwa utils', () => {
       });
 
       // Capture the channel instance created inside the util
-      let createdChannel: any;
+      // eslint-disable-next-line prefer-const
+      let createdChannel!: MockMessageChannel;
 
-      vi.stubGlobal('MessageChannel', function MessageChannelMock(this: any) {
+      vi.stubGlobal('MessageChannel', function MessageChannelMock(this: unknown) {
         createdChannel = {
-          port1: { onmessage: null as null | ((e: any) => void) },
+          port1: { onmessage: null },
           port2: {},
         };
         return createdChannel;
-      } as any);
+      } as unknown as typeof MessageChannel);
 
       const promise = getAppVersionFromSW(1000);
 
@@ -317,7 +332,7 @@ describe('pwa utils', () => {
       expect(typeof createdChannel.port1.onmessage).toBe('function');
 
       // Simulate SW response
-      createdChannel.port1.onmessage({ data: '1.2.3' });
+      createdChannel.port1.onmessage!({ data: '1.2.3' });
 
       await expect(promise).resolves.toBe('1.2.3');
 
@@ -335,12 +350,12 @@ describe('pwa utils', () => {
         configurable: true,
       });
 
-      vi.stubGlobal('MessageChannel', function MessageChannelMock(this: any) {
+      vi.stubGlobal('MessageChannel', function MessageChannelMock(this: unknown) {
         return {
           port1: { onmessage: null },
           port2: {},
         };
-      } as any);
+      } as unknown as typeof MessageChannel);
 
       const promise = getAppVersionFromSW(1000);
 
@@ -367,21 +382,21 @@ describe('pwa utils', () => {
         configurable: true,
       });
 
-      let createdChannel: any;
-      vi.stubGlobal('MessageChannel', function MessageChannelMock(this: any) {
+      let createdChannel!: MockMessageChannel;
+      vi.stubGlobal('MessageChannel', function MessageChannelMock(this: unknown) {
         createdChannel = {
-          port1: { onmessage: null as null | ((e: any) => void) },
+          port1: { onmessage: null },
           port2: {},
         };
         return createdChannel;
-      } as any);
+      } as unknown as typeof MessageChannel);
 
       const promise = getAppVersionFromSW(1000);
 
       await Promise.resolve();
 
       // Send a non-string value (e.g. an object)
-      createdChannel.port1.onmessage({ data: { version: '1.2.3' } });
+      createdChannel.port1.onmessage!({ data: { version: '1.2.3' } });
 
       await expect(promise).resolves.toBeNull();
 

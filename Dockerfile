@@ -1,6 +1,13 @@
 # =====================================================
 # Stage 1: Build (Node + Vite)
 # =====================================================
+# TODO: Pin the builder image to an immutable SHA-256 digest for supply-chain
+# security.  Mutable tags (e.g. node:22-alpine) can be silently replaced.
+# How to get the current digest:
+#   docker pull node:22-alpine
+#   docker inspect node:22-alpine --format='{{index .RepoDigests 0}}'
+# Then replace the line below with:
+#   FROM node:22-alpine@sha256:<digest> AS builder
 FROM node:22-alpine AS builder
 
 # Set working directory

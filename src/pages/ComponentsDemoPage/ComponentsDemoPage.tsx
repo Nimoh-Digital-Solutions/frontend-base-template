@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, type ReactElement } from 'react';
 import { LuDownload, LuHeart, LuTrash2, LuCheck, LuX } from 'react-icons/lu';
 
 import { Button } from '@components';
@@ -13,7 +13,7 @@ import styles from './ComponentsDemoPage.module.scss';
  * A comprehensive demonstration of all components in the project.
  * Showcases design patterns, usage examples, and interactive features.
  */
-export const ComponentsDemoPage = () => {
+export const ComponentsDemoPage = (): ReactElement => {
   useDocumentTitle(routeMetadata[PATHS.COMPONENTS_DEMO].title);
 
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});

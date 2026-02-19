@@ -22,7 +22,7 @@ type SetStateAction<T> = T | ((prev: T) => T);
  * @param initialValue - Value used when nothing is stored
  * @returns [value, setValue, writeError]
  */
-export function useLocalStorage<T>(key: string, initialValue: T) {
+export function useLocalStorage<T>(key: string, initialValue: T): readonly [T, (next: SetStateAction<T>) => void, boolean] {
   const [value, setValue] = useState<T>(() => getStorageItem<T>(key, initialValue));
   const [writeError, setWriteError] = useState(false);
 

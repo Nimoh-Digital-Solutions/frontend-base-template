@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, type ReactElement } from 'react';
 import { Navigate } from 'react-router-dom';
 
 import { PATHS } from '@routes/config/paths';
@@ -49,7 +49,7 @@ const ProtectedRoute = ({
   isAuthenticated,
   children,
   redirectTo = PATHS.HOME,
-}: ProtectedRouteProps) => {
+}: ProtectedRouteProps): ReactElement => {
   if (!isAuthenticated) {
     return <Navigate to={redirectTo} replace />;
   }

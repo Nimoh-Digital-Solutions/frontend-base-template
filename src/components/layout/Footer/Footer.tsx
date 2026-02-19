@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 import { APP_CONFIG } from '@configs';
 
 import styles from './Footer.module.scss';
@@ -6,7 +7,7 @@ import styles from './Footer.module.scss';
  * Footer
  * Layout component
  */
-export const Footer = ({ className }: { className?: string }) => {
+export const Footer = ({ className }: { className?: string }): ReactElement => {
   const currentYear = new Date().getFullYear();
 
   return (

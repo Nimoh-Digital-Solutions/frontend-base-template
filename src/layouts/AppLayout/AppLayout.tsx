@@ -1,10 +1,11 @@
+import type { ReactElement } from 'react';
 import { Outlet } from 'react-router-dom';
 
 import { Footer, Header } from '@components';
 
 import styles from './AppLayout.module.scss';
 
-const AppLayout = () => {
+const AppLayout = (): ReactElement => {
   return (
     <div className={styles.root}>
       {/* Skip navigation — satisfies WCAG 2.1 SC 2.4.1 (Bypass Blocks, Level A) */}

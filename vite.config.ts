@@ -80,7 +80,10 @@ export default defineConfig(({ mode }) => {
           pxtorem({
             rootValue: 16,
             mediaQuery: true,
-            propList: ['*'],
+            // Exclude properties where sub-pixel precision is meaningful
+            // (borders, shadows, outlines). '!border*' etc. uses postcss-pxtorem's
+            // negation prefix to keep those values in px.
+            propList: ['*', '!border*', '!box-shadow', '!outline*', '!column-rule*'],
           }),
         ],
       },
@@ -111,9 +114,12 @@ export default defineConfig(({ mode }) => {
       // independently of app code — a new deploy only invalidates app chunks.
       rollupOptions: {
         output: {
-          manualChunks: {
-            vendor: ['react', 'react-dom'],
-            router: ['react-router-dom'],
+          // Use a function so every react-icons sub-package (e.g. react-icons/lu)
+          // is grouped into the same chunk, independently cached from app code.
+          manualChunks(id) {
+            if (id.includes('react-icons')) return 'icons';
+            if (id.includes('react-dom') || id.includes('react/')) return 'vendor';
+            if (id.includes('react-router')) return 'router';
           },
         },
       },

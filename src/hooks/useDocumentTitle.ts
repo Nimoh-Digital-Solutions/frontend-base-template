@@ -17,6 +17,23 @@ export function useDocumentTitle(title: string): void {
     const prev = document.title;
     document.title = `${title} | ${APP_CONFIG.appName}`;
 
+    // Announce the new page title to screen readers via an aria-live region.
+    // document.title updates alone are not reliably announced by all AT/browser
+    // combinations during SPA navigation.  A single shared announcer element is
+    // created on first use and reused on subsequent route changes.
+    let announcer = document.getElementById('route-announcer');
+    if (!announcer) {
+      announcer = document.createElement('div');
+      announcer.id = 'route-announcer';
+      announcer.setAttribute('aria-live', 'polite');
+      announcer.setAttribute('aria-atomic', 'true');
+      // Visually hidden but accessible to screen readers:
+      announcer.style.cssText =
+        'position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap';
+      document.body.appendChild(announcer);
+    }
+    announcer.textContent = document.title;
+
     return () => {
       document.title = prev;
     };

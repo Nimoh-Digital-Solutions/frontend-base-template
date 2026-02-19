@@ -1,9 +1,10 @@
+import type { ReactElement } from 'react';
 import { useDocumentTitle } from '@hooks';
 import { PATHS, routeMetadata } from '@routes/config/paths';
 
 import styles from './HomePage.module.scss';
 
-const HomePage = () => {
+const HomePage = (): ReactElement => {
   useDocumentTitle(routeMetadata[PATHS.HOME].title);
 
   return (

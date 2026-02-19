@@ -155,7 +155,7 @@ describe('storage utilities', () => {
 
     it('returns false when JSON.stringify throws (circular)', () => {
       const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      const a: any = {};
+      const a: Record<string, unknown> = {};
       a.self = a;
 
       const success = setStorageItem('circular', a);

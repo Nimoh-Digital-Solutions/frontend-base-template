@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode, type ReactElement } from 'react';
 
 import type { Theme } from '@types';
 import { getStorageItem, setStorageItem } from '@utils';
@@ -47,7 +47,7 @@ interface ThemeProviderProps {
  *
  * Wrap this around `<App />` in `main.tsx` or at the top of `<App />`.
  */
-export const ThemeProvider = ({ children, defaultTheme = 'light' }: ThemeProviderProps) => {
+export const ThemeProvider = ({ children, defaultTheme = 'light' }: ThemeProviderProps): ReactElement => {
   const [theme, setThemeState] = useState<Theme>(() => {
     const stored = getStorageItem<string>('app-theme');
     if (stored === 'light' || stored === 'dark') return stored;

@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useDocumentTitle } from '@hooks';
@@ -5,7 +6,7 @@ import { PATHS, routeMetadata } from '@routes/config/paths';
 
 import styles from './NotFoundPage.module.scss';
 
-const NotFoundPage = () => {
+const NotFoundPage = (): ReactElement => {
   useDocumentTitle(routeMetadata[PATHS.NOT_FOUND].title);
 
   return (

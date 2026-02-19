@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 import { NavLink } from 'react-router-dom';
 import { LuHouse, LuLayers } from 'react-icons/lu';
 
@@ -18,7 +19,7 @@ const navLinks = [
  * Header
  * Layout component
  */
-export const Header = ({ className }: { className?: string }) => {
+export const Header = ({ className }: { className?: string }): ReactElement => {
   return (
     <header className={className ? `${styles.root} ${className}` : styles.root}>
       <nav className={styles.nav} aria-label="Main navigation">
