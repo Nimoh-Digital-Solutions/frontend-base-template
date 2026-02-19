@@ -1,0 +1,45 @@
+@use '../abstracts/mixins' as mixin;
+
+:root {
+    /* =========================================================================
+       Semantic Tokens
+       ========================================================================= */
+
+    /* Core Colors */
+    @include mixin.set-var('--color-primary', 'blue-500');
+    @include mixin.set-var('--color-primary-light', 'blue-100');
+    @include mixin.set-var('--color-primary-dark', 'blue-900');
+    @include mixin.set-var('--color-secondary', 'gray-500');
+    @include mixin.set-var('--color-secondary-light', 'gray-200');
+    @include mixin.set-var('--color-secondary-dark', 'gray-700');
+    @include mixin.set-var('--color-tertiary', 'teal-500');
+    @include mixin.set-var('--color-tertiary-light', 'teal-100');
+    @include mixin.set-var('--color-tertiary-dark', 'teal-900');
+
+    /* Feedback */
+    @include mixin.set-var('--color-success', 'green-500');
+    @include mixin.set-var('--color-success-light', 'green-100');
+    @include mixin.set-var('--color-success-dark', 'green-900');
+    @include mixin.set-var('--color-warning', 'yellow-500');
+    @include mixin.set-var('--color-warning-light', 'yellow-100');
+    @include mixin.set-var('--color-warning-dark', 'yellow-900');
+    @include mixin.set-var('--color-error', 'red-500');
+    @include mixin.set-var('--color-error-light', 'red-100');
+    @include mixin.set-var('--color-error-dark', 'red-900');
+
+    /* Backgrounds */
+    @include mixin.set-var('--bg-body', 'whiteish');
+    @include mixin.set-var('--bg-card', 'white');
+    @include mixin.set-var('--bg-primary', 'primary');
+    @include mixin.set-var('--bg-secondary', 'secondary');
+
+    /* Text */
+    @include mixin.set-var('--text-main', 'blackish');
+    @include mixin.set-var('--text-inverted', 'white');
+    @include mixin.set-var('--text-primary', 'primary');
+    @include mixin.set-var('--text-secondary', 'secondary');
+
+    /* Borders */
+    @include mixin.set-var('--border-subtle', 'primary-light');
+    @include mixin.set-var('--border-focus', 'primary');
+}

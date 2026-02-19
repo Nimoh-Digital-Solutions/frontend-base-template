@@ -1,0 +1,9 @@
+/* =========================================================================
+   Centralized SCSS entry point for global variables, mixins, and functions.
+   ========================================================================= */
+
+@forward 'animations';
+@forward 'functions';
+@forward 'mixins';
+@forward 'utils';
+@forward 'variables';

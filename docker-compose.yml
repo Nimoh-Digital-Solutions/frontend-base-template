@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  # Development environment with hot-reload
+  app:
+    image: node:22-alpine
+    container_name: react-starter-kit-dev
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - yarn_cache:/usr/local/share/.cache/yarn
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=development
+      - DOCKER=true
+
+      # Helps file watching reliability in some Docker setups (esp. Mac/Win)
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+
+      # Optional: enable PWA during dev in Docker
+      # - VITE_PWA=true
+
+    command: sh -c "yarn install && yarn dev"
+    stdin_open: true
+    tty: true
+
+  # Production preview (multi-stage build -> nginx)
+  app-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: react-starter-kit-prod
+    ports:
+      - '8080:8080'
+    restart: unless-stopped
+
+    # Optional hardening (safe defaults for static nginx)
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  yarn_cache:

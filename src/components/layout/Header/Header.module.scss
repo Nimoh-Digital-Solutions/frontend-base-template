@@ -1,0 +1,55 @@
+@use '@styles/abstracts/functions' as func;
+@use '@styles/abstracts/mixins' as mixin;
+
+.root {
+    .nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .navBrand {
+            margin: 0;
+            font-size: func.font-size('xl');
+            font-weight: func.font-weight('semibold');
+            color: func.color('primary');
+            text-decoration: none;
+        }
+
+        .navLinks {
+            @include mixin.bare-list;
+
+            display: flex;
+            gap: func.spacing('4');
+
+            li {
+                a {
+                    display: flex;
+                    gap: func.spacing('2');
+                    text-decoration: none;
+                    color: func.color('secondary');
+                    font-weight: func.font-weight('medium');
+                    transition: func.transition('fast');
+
+                    &:hover {
+                        color: func.color('primary');
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Responsive design
+@include mixin.bp-max('tablet') {
+    .root {
+        .nav {
+            flex-direction: column;
+            gap: func.spacing('4');
+            text-align: center;
+        }
+
+        .navLinks {
+            gap: func.spacing('2');
+        }
+    }
+}

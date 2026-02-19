@@ -1,0 +1,26 @@
+@use '@styles' as *;
+@use '@styles/abstracts/functions' as func;
+@use '@styles/abstracts/mixins' as mixin;
+
+.root {
+    @include mixin.full-page-flex-col;
+    padding: func.spacing('3');
+    gap: func.spacing('3');
+}
+
+// Layout pattern: Outer containers with inner content areas
+// Class selectors used intentionally (not bare tags) to prevent global style leakage
+// since CSS Modules does not scope bare HTML element selectors.
+.header,
+.main,
+.footer {
+    @include mixin.card-block;
+    max-width: func.breakpoint('xl-desktop');
+    margin-inline: auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.main {
+    flex: 1;
+}

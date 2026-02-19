@@ -1,0 +1,93 @@
+@use '@styles' as *;
+@use '@styles/abstracts/functions' as func;
+@use '@styles/abstracts/mixins' as mixin;
+
+.root {
+    // Container styles
+}
+
+.hero {
+    @include mixin.card-block('6');
+    margin-bottom: func.spacing('4');
+    text-align: center;
+}
+
+.heroTitle {
+    font-size: func.font-size('3xl');
+    font-weight: func.font-weight('bold');
+    margin-bottom: func.spacing('4');
+    color: func.color('primary');
+
+    @include mixin.bp-max('tablet') {
+        font-size: func.font-size('2xl');
+    }
+}
+
+.heroSubtitle {
+    font-size: func.font-size('lg');
+    color: func.color('secondary');
+    @include mixin.centered-prose;
+    line-height: 1.6;
+
+    @include mixin.bp-max('tablet') {
+        font-size: func.font-size('base');
+    }
+}
+
+.features {
+    @include mixin.card-block('6');
+
+    h2 {
+        text-align: center;
+        font-size: func.font-size('2xl');
+        margin-bottom: func.spacing('6');
+        color: func.color('primary');
+        font-weight: func.font-weight('semibold');
+
+        @include mixin.bp-max('tablet') {
+            font-size: func.font-size('xl');
+        }
+    }
+}
+
+.featuresGrid {
+    @include mixin.auto-grid;
+}
+
+.featureCard {
+    @include mixin.card-block;
+
+    h3 {
+        font-size: func.font-size('lg');
+        font-weight: func.font-weight('semibold');
+        margin-bottom: func.spacing('2');
+        color: func.color('primary');
+    }
+
+    p {
+        color: func.color('secondary');
+        line-height: 1.5;
+        margin: 0;
+    }
+}
+
+// Responsive design
+@include mixin.bp-max('tablet') {
+    .hero {
+        padding: func.spacing('4');
+    }
+
+    .features {
+        padding: func.spacing('4');
+    }
+
+    .featuresGrid {
+        grid-template-columns: 1fr;
+        gap: func.spacing('3');
+    }
+
+    .featureCard {
+        padding: func.spacing('3');
+    }
+}
+
