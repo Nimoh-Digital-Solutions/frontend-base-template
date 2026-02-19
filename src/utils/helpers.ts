@@ -1,16 +1,27 @@
 /**
- * Debounce a function call (leading false, trailing true)
+ * Debounce a function call (leading false, trailing true).
+ * The returned function exposes a `.cancel()` method to clear any
+ * pending invocation — useful for `useEffect` cleanup.
  */
 export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
-): (...args: Parameters<T>) => void {
+): ((...args: Parameters<T>) => void) & { cancel: () => void } {
   let timeout: ReturnType<typeof setTimeout> | undefined;
 
-  return (...args: Parameters<T>) => {
-    if (timeout) clearTimeout(timeout);
+  const debounced = (...args: Parameters<T>): void => {
+    if (timeout !== undefined) clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
   };
+
+  debounced.cancel = (): void => {
+    if (timeout !== undefined) {
+      clearTimeout(timeout);
+      timeout = undefined;
+    }
+  };
+
+  return debounced;
 }
 
 /**

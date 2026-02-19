@@ -1,9 +1,10 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, type ReactElement } from 'react';
 import { RouteObject } from 'react-router-dom';
 
 import { AppLayout } from '@layouts';
 
 import { PATHS, routeMetadata } from './paths';
+import styles from './pageFallback.module.scss';
 
 // Re-export PATHS and routeMetadata so existing imports from '@routes' / './config' still work
 export { PATHS, routeMetadata };
@@ -26,20 +27,7 @@ const NotFoundPage = lazy(() => import('@pages/NotFoundPage/NotFoundPage'));
  * Minimal loading state shown while a lazy page chunk is being fetched.
  * Replace with a proper <PageLoader /> component as the project grows.
  */
-const PageFallback = () => (
-  <div
-    style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      minHeight: '50vh',
-      fontSize: '1rem',
-      color: '#666',
-    }}
-  >
-    Loading…
-  </div>
-);
+const PageFallback = (): ReactElement => <div className={styles.fallback}>Loading…</div>;
 
 export const routes: RouteObject[] = [
   {

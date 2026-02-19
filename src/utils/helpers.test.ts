@@ -51,6 +51,25 @@ describe('helpers', () => {
 
       expect(fn).toHaveBeenCalledWith('arg1', 'arg2', 'arg3');
     });
+
+    it('cancel() prevents the pending call from firing', () => {
+      const fn = vi.fn();
+      const debouncedFn = debounce(fn, 500);
+
+      debouncedFn('queued');
+      debouncedFn.cancel();
+
+      vi.advanceTimersByTime(500);
+      expect(fn).not.toHaveBeenCalled();
+    });
+
+    it('cancel() is a no-op when no call is pending', () => {
+      const fn = vi.fn();
+      const debouncedFn = debounce(fn, 500);
+
+      expect(() => debouncedFn.cancel()).not.toThrow();
+      expect(fn).not.toHaveBeenCalled();
+    });
   });
 
   describe('throttle', () => {

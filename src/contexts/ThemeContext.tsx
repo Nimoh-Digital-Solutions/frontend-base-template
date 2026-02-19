@@ -61,6 +61,21 @@ export const ThemeProvider = ({ children, defaultTheme = 'light' }: ThemeProvide
     setStorageItem('app-theme', theme);
   }, [theme]);
 
+  // Track live OS-level theme changes. Only apply when the user has not
+  // manually chosen a theme (i.e. no stored preference).
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const handleChange = (e: MediaQueryListEvent) => {
+      const stored = getStorageItem<string>('app-theme');
+      if (stored === 'light' || stored === 'dark') return; // explicit user preference wins
+      setThemeState(e.matches ? 'dark' : defaultTheme);
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, [defaultTheme]);
+
   const toggleTheme = useCallback(() => setThemeState(t => (t === 'light' ? 'dark' : 'light')), []);
   const setTheme = useCallback((t: Theme) => setThemeState(t), []);
 

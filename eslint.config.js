@@ -69,13 +69,13 @@ export default [
   {
     files: ['src/**/*.{ts,tsx,js,jsx}'],
     rules: {
-      'no-console': ['warn', { allow: ['warn', 'error'] }],
+      'no-console': ['warn', { allow: ['warn', 'error', 'info'] }],
     },
   },
 
   // Relaxed rules for scripts and config files
   {
-    files: ['scripts/**/*.js', '*.config.{js,ts}', 'vite.config.ts'],
+    files: ['scripts/**/*.js', '*.config.{js,ts}'],
     languageOptions: {
       globals: {
         ...globals.node,

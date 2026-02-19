@@ -3,6 +3,9 @@
  * Notes:
  * - Use `timeZone: 'UTC'` in options for stable output across environments/tests.
  * - Returns empty string for invalid dates.
+ * - `locale` defaults to the browser/OS locale (`navigator.language`) so
+ *   formatted dates feel native to the user. Pass an explicit locale string
+ *   (e.g. `'en-US'`) when stable, locale-independent output is required.
  */
 export function formatDate(
   date: Date | string | number,
@@ -11,7 +14,7 @@ export function formatDate(
     month: 'long',
     day: 'numeric',
   },
-  locale = 'en-US'
+  locale: string = (typeof navigator !== 'undefined' && navigator.language) || 'en-US'
 ): string {
   const dateObj = date instanceof Date ? date : new Date(date);
 

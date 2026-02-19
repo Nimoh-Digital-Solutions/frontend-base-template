@@ -54,15 +54,3 @@ EXPOSE 8080
 
 # Start nginx
 CMD ["nginx", "-g", "daemon off;"]
-
-
-# For the last time:
-# This is a frontend base app using Vite. This is to serve as a template for future frontend projects. The Dockerfile is structured in two stages: the first stage builds the application using Node and Vite, while the second stage serves the built application using Nginx. This multi-stage build approach optimizes the final image size by only including necessary files for production.
-# The goal is to setup a robust base for a frontend application that can be easily extended and maintained for future projects. The use of Docker allows for consistent development and deployment environments, while the separation of services ensures scalability and maintainability.
-# With this in mind - Analyse this codebase for refactoring opportunities . Use subagents to: 
-#   1. Find duplicate code patterns
-#   2. Identify unused exports and dead code
-#   3. Review error handling consistency
-#   4. Check for security vulnerabilities
-#   5. Assess the architecture and find where improvements can be made for better maintainability and scalability
-# Compile the findings into a prioritized action plan for refactoring the codebase, focusing on improvements that will enhance maintainability, security and performance of the application.
