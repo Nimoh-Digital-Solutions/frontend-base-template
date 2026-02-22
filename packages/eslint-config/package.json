@@ -1,0 +1,33 @@
+{
+  "name": "@nimoh-digital-solutions/eslint-config",
+  "version": "1.0.0",
+  "description": "Shared ESLint flat config for Nimoh Digital Solutions React projects",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js"
+  },
+  "files": [
+    "index.js"
+  ],
+  "peerDependencies": {
+    "@eslint/js": ">=8",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": ">=8",
+    "eslint-plugin-jsx-a11y": "^6.0.0",
+    "eslint-plugin-react": "^7.0.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.0",
+    "globals": ">=15.0.0"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nimoh-Digital-Solutions/frontend-base-template.git",
+    "directory": "packages/eslint-config"
+  }
+}

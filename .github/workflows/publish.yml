@@ -1,0 +1,49 @@
+name: Publish Packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: 'Package to publish (eslint-config | tsconfig | stylelint-config | all)'
+        required: true
+        default: 'all'
+
+jobs:
+  publish:
+    name: Publish to GitHub Packages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://npm.pkg.github.com
+          scope: '@nimoh-digital-solutions'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Publish eslint-config
+        if: ${{ github.event.inputs.package == 'eslint-config' || github.event.inputs.package == 'all' }}
+        run: yarn workspace @nimoh-digital-solutions/eslint-config publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish tsconfig
+        if: ${{ github.event.inputs.package == 'tsconfig' || github.event.inputs.package == 'all' }}
+        run: yarn workspace @nimoh-digital-solutions/tsconfig publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish stylelint-config
+        if: ${{ github.event.inputs.package == 'stylelint-config' || github.event.inputs.package == 'all' }}
+        run: yarn workspace @nimoh-digital-solutions/stylelint-config publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
