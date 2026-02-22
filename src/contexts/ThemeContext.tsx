@@ -35,7 +35,7 @@ export const useThemeContext = (): ThemeContextValue => {
 // Provider
 // ---------------------------------------------------------------------------
 interface ThemeProviderProps {
-  children: ReactNode;
+  children?: ReactNode;
   /** Initial theme when no persisted preference exists (default: 'light') */
   defaultTheme?: Theme;
 }
