@@ -29,6 +29,7 @@ jobs:
           node-version: 22
           cache: yarn
           registry-url: https://npm.pkg.github.com
+          scope: "@nimoh-digital-solutions"
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
