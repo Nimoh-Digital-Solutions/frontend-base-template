@@ -1,0 +1,43 @@
+{
+  "name": "@nimoh-digital-solutions/create-tast-app",
+  "version": "1.0.0",
+  "description": "Create a new TAST frontend app",
+  "type": "module",
+  "bin": {
+    "create-tast-app": "./dist/index.cjs"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "prepublishOnly": "yarn build"
+  },
+  "dependencies": {
+    "prompts": "^2.4.2"
+  },
+  "devDependencies": {
+    "@nimoh-digital-solutions/tsconfig": "*",
+    "@types/node": "^24.0.14",
+    "@types/prompts": "^2.4.9",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.3"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nimoh-Digital-Solutions/frontend-base-template.git"
+  },
+  "keywords": [
+    "create-app",
+    "cli",
+    "react",
+    "vite",
+    "typescript",
+    "tast"
+  ],
+  "license": "MIT"
+}

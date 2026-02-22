@@ -1,0 +1,181 @@
+import path from 'path';
+import prompts from 'prompts';
+import { scaffold } from './scaffold.js';
+import { install, devCommand, type PackageManager } from './install.js';
+import { logStep, logError, toPackageName, getDestDir, commandExists } from './utils.js';
+
+// ─── Answers shape ────────────────────────────────────────────────────────────
+
+interface Answers {
+  appName: string;
+  description: string;
+  enablePwa: boolean;
+  enableDocker: boolean;
+  enableHusky: boolean;
+  packageManager: PackageManager;
+  installDeps: boolean;
+}
+
+// ─── Main ─────────────────────────────────────────────────────────────────────
+
+async function main(): Promise<void> {
+  printBanner();
+
+  // Allow app name to be passed as the first argument:
+  //   npx create-tast-app my-app
+  const argName = process.argv[2]?.trim();
+
+  const answers = await prompts<keyof Answers>(
+    [
+      // App name — skip if provided via argv
+      {
+        type: argName ? null : 'text',
+        name: 'appName',
+        message: 'App name:',
+        initial: 'my-tast-app',
+        validate: (v: string) =>
+          /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(toPackageName(v)) || 'Must be a valid slug',
+      },
+
+      // Description
+      {
+        type: 'text',
+        name: 'description',
+        message: 'Short description:',
+        initial: '',
+      },
+
+      // Features
+      {
+        type: 'toggle',
+        name: 'enablePwa',
+        message: 'Enable PWA support?',
+        initial: true,
+        active: 'Yes',
+        inactive: 'No',
+      },
+      {
+        type: 'toggle',
+        name: 'enableDocker',
+        message: 'Enable Docker support?',
+        initial: true,
+        active: 'Yes',
+        inactive: 'No',
+      },
+      {
+        type: 'toggle',
+        name: 'enableHusky',
+        message: 'Enable Husky git hooks?',
+        initial: true,
+        active: 'Yes',
+        inactive: 'No',
+      },
+
+      // Package manager
+      {
+        type: 'select',
+        name: 'packageManager',
+        message: 'Package manager:',
+        choices: buildPmChoices(),
+        initial: 0,
+      },
+
+      // Install now?
+      {
+        type: 'toggle',
+        name: 'installDeps',
+        message: 'Install dependencies now?',
+        initial: true,
+        active: 'Yes',
+        inactive: 'No',
+      },
+    ],
+    {
+      onCancel: () => {
+        console.log('\nOperation cancelled');
+        process.exit(0);
+      },
+    }
+  );
+
+  // Merge argv app name with prompt answers
+  const appName = toPackageName(argName ?? answers.appName ?? 'my-tast-app');
+  const destDir = getDestDir(appName);
+
+  console.log('');
+  logStep(`Creating "${appName}" in ${path.relative(process.cwd(), path.dirname(destDir))}`);
+
+  try {
+    await scaffold({
+      appName,
+      description: answers.description ?? '',
+      destDir,
+      enablePwa: answers.enablePwa ?? true,
+      enableDocker: answers.enableDocker ?? true,
+      enableHusky: answers.enableHusky ?? true,
+    });
+  } catch (err) {
+    logError(err instanceof Error ? err.message : String(err));
+    process.exit(1);
+  }
+
+  const pm: PackageManager = answers.packageManager ?? 'yarn';
+
+  if (answers.installDeps ?? true) {
+    const ok = await install(destDir, pm);
+    if (!ok) {
+      printNextSteps(appName, pm, /* installed */ false);
+      process.exit(1);
+    }
+  }
+
+  printNextSteps(appName, pm, answers.installDeps ?? true);
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function printBanner(): void {
+  console.log('');
+  console.log('  ╔════════════════════════════════╗');
+  console.log('  ║     create-tast-app  v1.0.0    ║');
+  console.log('  ╚════════════════════════════════╝');
+  console.log('');
+}
+
+function buildPmChoices(): Array<{ title: string; value: PackageManager }> {
+  const pms: Array<{ title: string; value: PackageManager }> = [
+    { title: 'yarn', value: 'yarn' },
+    { title: 'npm', value: 'npm' },
+    { title: 'pnpm', value: 'pnpm' },
+  ];
+
+  // Detect available package managers and put the first found at the top
+  const detected = pms.filter(p => commandExists(p.value));
+  const undetected = pms.filter(p => !commandExists(p.value));
+
+  return [
+    ...detected.map(p => ({ ...p, title: `${p.title} ✓` })),
+    ...undetected,
+  ];
+}
+
+function printNextSteps(appName: string, pm: PackageManager, installed: boolean): void {
+  console.log('');
+  console.log('  ✅  Your project is ready!\n');
+  console.log('  Next steps:\n');
+  console.log(`    cd ${appName}`);
+  if (!installed) {
+    console.log(`    ${pm} install`);
+  }
+  console.log(`    ${devCommand(pm)}`);
+  console.log('');
+  console.log('  Docs: https://github.com/Nimoh-Digital-Solutions/frontend-base-template');
+  console.log('');
+}
+
+// ─── Run ──────────────────────────────────────────────────────────────────────
+
+main().catch(err => {
+  console.error('\n  ✗ Unexpected error:', err instanceof Error ? err.message : String(err));
+  process.exit(1);
+});
