@@ -40,6 +40,10 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@nimoh-digital-solutions/tast-styles": "*",
+    "@nimoh-digital-solutions/tast-utils": "*",
+    "@nimoh-digital-solutions/tast-hooks": "*",
+    "@nimoh-digital-solutions/tast-ui": "*",
     "clsx": "^2.1.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

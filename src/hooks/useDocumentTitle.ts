@@ -1,41 +1,19 @@
-import { useEffect } from 'react';
-
+import { useDocumentTitle as _useDocumentTitle } from '@nimoh-digital-solutions/tast-hooks';
 import { APP_CONFIG } from '@configs';
 
 /**
- * useDocumentTitle
+ * useDocumentTitle — app-level wrapper around the tast-hooks primitive.
  *
- * Sets document.title on mount and restores the previous title on unmount.
- * Appends the app name for consistent branding across all pages.
+ * Automatically appends APP_CONFIG.appName so every page title is branded
+ * consistently without each call site having to pass the app name.
  *
  * @example
  * useDocumentTitle('Home');
  * // document.title => "Home | React Starter Kit"
+ *
+ * To use without the app name prefix, import directly from the package:
+ * import { useDocumentTitle } from '@nimoh-digital-solutions/tast-hooks';
  */
 export function useDocumentTitle(title: string): void {
-  useEffect(() => {
-    const prev = document.title;
-    document.title = `${title} | ${APP_CONFIG.appName}`;
-
-    // Announce the new page title to screen readers via an aria-live region.
-    // document.title updates alone are not reliably announced by all AT/browser
-    // combinations during SPA navigation.  A single shared announcer element is
-    // created on first use and reused on subsequent route changes.
-    let announcer = document.getElementById('route-announcer');
-    if (!announcer) {
-      announcer = document.createElement('div');
-      announcer.id = 'route-announcer';
-      announcer.setAttribute('aria-live', 'polite');
-      announcer.setAttribute('aria-atomic', 'true');
-      // Visually hidden but accessible to screen readers:
-      announcer.style.cssText =
-        'position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap';
-      document.body.appendChild(announcer);
-    }
-    announcer.textContent = document.title;
-
-    return () => {
-      document.title = prev;
-    };
-  }, [title]);
+  _useDocumentTitle(title, APP_CONFIG.appName);
 }
