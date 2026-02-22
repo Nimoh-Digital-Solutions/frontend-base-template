@@ -7,10 +7,12 @@ import { ThemeProvider } from '@contexts/ThemeContext';
 import { useTheme } from './useTheme';
 
 function makeWrapper(defaultTheme?: 'light' | 'dark') {
-  return ({ children }: { children: ReactNode }) =>
-    defaultTheme
-      ? createElement(ThemeProvider, { defaultTheme, children })
-      : createElement(ThemeProvider, { children });
+  function Wrapper({ children }: { children: ReactNode }) {
+    return defaultTheme
+      ? createElement(ThemeProvider, { defaultTheme }, children)
+      : createElement(ThemeProvider, null, children);
+  }
+  return Wrapper;
 }
 
 describe('useTheme', () => {

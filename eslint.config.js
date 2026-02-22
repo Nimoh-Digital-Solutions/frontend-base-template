@@ -47,6 +47,7 @@ export default [
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-redeclare': 'off', // Allow function overloads
       'no-redeclare': 'off', // TypeScript handles this
+      'no-undef': 'off', // TypeScript's type checker handles undefined globals in .ts/.tsx files
 
       // React
       ...react.configs.recommended.rules,
