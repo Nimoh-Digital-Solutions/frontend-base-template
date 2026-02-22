@@ -35,10 +35,11 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Authenticate with GitHub Packages
-        # Yarn v1 cannot interpolate ${ENV_VAR} in .npmrc, so the token is
-        # injected here via bash expansion and written to the user-level ~/.npmrc.
-        # Both yarn and npm (used by changeset publish) read ~/.npmrc for auth.
-        run: echo "//npm.pkg.github.com/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+        # Must run AFTER yarn install — Yarn v1 fails on ${ENV_VAR} in .npmrc but
+        # has no issue with a literal token value. Writing after install means Yarn
+        # never reads this line. npm (used by changeset publish internally) reads
+        # the project .npmrc alongside NPM_CONFIG_USERCONFIG set by changesets/action.
+        run: echo "//npm.pkg.github.com/:_authToken=$NPM_TOKEN" >> .npmrc
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
