@@ -1,8 +1,13 @@
 {
   "name": "@nimoh-digital-solutions/tast-ui",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "UI components and theme system for tast projects",
-  "keywords": ["react", "components", "ui", "tast"],
+  "keywords": [
+    "react",
+    "components",
+    "ui",
+    "tast"
+  ],
   "license": "MIT",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
