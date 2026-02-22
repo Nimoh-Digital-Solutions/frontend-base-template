@@ -1,0 +1,48 @@
+{
+  "name": "@nimoh-digital-solutions/tast-ui",
+  "version": "1.0.0",
+  "description": "UI components and theme system for tast projects",
+  "keywords": ["react", "components", "ui", "tast"],
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build && tsc --emitDeclarationOnly --declaration --outDir dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0",
+    "react-router-dom": "^7.0.0"
+  },
+  "dependencies": {
+    "@nimoh-digital-solutions/tast-utils": "*",
+    "clsx": "^2.1.1",
+    "react-icons": "^5.5.0"
+  },
+  "devDependencies": {
+    "@nimoh-digital-solutions/tsconfig": "*",
+    "@nimoh-digital-solutions/tast-styles": "*",
+    "@types/react": "^19.1.5",
+    "@types/react-dom": "^19.1.5",
+    "@vitejs/plugin-react": "^4.5.2",
+    "sass": "^1.89.2",
+    "typescript": "^5.8.3",
+    "vite": "^7.0.0",
+    "vite-plugin-dts": "^4.5.4"
+  }
+}

@@ -1,0 +1,59 @@
+@use '../abstracts/mixins' as mixin;
+
+/* ============================================================================
+   Dark Theme Token Overrides
+   ----------------------------------------------------------------------------
+   Applied via `[data-theme="dark"]` on `<html>` (set by ThemeProvider).
+
+   Only semantic token CSS variables are overridden here — layout and component
+   styles should reference semantic tokens (e.g. `func.color('bg-body')`) rather
+   than raw palette values (e.g. `func.color('white')`) to get automatic
+   dark-mode support without per-component overrides.
+
+   MIGRATION NOTE for existing module files:
+   Currently some modules use raw palette tokens (e.g. `func.color('white')`).
+   Replace those with semantic equivalents to opt each component into dark mode:
+     white       → bg-card
+     whiteish    → bg-body
+     blackish    → text-main
+     primary-light (borders) → border-subtle
+   ============================================================================ */
+
+[data-theme='dark'] {
+    /* Core Colors — lighter on dark backgrounds for readability */
+    @include mixin.set-var('--color-primary', 'blue-400');
+    @include mixin.set-var('--color-primary-light', 'blue-900');
+    @include mixin.set-var('--color-primary-dark', 'blue-100');
+
+    @include mixin.set-var('--color-secondary', 'gray-400');
+    @include mixin.set-var('--color-secondary-light', 'gray-800');
+    @include mixin.set-var('--color-secondary-dark', 'gray-200');
+
+    @include mixin.set-var('--color-tertiary', 'teal-500');
+    @include mixin.set-var('--color-tertiary-light', 'teal-900');
+    @include mixin.set-var('--color-tertiary-dark', 'teal-100');
+
+    /* Feedback — keep mid-range values; they read well on dark backgrounds */
+    @include mixin.set-var('--color-success', 'green-500');
+    @include mixin.set-var('--color-success-light', 'green-900');
+    @include mixin.set-var('--color-success-dark', 'green-100');
+
+    @include mixin.set-var('--color-warning', 'yellow-500');
+    @include mixin.set-var('--color-warning-light', 'yellow-900');
+    @include mixin.set-var('--color-warning-dark', 'yellow-100');
+
+    @include mixin.set-var('--color-error', 'red-500');
+    @include mixin.set-var('--color-error-light', 'red-900');
+    @include mixin.set-var('--color-error-dark', 'red-100');
+
+    /* Backgrounds */
+    @include mixin.set-var('--bg-body', 'gray-950');
+    @include mixin.set-var('--bg-card', 'gray-900');
+
+    /* Text — inverted from light default */
+    @include mixin.set-var('--text-main', 'whiteish');
+    @include mixin.set-var('--text-inverted', 'blackish');
+
+    /* Borders — subtly visible on dark surfaces */
+    @include mixin.set-var('--border-subtle', 'gray-700');
+}

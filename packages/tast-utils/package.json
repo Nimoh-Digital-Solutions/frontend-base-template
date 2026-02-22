@@ -1,0 +1,31 @@
+{
+  "name": "@nimoh-digital-solutions/tast-utils",
+  "version": "1.0.0",
+  "description": "Utility functions, types, and HTTP client for tast projects",
+  "keywords": ["utils", "http", "types", "tast"],
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@nimoh-digital-solutions/tsconfig": "*",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.3"
+  }
+}

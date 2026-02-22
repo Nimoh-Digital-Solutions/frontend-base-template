@@ -1,0 +1,38 @@
+{
+  "name": "@nimoh-digital-solutions/tast-hooks",
+  "version": "1.0.0",
+  "description": "Reusable React hooks for tast projects",
+  "keywords": ["react", "hooks", "tast"],
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
+  },
+  "dependencies": {
+    "@nimoh-digital-solutions/tast-utils": "*"
+  },
+  "devDependencies": {
+    "@nimoh-digital-solutions/tsconfig": "*",
+    "@types/react": "^19.1.5",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.3"
+  }
+}

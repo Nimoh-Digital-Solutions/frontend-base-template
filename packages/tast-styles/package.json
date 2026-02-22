@@ -1,0 +1,23 @@
+{
+  "name": "@nimoh-digital-solutions/tast-styles",
+  "version": "1.0.0",
+  "description": "SCSS design tokens, mixins, and base styles for the tast design system",
+  "keywords": ["scss", "design-tokens", "styles", "tast"],
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "files": [
+    "src"
+  ],
+  "exports": {
+    ".": "./src/index.scss",
+    "./abstracts/*": "./src/abstracts/*",
+    "./base/*": "./src/base/*",
+    "./themes/*": "./src/themes/*",
+    "./layout/*": "./src/layout/*",
+    "./pages/*": "./src/pages/*",
+    "./vendors/*": "./src/vendors/*",
+    "./src/*": "./src/*"
+  }
+}

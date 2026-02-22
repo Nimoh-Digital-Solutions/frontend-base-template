@@ -4,7 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       package:
-        description: 'Package to publish (eslint-config | tsconfig | stylelint-config | all)'
+        description: >
+          Package to publish:
+          eslint-config | tsconfig | stylelint-config |
+          tast-styles | tast-utils | tast-hooks | tast-ui | all
         required: true
         default: 'all'
 
@@ -30,6 +33,10 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      # -----------------------------------------------------------------------
+      # Config packages (no build step required)
+      # -----------------------------------------------------------------------
+
       - name: Publish eslint-config
         if: ${{ github.event.inputs.package == 'eslint-config' || github.event.inputs.package == 'all' }}
         run: yarn workspace @nimoh-digital-solutions/eslint-config publish --access public
@@ -45,5 +52,45 @@ jobs:
       - name: Publish stylelint-config
         if: ${{ github.event.inputs.package == 'stylelint-config' || github.event.inputs.package == 'all' }}
         run: yarn workspace @nimoh-digital-solutions/stylelint-config publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # -----------------------------------------------------------------------
+      # Runtime packages (build required before publish)
+      # -----------------------------------------------------------------------
+
+      - name: Publish tast-styles
+        if: ${{ github.event.inputs.package == 'tast-styles' || github.event.inputs.package == 'all' }}
+        run: yarn workspace @nimoh-digital-solutions/tast-styles publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build tast-utils
+        if: ${{ github.event.inputs.package == 'tast-utils' || github.event.inputs.package == 'all' }}
+        run: yarn workspace @nimoh-digital-solutions/tast-utils build
+
+      - name: Publish tast-utils
+        if: ${{ github.event.inputs.package == 'tast-utils' || github.event.inputs.package == 'all' }}
+        run: yarn workspace @nimoh-digital-solutions/tast-utils publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build tast-hooks
+        if: ${{ github.event.inputs.package == 'tast-hooks' || github.event.inputs.package == 'all' }}
+        run: yarn workspace @nimoh-digital-solutions/tast-hooks build
+
+      - name: Publish tast-hooks
+        if: ${{ github.event.inputs.package == 'tast-hooks' || github.event.inputs.package == 'all' }}
+        run: yarn workspace @nimoh-digital-solutions/tast-hooks publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build tast-ui
+        if: ${{ github.event.inputs.package == 'tast-ui' || github.event.inputs.package == 'all' }}
+        run: yarn workspace @nimoh-digital-solutions/tast-ui build
+
+      - name: Publish tast-ui
+        if: ${{ github.event.inputs.package == 'tast-ui' || github.event.inputs.package == 'all' }}
+        run: yarn workspace @nimoh-digital-solutions/tast-ui publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

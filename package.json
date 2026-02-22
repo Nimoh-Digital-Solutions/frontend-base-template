@@ -15,6 +15,8 @@
     "dev": "vite",
     "start": "vite",
     "build": "tsc && vite build",
+    "packages:build": "yarn workspace @nimoh-digital-solutions/tast-utils build && yarn workspace @nimoh-digital-solutions/tast-hooks build && yarn workspace @nimoh-digital-solutions/tast-ui build",
+    "packages:typecheck": "yarn workspace @nimoh-digital-solutions/tast-utils typecheck && yarn workspace @nimoh-digital-solutions/tast-hooks typecheck && yarn workspace @nimoh-digital-solutions/tast-ui typecheck",
     "build:analyze": "tsc && vite build --mode analyze",
     "preview": "vite preview",
     "type-check": "tsc --noEmit",

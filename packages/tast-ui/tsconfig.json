@@ -1,0 +1,10 @@
+{
+  "extends": "@nimoh-digital-solutions/tsconfig/react.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "declaration": true,
+    "declarationDir": "dist"
+  },
+  "include": ["src"]
+}
