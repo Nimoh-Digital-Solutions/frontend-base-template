@@ -46,5 +46,9 @@ jobs:
           title: "chore: version packages"
           commit: "chore: version packages"
         env:
+          # GITHUB_TOKEN is used by changesets/action to open/update the Version Packages PR.
+          # NPM_TOKEN is a fine-grained PAT with Contents + Packages write access,
+          # stored as a repository secret — required because org-level workflow permissions
+          # prevent GITHUB_TOKEN from having write access to packages.
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
