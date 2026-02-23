@@ -53,7 +53,7 @@
     h3 {
         font-size: func.font-size('2xl');
         font-weight: func.font-weight('semibold');
-        color: func.color('blackish');
+        color: func.color('text-primary');
         margin-bottom: func.spacing('3');
     }
 
@@ -76,12 +76,12 @@
     padding: func.spacing('4');
     border: 1px solid func.color('primary-light');
     border-radius: func.border-radius('md');
-    background-color: func.color('whiteish');
+    background-color: func.color('bg-card');
 
     h4 {
         font-size: func.font-size('base');
         font-weight: func.font-weight('medium');
-        color: func.color('blackish');
+        color: func.color('text-primary');
         margin: 0;
     }
 }
