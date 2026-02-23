@@ -245,11 +245,16 @@ $border-radius: (
     'pill': 100vmax
 ) !default;
 
-/* Transitions */
+/* Transitions
+   Timing functions use Open Props easing vars (--ease-3 = smooth ease-in-out).
+   Consumers can override individual entries by merging this map:
+     @use 'sass:map';
+     $transitions: map.merge(lib.$transitions, ('fast': 0.15s var(--ease-spring-1)));
+*/
 $transitions: (
-    'fast': 0.2s ease,
-    'normal': 0.3s ease,
-    'slow': 0.5s ease
+    'fast': 0.2s var(--ease-3),
+    'normal': 0.3s var(--ease-3),
+    'slow': 0.5s var(--ease-3)
 ) !default;
 
 /* Z-index (layering scale) */

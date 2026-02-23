@@ -5445,6 +5445,11 @@ onetime@^7.0.0:
   dependencies:
     mimic-function "^5.0.0"
 
+open-props@^1.7.23:
+  version "1.7.23"
+  resolved "https://registry.yarnpkg.com/open-props/-/open-props-1.7.23.tgz#087b9e0bdb423cbb9463ec8a045ec02b85ea936c"
+  integrity sha512-+xyrJmxV9QUBFbSwPROYhOg/FLXry+uuPr4R+B5EaE4556Oc18/8ZC/fL5A+/lbRSwNvA0Alh+C0KpyFWLmLZg==
+
 open@^10.0.0:
   version "10.2.0"
   resolved "https://registry.yarnpkg.com/open/-/open-10.2.0.tgz#b9d855be007620e80b6fb05fac98141fe62db73c"

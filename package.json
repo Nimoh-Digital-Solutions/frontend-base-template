@@ -48,6 +48,7 @@
     "@nimoh-digital-solutions/tast-ui": "^1.0.0",
     "@nimoh-digital-solutions/tast-utils": "^1.0.0",
     "clsx": "^2.1.1",
+    "open-props": "^1.7.23",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-icons": "^5.5.0",

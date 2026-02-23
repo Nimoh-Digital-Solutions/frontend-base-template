@@ -1,2 +1,12 @@
 // Third-party styles
-// Import vendor styles here 
+//
+// open-props (v1) is a peer dependency of this package.
+// Consumer apps must load it once at their entry point:
+//
+//   import 'open-props/style'; // in main.tsx / entry JS
+//
+// This makes all Open Props CSS custom properties available on :root, which
+// means any component that uses var(--size-*), var(--ease-*), var(--shadow-*)
+// etc. will resolve them at runtime without any extra imports.
+//
+// Full reference: https://open-props.style 
