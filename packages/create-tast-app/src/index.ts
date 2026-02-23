@@ -24,7 +24,7 @@ interface Answers {
 
 async function main(): Promise<void> {
   printBanner();
-  warnIfInsideWorkspace();
+  abortIfInsideWorkspace();
 
   // Allow app name to be passed as the first argument:
   //   npx create-tast-app my-app
@@ -186,7 +186,7 @@ function printBanner(): void {
  * Apps created inside a workspace will have their scoped packages resolved
  * to local workspace symlinks (no dist/) instead of the published registry.
  */
-function warnIfInsideWorkspace(): void {
+function abortIfInsideWorkspace(): void {
   let dir = process.cwd();
   const root = path.parse(dir).root;
 
@@ -196,13 +196,22 @@ function warnIfInsideWorkspace(): void {
       try {
         const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8')) as Record<string, unknown>;
         if (pkg.workspaces) {
-          console.log('  ⚠️  Warning: You are running this inside a Yarn workspace.');
-          console.log('  ⚠️  The new app should be created OUTSIDE the monorepo directory.');
-          console.log(`  ⚠️  Workspace root detected at: ${dir}`);
-          console.log('  ⚠️  Yarn will resolve @nimoh-digital-solutions/* to local workspace');
-          console.log('  ⚠️  symlinks instead of the published packages. yarn dev will fail.');
-          console.log('');
-          return;
+          console.error('');
+          console.error('  ✗  Cannot create app inside a Yarn workspace.');
+          console.error('');
+          console.error(`  Workspace root detected at: ${dir}`);
+          console.error('');
+          console.error('  When you run create-tast-app from inside a workspace, Yarn resolves');
+          console.error('  @nimoh-digital-solutions/* packages to local workspace symlinks');
+          console.error('  (no dist/) instead of the published registry packages, then fails');
+          console.error('  with "Workspace not found" errors for workspace:^ references.');
+          console.error('');
+          console.error('  Fix: run create-tast-app from a directory outside any monorepo.');
+          console.error('  Example:');
+          console.error('    cd ~');
+          console.error(`    npx @nimoh-digital-solutions/create-tast-app ${process.argv[2] ?? 'my-app'}`);
+          console.error('');
+          process.exit(1);
         }
       } catch {
         // ignore parse errors
