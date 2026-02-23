@@ -31,8 +31,11 @@ jobs:
           registry-url: https://npm.pkg.github.com
           scope: "@nimoh-digital-solutions"
 
+      - name: Enable Corepack (Yarn 4)
+        run: corepack enable
+
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --immutable
 
       - name: Authenticate with GitHub Packages
         # changesets/action sets NPM_CONFIG_USERCONFIG=$RUNNER_TEMP/.npmrc and checks

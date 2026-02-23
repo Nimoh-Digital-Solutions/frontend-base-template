@@ -12,14 +12,17 @@ import { ThemeProvider, useThemeContext } from './ThemeContext';
  * call context actions through button clicks.
  */
 const ThemeConsumer = () => {
-  const { theme, toggleTheme, setTheme } = useThemeContext();
+  const { theme, toggleTheme, setTheme, preferredTheme, setPreferredTheme } = useThemeContext();
 
   return (
     <div>
       <span data-testid="theme">{theme}</span>
+      <span data-testid="preferred">{preferredTheme ?? 'none'}</span>
       <button onClick={toggleTheme}>Toggle</button>
       <button onClick={() => setTheme('dark')}>Set Dark</button>
       <button onClick={() => setTheme('light')}>Set Light</button>
+      <button onClick={() => setPreferredTheme('dim')}>Prefer Dim</button>
+      <button onClick={() => setPreferredTheme(null)}>Clear Preferred</button>
     </div>
   );
 };
@@ -207,5 +210,65 @@ describe('useThemeContext', () => {
     expect(() => {
       render(<ThemeConsumer />);
     }).toThrow('[ThemeContext] useThemeContext must be used within a <ThemeProvider>');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// preferredTheme tests
+// ---------------------------------------------------------------------------
+
+describe('preferredTheme', () => {
+  it('is null by default when no stored preferred theme', () => {
+    renderWithProvider();
+
+    expect(screen.getByTestId('preferred').textContent).toBe('none');
+  });
+
+  it('reads stored preferred theme from localStorage on init', () => {
+    localStorage.setItem('app-theme-preferred', JSON.stringify('dim'));
+
+    renderWithProvider();
+
+    expect(screen.getByTestId('preferred').textContent).toBe('dim');
+  });
+
+  it('biases OS dark preference to dim when preferredTheme is dim', () => {
+    localStorage.setItem('app-theme-preferred', JSON.stringify('dim'));
+    (window.matchMedia as ReturnType<typeof vi.fn>).mockImplementation((query: string) => ({
+      matches: query === '(prefers-color-scheme: dark)',
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
+
+    renderWithProvider();
+
+    // OS dark + preferredTheme=dim → init theme should be 'dim' not 'dark'
+    expect(screen.getByTestId('theme').textContent).toBe('dim');
+  });
+
+  it('setPreferredTheme persists to localStorage and updates context', async () => {
+    const user = userEvent.setup();
+    renderWithProvider();
+
+    await user.click(screen.getByRole('button', { name: 'Prefer Dim' }));
+
+    expect(screen.getByTestId('preferred').textContent).toBe('dim');
+    expect(localStorage.getItem('app-theme-preferred')).toBe(JSON.stringify('dim'));
+  });
+
+  it('setPreferredTheme(null) clears localStorage and resets preferredTheme', async () => {
+    const user = userEvent.setup();
+    localStorage.setItem('app-theme-preferred', JSON.stringify('dim'));
+    renderWithProvider();
+
+    await user.click(screen.getByRole('button', { name: 'Clear Preferred' }));
+
+    expect(screen.getByTestId('preferred').textContent).toBe('none');
+    expect(localStorage.getItem('app-theme-preferred')).toBeNull();
   });
 });

@@ -3,9 +3,7 @@
   "version": "1.1.1",
   "description": "Create a new TAST frontend app",
   "type": "module",
-  "bin": {
-    "create-tast-app": "./dist/index.cjs"
-  },
+  "bin": "./dist/index.cjs",
   "files": [
     "dist"
   ],
@@ -18,7 +16,7 @@
     "prompts": "^2.4.2"
   },
   "devDependencies": {
-    "@nimoh-digital-solutions/tsconfig": "*",
+    "@nimoh-digital-solutions/tsconfig": "workspace:^",
     "@types/node": "^24.0.14",
     "@types/prompts": "^2.4.9",
     "tsup": "^8.4.0",

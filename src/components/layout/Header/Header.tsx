@@ -24,8 +24,9 @@ const themeConfig = {
  * Layout component — includes light → dim → dark theme cycler.
  */
 export const Header = ({ className }: { className?: string }): ReactElement => {
-  const { theme, toggleTheme } = useThemeContext();
+  const { theme, toggleTheme, preferredTheme, setPreferredTheme } = useThemeContext();
   const { icon, label } = themeConfig[theme] ?? themeConfig.light;
+  const isPreferred = theme === preferredTheme;
 
   return (
     <header className={className ? `${styles.root} ${className}` : styles.root}>
@@ -47,16 +48,26 @@ export const Header = ({ className }: { className?: string }): ReactElement => {
             </li>
           ))}
         </ul>
-        <button
-          className={styles.themeToggle}
-          onClick={toggleTheme}
-          aria-label={label}
-          title={label}
-          data-theme-current={theme}
-        >
-          {icon}
-          <span className={styles.themeLabel}>{theme}</span>
-        </button>
+        <div className={styles.themeActions}>
+          <button
+            className={styles.themeToggle}
+            onClick={toggleTheme}
+            aria-label={label}
+            title={label}
+            data-theme-current={theme}
+          >
+            {icon}
+            <span className={styles.themeLabel}>{theme}</span>
+          </button>
+          <button
+            className={`${styles.themeDefault}${isPreferred ? ` ${styles.themeDefaultActive}` : ''}`}
+            onClick={() => setPreferredTheme(isPreferred ? null : theme)}
+            aria-label={isPreferred ? 'Unpin default theme' : 'Set as default theme'}
+            title={isPreferred ? 'Unpin default theme' : 'Set as default theme'}
+          >
+            <span aria-hidden="true">{isPreferred ? '★' : '☆'}</span>
+          </button>
+        </div>
       </nav>
     </header>
   );

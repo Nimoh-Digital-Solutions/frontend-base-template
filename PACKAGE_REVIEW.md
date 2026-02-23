@@ -302,9 +302,9 @@ There is no `src/i18n/` directory, no `i18next` or similar setup, and no guidanc
 | I8 | Add env var Zod validation in `APP_CONFIG` | 🔴 High | Small | ✅ Done |
 | I9 | Add `Input`, `Textarea`, `Badge`, `Spinner`, `Card`, `Modal`, `Toast` to `tast-ui` | 🟠 Medium | Large | ✅ Done |
 | I10 | Add Storybook to `packages/tast-ui/` | 🟡 Low | Medium | ⬜ Todo |
-| I11 | Migrate Yarn v1 → Yarn v4 Berry | 🟡 Low | Large | ⬜ Todo |
-| I12 | Add opt-in path to setup scripts | 🟡 Low | Medium | ⬜ Todo |
-| I13 | OS preference path for `dim` theme | 🟡 Low | Small | ⬜ Todo |
+| I11 | Migrate Yarn v1 → Yarn v4 Berry | 🟡 Low | Large | ✅ Done |
+| I12 | Add opt-in path to setup scripts | 🟡 Low | Medium | ✅ Done |
+| I13 | OS preference path for `dim` theme | 🟡 Low | Small | ✅ Done |
 | I14 | Add `jest-axe` + `@axe-core/react` for a11y testing | 🟠 Medium | Small | ⬜ Todo |
 | I15 | Add `i18n` stub (opt-out) | 🟡 Low | Medium | ⬜ Todo |
 
@@ -556,7 +556,7 @@ All 7 components render in `ComponentsDemoPage`. Theme toggle changes them all. 
 
 ---
 
-### Phase 8 — DX Tooling
+### Phase 8 — DX Tooling ✅ DONE
 
 > **Goal:** Polish the development loop — better setup scripting, Yarn upgrade, and theme preference.  
 > These are low-risk standalone changes that don't affect published packages.
@@ -605,7 +605,7 @@ All 7 components render in `ComponentsDemoPage`. Theme toggle changes them all. 
 | 5 | Component Library Expansion | I9 | `tast-ui` package | 5–7 days | ✅ Done |
 | 6 | Storybook & Visual Dev | I10 | `tast-ui` tooling | 2–3 days | ✅ Done |
 | 7 | Accessibility & i18n | I14, I15 | Template + `tast-ui` | 3–4 days | ✅ Done |
-| 8 | DX Tooling | I11, I12, I13 | Infra + scripts | 3–5 days | ⬜ Todo |
+| 8 | DX Tooling | I11, I12, I13 | Infra + scripts | 3–5 days | ✅ Done |
 
 Phases 2–4 can be worked in parallel (no cross-dependencies). Phase 5 depends on Phase 4 (`Field` uses `Input`). Phase 6 depends on Phase 5 (Storybook needs all components). Phase 7 and 8 are independent.
 

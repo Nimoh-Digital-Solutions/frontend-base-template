@@ -354,6 +354,55 @@ async function run() {
     console.error('\nError during setup:', err);
   }
 
+  // -----------------------------------------------------------------------
+  // Offer to add features that are currently absent
+  // -----------------------------------------------------------------------
+  const nowAbsent = [];
+  if (!hasPWA()) nowAbsent.push({ title: 'PWA Support', value: 'pwa' });
+  if (!hasTesting()) nowAbsent.push({ title: 'Testing Infrastructure', value: 'testing' });
+  if (!hasHusky()) nowAbsent.push({ title: 'Git Hooks (Husky)', value: 'husky' });
+  if (!hasDocker()) nowAbsent.push({ title: 'Docker Support', value: 'docker' });
+
+  if (nowAbsent.length > 0) {
+    try {
+      const addPrompts = (await import('prompts')).default;
+      const addResponse = await addPrompts({
+        type: 'multiselect',
+        name: 'features',
+        message: 'Add any absent features? (Space to select, Enter to skip):',
+        choices: nowAbsent.map(c => ({ ...c, selected: false })),
+        hint: '- Space to select. Return to submit',
+      });
+
+      if (addResponse.features?.length > 0) {
+        const toAdd = new Set(addResponse.features);
+
+        if (toAdd.has('pwa')) {
+          const { apply } = await import('./setup-add-pwa.js');
+          await apply({ rootDir });
+          logOk('PWA support added');
+        }
+        if (toAdd.has('testing')) {
+          const { apply } = await import('./setup-add-testing.js');
+          await apply({ rootDir });
+          logOk('Testing infrastructure added');
+        }
+        if (toAdd.has('husky')) {
+          const { apply } = await import('./setup-add-husky.js');
+          await apply({ rootDir });
+          logOk('Git hooks added');
+        }
+        if (toAdd.has('docker')) {
+          const { apply } = await import('./setup-add-docker.js');
+          await apply({ rootDir });
+          logOk('Docker configuration added');
+        }
+      }
+    } catch (addErr) {
+      console.error('\nError during feature addition:', addErr);
+    }
+  }
+
   // Re-check feature presence after child scripts ran
   pwaPresent = hasPWA();
   testingPresent = hasTesting();

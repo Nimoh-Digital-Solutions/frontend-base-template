@@ -31,10 +31,10 @@
     "react": "^18.0.0 || ^19.0.0"
   },
   "dependencies": {
-    "@nimoh-digital-solutions/tast-utils": "*"
+    "@nimoh-digital-solutions/tast-utils": "workspace:^"
   },
   "devDependencies": {
-    "@nimoh-digital-solutions/tsconfig": "*",
+    "@nimoh-digital-solutions/tsconfig": "workspace:^",
     "@types/react": "^19.1.5",
     "tsup": "^8.4.0",
     "typescript": "^5.8.3"

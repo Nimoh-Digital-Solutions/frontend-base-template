@@ -9,7 +9,7 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
-      - yarn_cache:/usr/local/share/.cache/yarn
+      - yarn_cache:/root/.yarn/berry/cache
     ports:
       - '3000:3000'
     environment:

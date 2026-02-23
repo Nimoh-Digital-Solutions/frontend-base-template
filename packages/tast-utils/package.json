@@ -29,7 +29,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@nimoh-digital-solutions/tsconfig": "*",
+    "@nimoh-digital-solutions/tsconfig": "workspace:^",
     "tsup": "^8.4.0",
     "typescript": "^5.8.3"
   }

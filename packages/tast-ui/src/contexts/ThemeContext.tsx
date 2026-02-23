@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode, type ReactElement } from 'react';
 
 import type { Theme } from '@nimoh-digital-solutions/tast-utils';
-import { getStorageItem, setStorageItem } from '@nimoh-digital-solutions/tast-utils';
+import { getStorageItem, removeStorageItem, setStorageItem } from '@nimoh-digital-solutions/tast-utils';
 
 // ---------------------------------------------------------------------------
 // Context types
@@ -9,10 +9,14 @@ import { getStorageItem, setStorageItem } from '@nimoh-digital-solutions/tast-ut
 interface ThemeContextValue {
   /** Current active theme */
   theme: Theme;
-  /** Toggle between 'light' and 'dark' */
+  /** User's explicitly preferred default theme (stored separately from the active theme) */
+  preferredTheme: Theme | null;
+  /** Toggle between 'light', 'dim', and 'dark' */
   toggleTheme: () => void;
   /** Set a specific theme */
   setTheme: (theme: Theme) => void;
+  /** Persist the given theme as the default preference (used to bias OS-dark → dim) */
+  setPreferredTheme: (theme: Theme | null) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -47,12 +51,22 @@ interface ThemeProviderProps {
  * Wrap this around `<App />` in `main.tsx` or at the top of `<App />`.
  */
 export const ThemeProvider = ({ children, defaultTheme = 'light' }: ThemeProviderProps): ReactElement => {
+  const [preferredTheme, setPreferredThemeState] = useState<Theme | null>(() => {
+    const stored = getStorageItem<string>('app-theme-preferred');
+    if (stored === 'light' || stored === 'dark' || stored === 'dim') return stored;
+    return null;
+  });
+
   const [theme, setThemeState] = useState<Theme>(() => {
     const stored = getStorageItem<string>('app-theme');
     if (stored === 'light' || stored === 'dark' || stored === 'dim') return stored;
-    // Respect OS preference if no stored value
+    // Respect OS preference if no stored value; preferredTheme biases OS dark → dim
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    return prefersDark ? 'dark' : defaultTheme;
+    if (prefersDark) {
+      const pref = getStorageItem<string>('app-theme-preferred');
+      return pref === 'dim' ? 'dim' : 'dark';
+    }
+    return defaultTheme;
   });
 
   useEffect(() => {
@@ -67,8 +81,14 @@ export const ThemeProvider = ({ children, defaultTheme = 'light' }: ThemeProvide
 
     const handleChange = (e: MediaQueryListEvent) => {
       const stored = getStorageItem<string>('app-theme');
-      if (stored === 'light' || stored === 'dark') return; // explicit user preference wins
-      setThemeState(e.matches ? 'dark' : defaultTheme);
+      if (stored === 'light' || stored === 'dark' || stored === 'dim') return; // explicit user preference wins
+      if (e.matches) {
+        // OS switched to dark — honour preferredTheme=dim bias
+        const pref = getStorageItem<string>('app-theme-preferred');
+        setThemeState(pref === 'dim' ? 'dim' : 'dark');
+      } else {
+        setThemeState(defaultTheme);
+      }
     };
 
     mediaQuery.addEventListener('change', handleChange);
@@ -79,9 +99,17 @@ export const ThemeProvider = ({ children, defaultTheme = 'light' }: ThemeProvide
     setThemeState(t => t === 'light' ? 'dim' : t === 'dim' ? 'dark' : 'light'),
   []);
   const setTheme = useCallback((t: Theme) => setThemeState(t), []);
+  const setPreferredTheme = useCallback((newPreferred: Theme | null) => {
+    if (newPreferred) {
+      setStorageItem('app-theme-preferred', newPreferred);
+    } else {
+      removeStorageItem('app-theme-preferred');
+    }
+    setPreferredThemeState(newPreferred);
+  }, []);
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, preferredTheme, toggleTheme, setTheme, setPreferredTheme }}>
       {children}
     </ThemeContext.Provider>
   );
