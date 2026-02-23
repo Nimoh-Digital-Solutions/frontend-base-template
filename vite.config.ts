@@ -6,6 +6,8 @@ import checker from 'vite-plugin-checker';
 import { visualizer } from 'rollup-plugin-visualizer';
 import autoprefixer from 'autoprefixer';
 import pxtorem from 'postcss-pxtorem';
+import postcssJitProps from 'postcss-jit-props';
+import OpenProps from 'open-props';
 
 import { pwaPlugin, htmlTransformPlugin } from './plugins';
 
@@ -75,8 +77,9 @@ export default defineConfig(({ mode }) => {
 
     css: {
       postcss: {
-        plugins: [
-          autoprefixer(),
+        plugins: [          // Injects only the Open Props custom properties that are actually
+          // referenced via var(--...) in CSS/SCSS — keeps bundle lean.
+          postcssJitProps(OpenProps),          autoprefixer(),
           pxtorem({
             rootValue: 16,
             mediaQuery: true,

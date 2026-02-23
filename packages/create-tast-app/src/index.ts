@@ -10,6 +10,9 @@ import { logStep, logError, toPackageName, getDestDir, commandExists } from './u
 interface Answers {
   appName: string;
   description: string;
+  brandPrimary: string;
+  brandSecondary: string;
+  brandTertiary: string;
   enablePwa: boolean;
   enableDocker: boolean;
   enableHusky: boolean;
@@ -45,6 +48,33 @@ async function main(): Promise<void> {
         name: 'description',
         message: 'Short description:',
         initial: '',
+      },
+
+      // Brand colours
+      {
+        type: 'text',
+        name: 'brandPrimary',
+        message: 'Brand primary colour (hex, e.g. #3b82f6 — leave blank for default blue):',
+        initial: '',
+        validate: (v: string) =>
+          !v || /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v)
+            || 'Must be a valid hex colour (e.g. #3b82f6 or #38f)',
+      },
+      {
+        type: 'text',
+        name: 'brandSecondary',
+        message: 'Brand secondary colour (hex — leave blank for default gray):',
+        initial: '',
+        validate: (v: string) =>
+          !v || /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v) || 'Must be a valid hex colour',
+      },
+      {
+        type: 'text',
+        name: 'brandTertiary',
+        message: 'Brand tertiary/accent colour (hex — leave blank for default teal):',
+        initial: '',
+        validate: (v: string) =>
+          !v || /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v) || 'Must be a valid hex colour',
       },
 
       // Features
@@ -115,6 +145,9 @@ async function main(): Promise<void> {
       enablePwa: answers.enablePwa ?? true,
       enableDocker: answers.enableDocker ?? true,
       enableHusky: answers.enableHusky ?? true,
+      brandPrimary: answers.brandPrimary?.trim() || undefined,
+      brandSecondary: answers.brandSecondary?.trim() || undefined,
+      brandTertiary: answers.brandTertiary?.trim() || undefined,
     });
   } catch (err) {
     logError(err instanceof Error ? err.message : String(err));

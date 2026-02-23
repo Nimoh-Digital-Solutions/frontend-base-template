@@ -2,10 +2,9 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { initPWA } from './sw/pwa';
-
-// Open Props — CSS custom property primitives (sizes, easing, colours, etc.)
-// Loaded here once so all components and styles can access var(--size-*) etc.
-import 'open-props/style';
+// open-props custom properties are injected at build time by postcss-jit-props
+// (see vite.config.ts → css.postcss). Only the vars actually used in CSS/SCSS
+// end up in the bundle — no manual import needed here.
 
 import App from './App';
 

@@ -30,6 +30,16 @@ export interface ScaffoldOptions {
   enablePwa: boolean;
   enableDocker: boolean;
   enableHusky: boolean;
+  /**
+   * Optional brand hex colours, e.g. '#3b82f6'.
+   * When provided, a `_brand.scss` override file is generated in
+   * `src/styles/themes/` that sets `--color-primary*` etc. to the
+   * supplied values (with auto-derived light/dark stops).
+   * Leave undefined to keep the template default palette.
+   */
+  brandPrimary?: string;
+  brandSecondary?: string;
+  brandTertiary?: string;
 }
 
 // ─── Main entry ──────────────────────────────────────────────────────────────
@@ -51,6 +61,7 @@ export async function scaffold(opts: ScaffoldOptions): Promise<void> {
   // 3. Token replace
   logStep('Customising template');
   replaceTokens(destDir, appName, description);
+  injectBrandColors(destDir, opts);
 
   // 4. Optional feature removal
   if (!enableDocker) {
@@ -470,6 +481,141 @@ function cleanupSetupScripts(
     const scriptPath = path.join(destDir, 'scripts', script);
     if (safeUnlink(scriptPath)) {
       logOk(`scripts/${script} — removed`);
+    }
+  }
+}
+
+// ─── Brand colour injection ───────────────────────────────────────────────────
+
+// ── Minimal hex / HSL helpers (no runtime dependencies) ──────────────────────
+
+function hexToRgb(hex: string): { r: number; g: number; b: number } {
+  const h = hex.replace('#', '');
+  const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
+  const n = parseInt(full, 16);
+  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+}
+
+function rgbToHsl(r: number, g: number, b: number): { h: number; s: number; l: number } {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  if (max === min) return { h: 0, s: 0, l: l * 100 };
+  const d = max - min;
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+  let h = 0;
+  if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+  else if (max === g) h = ((b - r) / d + 2) / 6;
+  else h = ((r - g) / d + 4) / 6;
+  return { h: h * 360, s: s * 100, l: l * 100 };
+}
+
+function hslToHex(h: number, s: number, l: number): string {
+  h /= 360; s /= 100; l /= 100;
+  const hue2rgb = (p: number, q: number, t: number): number => {
+    if (t < 0) t += 1; if (t > 1) t -= 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+  };
+  let r, g, b;
+  if (s === 0) { r = g = b = l; } else {
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    r = hue2rgb(p, q, h + 1 / 3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1 / 3);
+  }
+  return '#' + [r, g, b].map(x => Math.round(x * 255).toString(16).padStart(2, '0')).join('');
+}
+
+function normHex(hex: string): string {
+  const h = hex.replace('#', '');
+  return '#' + (h.length === 3 ? h.split('').map(c => c + c).join('') : h).toLowerCase();
+}
+
+/** Derive a 4-stop palette from a single base hex:
+ *  100 = very light tint, 400 = slightly lighter, 500 = base, 900 = deep shade */
+function derivePalette(hex: string): Record<'100' | '400' | '500' | '900', string> {
+  const base = normHex(hex);
+  const { r, g, b } = hexToRgb(base);
+  const { h, s, l } = rgbToHsl(r, g, b);
+  return {
+    '100': hslToHex(h, Math.max(s - 15, 8), Math.min(l + 42, 93)),
+    '400': hslToHex(h, s, Math.min(l + 12, 82)),
+    '500': base,
+    '900': hslToHex(h, Math.min(s + 12, 100), Math.max(l - 32, 10)),
+  };
+}
+
+// ── Brand colour injection ────────────────────────────────────────────────────
+
+/**
+ * Generates `src/styles/themes/_brand.scss` in the scaffolded project.
+ * The file overrides `--color-primary*`, `--color-secondary*`, and/or
+ * `--color-tertiary*` CSS custom properties for both light and dark themes.
+ * It is forwarded last in `themes/_index.scss` so it wins the cascade.
+ */
+function injectBrandColors(
+  destDir: string,
+  opts: Pick<ScaffoldOptions, 'brandPrimary' | 'brandSecondary' | 'brandTertiary'>
+): void {
+  if (!opts.brandPrimary && !opts.brandSecondary && !opts.brandTertiary) return;
+
+  logStep('Injecting brand colours');
+
+  const pairs = [
+    { name: 'primary', hex: opts.brandPrimary },
+    { name: 'secondary', hex: opts.brandSecondary },
+    { name: 'tertiary', hex: opts.brandTertiary },
+  ].filter((p): p is { name: string; hex: string } => !!p.hex);
+
+  const lightLines: string[] = [];
+  const darkLines: string[] = [];
+
+  for (const { name, hex } of pairs) {
+    const p = derivePalette(hex);
+    lightLines.push(
+      `    --color-${name}: ${p['500']};`,
+      `    --color-${name}-light: ${p['100']};`,
+      `    --color-${name}-dark: ${p['900']};`,
+    );
+    darkLines.push(
+      `    --color-${name}: ${p['400']};         /* lighter for readability on dark bg */`,
+      `    --color-${name}-light: ${p['900']};   /* tonal surface on dark bg */`,
+      `    --color-${name}-dark: ${p['100']};    /* very light for text accents on dark bg */`,
+    );
+  }
+
+  const brandScss = [
+    '// Brand colours — generated by create-tast-app.',
+    '// Overrides the default semantic tokens defined in _base.scss / _dark.scss.',
+    '// Edit hex values here to retheme the entire app.',
+    '',
+    ':root {',
+    ...lightLines,
+    '}',
+    '',
+    "[data-theme='dark'] {",
+    ...darkLines,
+    '}',
+    '',
+  ].join('\n');
+
+  const themesDir = path.join(destDir, 'src', 'styles', 'themes');
+  const brandPath = path.join(themesDir, '_brand.scss');
+  writeText(brandPath, brandScss);
+  logOk('src/styles/themes/_brand.scss — created');
+
+  // Append @forward after existing entries so overrides win the cascade
+  const indexPath = path.join(themesDir, '_index.scss');
+  if (exists(indexPath)) {
+    let idx = readText(indexPath);
+    if (!idx.includes("@forward './brand'")) {
+      idx = idx.trimEnd() + "\n@forward './brand';\n";
+      writeText(indexPath, idx);
+      logOk("src/styles/themes/_index.scss — added @forward './brand'");
     }
   }
 }

@@ -105,7 +105,7 @@
     &--sm {
         padding: func.spacing('1.5') func.spacing('3');
         font-size: func.font-size('sm');
-        min-height: 2rem;
+        min-height: var(--size-7); /* 2rem */
 
         .icon {
             font-size: 0.875em;
@@ -127,7 +127,7 @@
     &--lg {
         padding: func.spacing('3') func.spacing('6');
         font-size: func.font-size('lg');
-        min-height: 3rem;
+        min-height: var(--size-8); /* 3rem */
 
         .icon {
             font-size: 1.125em;

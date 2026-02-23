@@ -2,6 +2,8 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import dts from 'vite-plugin-dts';
 import path from 'path';
+import postcssJitProps from 'postcss-jit-props';
+import OpenProps from 'open-props';
 
 export default defineConfig({
   plugins: [
@@ -21,6 +23,13 @@ export default defineConfig({
     modules: {
       // Generates short, deterministic class names: Button_root__abc123
       generateScopedName: '[name]_[local]__[hash:base64:6]',
+    },
+    postcss: {
+      plugins: [
+        // Strip unused Open Props from the distributed CSS bundle.
+        // Only vars referenced via var(--...) in component SCSS are emitted.
+        postcssJitProps(OpenProps),
+      ],
     },
   },
   build: {
