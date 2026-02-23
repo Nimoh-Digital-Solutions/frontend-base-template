@@ -6,7 +6,7 @@ import type { ReactNode } from 'react';
 import { ThemeProvider } from '@contexts/ThemeContext';
 import { useTheme } from './useTheme';
 
-function makeWrapper(defaultTheme?: 'light' | 'dark') {
+function makeWrapper(defaultTheme?: 'light' | 'dark' | 'dim') {
   function Wrapper({ children }: { children: ReactNode }) {
     return defaultTheme
       ? createElement(ThemeProvider, { defaultTheme }, children)
@@ -36,23 +36,22 @@ describe('useTheme', () => {
     expect(result.current.isDark).toBe(false);
   });
 
-  it('toggleTheme switches between light and dark', () => {
+  it('toggleTheme cycles light → dim → dark → light', () => {
     const { result } = renderHook(() => useTheme(), { wrapper: makeWrapper('light') });
 
     expect(result.current.theme).toBe('light');
 
-    act(() => {
-      result.current.toggleTheme();
-    });
+    act(() => { result.current.toggleTheme(); });
+    expect(result.current.theme).toBe('dim');
+    expect(result.current.isDark).toBe(false);
 
+    act(() => { result.current.toggleTheme(); });
     expect(result.current.theme).toBe('dark');
     expect(result.current.isDark).toBe(true);
 
-    act(() => {
-      result.current.toggleTheme();
-    });
-
+    act(() => { result.current.toggleTheme(); });
     expect(result.current.theme).toBe('light');
+    expect(result.current.isLight).toBe(true);
   });
 
   it('setTheme sets the theme to the given value', () => {

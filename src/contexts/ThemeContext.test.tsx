@@ -24,7 +24,7 @@ const ThemeConsumer = () => {
   );
 };
 
-function renderWithProvider(defaultTheme?: 'light' | 'dark') {
+function renderWithProvider(defaultTheme?: 'light' | 'dark' | 'dim') {
   return render(
     // Only pass defaultTheme when defined — exactOptionalPropertyTypes rejects
     // explicit `undefined` for optional props typed as a concrete type.
@@ -131,14 +131,23 @@ describe('ThemeProvider', () => {
 
       await user.click(screen.getByRole('button', { name: 'Toggle' }));
 
-      expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+      expect(document.documentElement.getAttribute('data-theme')).toBe('dim');
     });
   });
 
   describe('toggleTheme', () => {
-    it('switches from light to dark', async () => {
+    it('switches from light to dim', async () => {
       const user = userEvent.setup();
       renderWithProvider('light');
+
+      await user.click(screen.getByRole('button', { name: 'Toggle' }));
+
+      expect(screen.getByTestId('theme').textContent).toBe('dim');
+    });
+
+    it('switches from dim to dark', async () => {
+      const user = userEvent.setup();
+      renderWithProvider('dim');
 
       await user.click(screen.getByRole('button', { name: 'Toggle' }));
 
@@ -184,8 +193,8 @@ describe('ThemeProvider', () => {
 
       await user.click(screen.getByRole('button', { name: 'Toggle' }));
 
-      // setStorageItem stores as JSON string
-      expect(localStorage.getItem('app-theme')).toBe(JSON.stringify('dark'));
+      // setStorageItem stores as JSON string — first toggle from light goes to dim
+      expect(localStorage.getItem('app-theme')).toBe(JSON.stringify('dim'));
     });
   });
 });
