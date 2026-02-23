@@ -30,8 +30,8 @@ html {
     font-synthesis-style: none;
     line-height: 1.5;
 
-    /* If you add dark tokens later, switch to `light dark` */
-    color-scheme: light;
+    /* Support both light and dark — ThemeProvider picks one via [data-theme] */
+    color-scheme: light dark;
 }
 
 body {
@@ -39,8 +39,8 @@ body {
     margin: 0;
     padding: 0;
     overflow-x: hidden;
-    background: func.color('white');
-    color: func.color('blackish');
+    background: var(--surface-1);
+    color: var(--text-1);
 }
 
 h1,
@@ -93,8 +93,8 @@ textarea {
 
 /* Subtle selection */
 ::selection {
-    background-color: func.color('primary-light');
-    color: func.color('blackish');
+    background-color: var(--surface-3);
+    color: var(--text-1);
 }
 
 /* Accessible focus by default; override with @include mixin.focus-ring() if needed */
@@ -115,4 +115,13 @@ textarea {
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
     }
+}
+
+#root {
+    block-size: 100dvh;
+    inline-size: 100dvw;
+}
+
+* > ::placeholder {
+    color: var(--text-2);
 }

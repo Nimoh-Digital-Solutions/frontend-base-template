@@ -1,9 +1,10 @@
 import type { ReactElement } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LuHouse, LuLayers } from 'react-icons/lu';
+import { LuHouse, LuLayers, LuSun, LuMoon } from 'react-icons/lu';
 
 import { APP_CONFIG } from '@configs';
 import { PATHS } from '@routes/config/paths';
+import { useThemeContext } from '@contexts';
 
 import styles from './Header.module.scss';
 
@@ -20,6 +21,8 @@ const navLinks = [
  * Layout component
  */
 export const Header = ({ className }: { className?: string }): ReactElement => {
+  const { theme, toggleTheme } = useThemeContext();
+
   return (
     <header className={className ? `${styles.root} ${className}` : styles.root}>
       <nav className={styles.nav} aria-label="Main navigation">
@@ -40,6 +43,14 @@ export const Header = ({ className }: { className?: string }): ReactElement => {
             </li>
           ))}
         </ul>
+        <button
+          className={styles.themeToggle}
+          onClick={toggleTheme}
+          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
+        >
+          {theme === 'dark' ? <LuSun size={20} aria-hidden="true" /> : <LuMoon size={20} aria-hidden="true" />}
+        </button>
       </nav>
     </header>
   );
