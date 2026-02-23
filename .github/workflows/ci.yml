@@ -36,5 +36,5 @@ jobs:
       - name: Lint (Stylelint)
         run: yarn stylelint
 
-      - name: Tests
-        run: yarn test:run
+      - name: Tests (with coverage gates)
+        run: yarn test:coverage

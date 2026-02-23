@@ -143,7 +143,17 @@ export default defineConfig(({ mode }) => {
           '**/*.config.*',
           '**/mockData',
           'dist/',
+          // Configs are thin wrappers around env vars — not unit-testable in isolation
+          'src/configs/',
+          // Route config and page fallback are declarative, not logic
+          'src/routes/config/',
         ],
+        thresholds: {
+          lines: 70,
+          functions: 70,
+          branches: 60,
+          statements: 70,
+        },
       },
       include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
       exclude: ['node_modules', 'dist'],
