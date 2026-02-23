@@ -5,6 +5,7 @@
 ### Minor Changes
 
 - 44e6d12: feat: add 'dim' theme to Theme type and 3-way toggle cycle
+
   - tast-utils: Theme type extended to 'light' | 'dark' | 'dim'
   - tast-ui: ThemeContext toggleTheme cycles light → dim → dark → light
     instead of the previous binary light ↔ dark toggle
@@ -31,6 +32,7 @@
   `postcss-jit-props` is now wired into the tast-ui Vite build config.
   Only the Open Props vars actually used by components are emitted
   (--ease-3, --size-7, --size-8) — down from ~150 vars to 3.
+
   - Button --sm and --lg min-height migrated to var(--size-7) / var(--size-8)
 
 ## 1.0.2
