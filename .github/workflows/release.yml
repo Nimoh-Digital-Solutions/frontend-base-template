@@ -23,6 +23,9 @@ jobs:
           # Full git history lets Changesets diff against the last release tag
           fetch-depth: 0
 
+      - name: Enable Corepack (Yarn 4)
+        run: corepack enable
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -30,9 +33,6 @@ jobs:
           cache: yarn
           registry-url: https://npm.pkg.github.com
           scope: "@nimoh-digital-solutions"
-
-      - name: Enable Corepack (Yarn 4)
-        run: corepack enable
 
       - name: Install dependencies
         run: yarn install --immutable
