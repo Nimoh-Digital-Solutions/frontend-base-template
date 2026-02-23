@@ -4,6 +4,7 @@
     background-color: func.color('bg-card');
     border: 1px solid func.color('border-subtle');
     border-radius: func.border-radius('lg');
+    min-inline-size: 100%;
 
     /* ---- Padding variants ---- */
 
