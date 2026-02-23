@@ -1,5 +1,13 @@
 # @nimoh-digital-solutions/create-tast-app
 
+## 1.0.3
+
+### Patch Changes
+
+- 7bd16a6: fix(tast-ui): correct CSS export path to point at dist/index.css (actual Vite lib output)
+
+  fix(create-tast-app): strip workspaces, changeset scripts, and monorepo-only devDeps from scaffolded app package.json to prevent Yarn from treating new projects as workspace roots
+
 ## 1.0.2
 
 ### Patch Changes
