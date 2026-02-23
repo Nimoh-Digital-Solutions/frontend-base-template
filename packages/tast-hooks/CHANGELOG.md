@@ -1,5 +1,11 @@
 # @nimoh-digital-solutions/tast-hooks
 
+## 1.2.0
+
+### Minor Changes
+
+- da7509e: feat: add useToast hook for managing transient notifications
+
 ## 1.1.0
 
 ### Minor Changes
