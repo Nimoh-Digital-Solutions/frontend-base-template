@@ -58,6 +58,18 @@ export async function scaffold(opts: ScaffoldOptions): Promise<void> {
   safeRmDir(path.join(destDir, '.git'));
   logOk('Removed .git history — clean slate');
 
+  // 2.5 Remove monorepo-only artifacts that must not exist in a standalone app.
+  //   - yarn.lock: the monorepo lockfile resolves @nimoh-digital-solutions/*
+  //     packages via the workspace: protocol (e.g. workspace:^). Outside the
+  //     monorepo those workspace references don't exist, causing Yarn to fail with
+  //     "Workspace not found". Deleting it forces Yarn to generate a fresh
+  //     lockfile from the npm / GitHub Packages registry.
+  //   - packages/: internal monorepo packages (tast-ui, tast-utils, etc.)
+  //   - .changeset/: changeset config and pending changesets
+  safeUnlink(path.join(destDir, 'yarn.lock'));
+  safeRmDir(path.join(destDir, 'packages'));
+  safeRmDir(path.join(destDir, '.changeset'));
+
   // 3. Token replace
   logStep('Customising template');
   replaceTokens(destDir, appName, description);
