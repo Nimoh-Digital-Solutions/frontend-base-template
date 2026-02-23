@@ -27,3 +27,4 @@ export function useClickOutside<T extends Element>(
     return () => document.removeEventListener('pointerdown', listener);
   }, [ref, handler]);
 }
+
