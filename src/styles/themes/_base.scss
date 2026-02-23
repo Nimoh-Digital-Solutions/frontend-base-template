@@ -14,7 +14,7 @@ html {
 
   /* Secondary brand accent */
   --accent-hue: 75;
-  --accent: hsl(75, 80%, 50%);
+  --accent: hsl(75deg, 80%, 50%);
   --radius-base: calc(var(--radius-2) + var(--size-2));
 
   /* ── Light Palette ── */
@@ -44,8 +44,8 @@ html {
   --shadow-strength-dark: .8;
 
   /* ── Brand-Specific Colors ── */
-  --brand-secondary: hsl(264 48% 51%);
-  --brand-accent: hsl(75 80% 50%);
+  --brand-secondary: hsl(264deg 48% 51%);
+  --brand-accent: hsl(75deg 80% 50%);
 
   /* ── HSL Components (for gradients & opacity) ── */
   --brand-hsl: var(--brand-hue) var(--brand-saturation) var(--brand-lightness);
@@ -68,8 +68,8 @@ html {
   --success-color-light: #e8f5e8;
   --success-color-dark: #1ea557;
 
-  --link-color-light: hsl(264 48% 51%);
-  --link-color-dark: hsl(264 60% 70%);
+  --link-color-light: hsl(264deg 48% 51%);
+  --link-color-dark: hsl(264deg 60% 70%);
 
   /* ── Border Colors ── */
   --border-subtle-light: hsl(var(--brand-hue) 15% 92%);
@@ -249,8 +249,8 @@ html {
    ============================================================================ */
 
 :root {
-  --grey: hsl(0, 0%, 92%);
+  --grey: hsl(0deg, 0%, 92%);
   --grey-light: #818181;
-  --grey-lightest: #DDDDDD;
+  --grey-lightest: #DDD;
   --grey-dark: #D1D1D1;
 }
