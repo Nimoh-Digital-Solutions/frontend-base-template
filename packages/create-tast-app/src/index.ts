@@ -161,8 +161,10 @@ async function main(): Promise<void> {
   if (answers.installDeps ?? true) {
     const ok = await install(destDir, pm);
     if (!ok) {
+      // Scaffold succeeded — only the install step was skipped/failed.
+      // Exit 0 so the calling shell doesn't treat a ready project as an error.
       printNextSteps(appName, pm, /* installed */ false);
-      process.exit(1);
+      process.exit(0);
     }
   }
 
@@ -230,11 +232,19 @@ function buildPmChoices(): Array<{ title: string; value: PackageManager }> {
 }
 
 function printNextSteps(appName: string, pm: PackageManager, installed: boolean): void {
+  const needsToken = pm === 'yarn' && !process.env['NPM_TOKEN'];
   console.log('');
   console.log('  ✅  Your project is ready!\n');
   console.log('  Next steps:\n');
   console.log(`    cd ${appName}`);
   if (!installed) {
+    if (needsToken) {
+      console.log('');
+      console.log('  First, create a GitHub token with read:packages scope:');
+      console.log('    https://github.com/settings/tokens\n');
+      console.log(`    export NPM_TOKEN=<your-github-token>`);
+      console.log('');
+    }
     console.log(`    ${pm} install`);
   }
   console.log(`    ${devCommand(pm)}`);

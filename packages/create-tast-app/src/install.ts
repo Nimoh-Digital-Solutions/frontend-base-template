@@ -12,17 +12,17 @@ export async function install(destDir: string, manager: PackageManager): Promise
 
   logStep(`Installing dependencies with ${resolvedManager}`);
 
-  // GitHub Packages requires an auth token for @nimoh-digital-solutions/* packages.
-  // Yarn 4 reads NPM_TOKEN via ${NPM_TOKEN} interpolation in .yarnrc.yml — warn early
-  // if it is missing so the user gets a clear message instead of a cryptic 401/404.
+  // @nimoh-digital-solutions/* packages are on GitHub Packages which requires auth
+  // even for reads. Yarn 4 reads the token via ${NPM_TOKEN:-} in .yarnrc.yml — when
+  // the var is absent the registry returns 401 (anonymous). Bail immediately so the
+  // user gets a clear message rather than a confusing Yarn error.
   if (resolvedManager === 'yarn' && !process.env['NPM_TOKEN']) {
     console.warn('');
-    console.warn('  ⚠️  NPM_TOKEN is not set.');
-    console.warn('  ⚠️  @nimoh-digital-solutions/* packages are hosted on GitHub Packages');
-    console.warn('  ⚠️  and require a personal access token with read:packages scope.');
-    console.warn('  ⚠️  Create one at https://github.com/settings/tokens and set it:');
-    console.warn('  ⚠️    export NPM_TOKEN=<your-token>');
+    console.warn('  ⚠️  Skipping install — NPM_TOKEN is not set.');
+    console.warn('  ⚠️  @nimoh-digital-solutions/* packages require a GitHub personal access');
+    console.warn('  ⚠️  token with read:packages scope. See next steps below.');
     console.warn('');
+    return false;
   }
 
   const result = exec(installCmd, destDir, 'inherit');
