@@ -1,5 +1,11 @@
 # @nimoh-digital-solutions/tast-hooks
 
+## 1.1.0
+
+### Minor Changes
+
+- c73a57c: feat: add 6 common hooks — useDebounce, useMediaQuery, useClickOutside, useWindowSize, usePrevious, useToggle
+
 ## 1.0.1
 
 ### Patch Changes
