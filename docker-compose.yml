@@ -28,7 +28,9 @@ services:
       - NPM_TOKEN=${NPM_TOKEN}
 
     command: >-
-      sh -c "echo '//npm.pkg.github.com/:_authToken='\$NPM_TOKEN >> ~/.npmrc
+      sh -c "corepack enable
+      && corepack prepare yarn@4.12.0 --activate
+      && echo '//npm.pkg.github.com/:_authToken='\$NPM_TOKEN >> ~/.npmrc
       && yarn install
       && yarn dev"
     stdin_open: true
