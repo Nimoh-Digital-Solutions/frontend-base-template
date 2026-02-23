@@ -1,9 +1,10 @@
 # TAST Frontend Template — Package Review
 
 > Review date: February 23, 2026  
-> Template version: 1.0.0 (TEMPLATE_VERSION)  
-> All published packages: `create-tast-app@1.1.1`, `tast-utils@1.1.0`, `tast-ui@1.1.0`,  
-> `tast-hooks@1.0.1`, `tast-styles@1.1.0`, `eslint-config@1.0.0`, `stylelint-config@1.0.0`, `tsconfig@1.0.0`
+> Template version: 1.1.0 (TEMPLATE_VERSION)  
+> All published packages: `create-tast-app@1.1.1`, `tast-utils@1.1.0`, `tast-ui@1.1.0` (1.2.0 changeset pending),  
+> `tast-hooks@1.1.0`, `tast-styles@1.1.0`, `eslint-config@1.0.0`, `stylelint-config@1.0.0`, `tsconfig@1.0.0`  
+> **Phases complete: 1–5 of 8** | Tests: 288 passing
 
 ---
 
@@ -289,21 +290,23 @@ There is no `src/i18n/` directory, no `i18next` or similar setup, and no guidanc
 
 | # | Area | Priority | Effort |
 |---|---|---|---|
-| I1 | Pin `tast-ui`/`tast-utils` at `^1.1.0` in root `package.json` | 🔴 High | Trivial |
-| I2 | Bump `TEMPLATE_VERSION` to `1.1.0` | 🔴 High | Trivial |
-| I3 | Add coverage thresholds to `vite.config.ts` | 🔴 High | Small |
-| I4 | Add example feature to `src/features/` | 🟠 Medium | Medium |
-| I5 | Add 6 common hooks to `tast-hooks` | 🟠 Medium | Medium |
-| I6 | Add state management guidance + example | 🟠 Medium | Medium |
-| I7 | Add `react-hook-form` + `zod` form boilerplate | 🟠 Medium | Medium |
-| I8 | Add env var Zod validation in `APP_CONFIG` | 🔴 High | Small |
-| I9 | Add `Input`, `Badge`, `Spinner`, `Card`, `Modal` to `tast-ui` | 🟠 Medium | Large |
-| I10 | Add Storybook to `packages/tast-ui/` | 🟡 Low | Medium |
-| I11 | Migrate Yarn v1 → Yarn v4 Berry | 🟡 Low | Large |
-| I12 | Add opt-in path to setup scripts | 🟡 Low | Medium |
-| I13 | OS preference path for `dim` theme | 🟡 Low | Small |
-| I14 | Add `jest-axe` + `@axe-core/react` for a11y testing | 🟠 Medium | Small |
-| I15 | Add `i18n` stub (opt-out) | 🟡 Low | Medium |
+| # | Area | Priority | Effort | Status |
+|---|---|---|---|---|
+| I1 | Pin `tast-ui`/`tast-utils` at `^1.1.0` in root `package.json` | 🔴 High | Trivial | ✅ Done |
+| I2 | Bump `TEMPLATE_VERSION` to `1.1.0` | 🔴 High | Trivial | ✅ Done |
+| I3 | Add coverage thresholds to `vite.config.ts` | 🔴 High | Small | ✅ Done |
+| I4 | Add example feature to `src/features/` | 🟠 Medium | Medium | ✅ Done |
+| I5 | Add 6 common hooks to `tast-hooks` | 🟠 Medium | Medium | ✅ Done |
+| I6 | Add state management guidance + example | 🟠 Medium | Medium | ✅ Done |
+| I7 | Add `react-hook-form` + `zod` form boilerplate | 🟠 Medium | Medium | ✅ Done |
+| I8 | Add env var Zod validation in `APP_CONFIG` | 🔴 High | Small | ✅ Done |
+| I9 | Add `Input`, `Textarea`, `Badge`, `Spinner`, `Card`, `Modal`, `Toast` to `tast-ui` | 🟠 Medium | Large | ✅ Done |
+| I10 | Add Storybook to `packages/tast-ui/` | 🟡 Low | Medium | ⬜ Todo |
+| I11 | Migrate Yarn v1 → Yarn v4 Berry | 🟡 Low | Large | ⬜ Todo |
+| I12 | Add opt-in path to setup scripts | 🟡 Low | Medium | ⬜ Todo |
+| I13 | OS preference path for `dim` theme | 🟡 Low | Small | ⬜ Todo |
+| I14 | Add `jest-axe` + `@axe-core/react` for a11y testing | 🟠 Medium | Small | ⬜ Todo |
+| I15 | Add `i18n` stub (opt-out) | 🟡 Low | Medium | ⬜ Todo |
 
 ---
 
@@ -318,6 +321,8 @@ Each phase has a clear goal, the items it covers, concrete deliverables, and a d
 
 ### Phase 1 — Safety & Correctness ✅ DONE
 
+> **Completed:** `package.json` pins bumped to `^1.1.0` for `tast-ui`/`tast-utils`. `TEMPLATE_VERSION` updated to `1.1.0`.
+
 > **Goal:** Ensure the published packages and template version are truthful and that CI cannot silently regress.
 
 | Item | Status |
@@ -329,7 +334,9 @@ Each phase has a clear goal, the items it covers, concrete deliverables, and a d
 
 ---
 
-### Phase 2 — Quality Gates
+### Phase 2 — Quality Gates ✅ DONE
+
+> **Completed:** Zod env validation (`src/configs/env.ts`), coverage thresholds in `vite.config.ts`, CI updated to `yarn test:coverage`. Commit `7644201`.
 
 > **Goal:** Make CI catch regressions that it currently lets through.  
 > **Packages affected:** `tast-fe-app` template, `tast-utils`, `tast-ui`  
@@ -359,7 +366,9 @@ CI fails on a PR that deletes tests below threshold. `yarn dev` throws a clear e
 
 ---
 
-### Phase 3 — Hook Library Expansion
+### Phase 3 — Hook Library Expansion ✅ DONE
+
+> **Completed:** All 6 hooks (`useDebounce`, `useMediaQuery`, `useClickOutside`, `useWindowSize`, `usePrevious`, `useToggle`) added to `tast-hooks` with tests and shims. `tast-hooks` bumped to `1.1.0`. Commit `c73a57c`.
 
 > **Goal:** Ship the hooks every project reaches for in the first week so scaffolded apps don't vendor-copy them.  
 > **Package affected:** `tast-hooks`  
@@ -394,7 +403,9 @@ Each hook needs:
 
 ---
 
-### Phase 4 — App Patterns Foundation
+### Phase 4 — App Patterns Foundation ✅ DONE
+
+> **Completed:** `src/features/auth/` tree (types, service, `useAuth`, `LoginForm`, `LoginPage`), `src/data/useAppStore.ts` (Zustand), `STATE_MANAGEMENT.md`, `src/components/ui/Field/` (component + SCSS + tests). Deps added: `zustand@5`, `react-hook-form@7`, `zod@4`, `@hookform/resolvers@5`. 216 tests passing. Commit `49f21b6`.
 
 > **Goal:** Give developers working examples of the three patterns every real app needs: feature modules, state, and forms.  
 > **Files affected:** `src/` template shell only (no package publish needed)  
@@ -443,7 +454,9 @@ auth/
 
 ---
 
-### Phase 5 — Component Library Expansion
+### Phase 5 — Component Library Expansion ✅ DONE
+
+> **Completed:** 7 new components (`Input`, `Textarea`, `Badge`, `Spinner`, `Card`, `Modal`, `Toast`) added to `tast-ui`. `useToast()` hook added to `tast-hooks`. Template shims, 8 test files, `ComponentsDemoPage` showcase sections. 288 tests passing. Changesets created for `tast-ui` minor and `tast-hooks` minor. Commit `da7509e`.
 
 > **Goal:** Give `tast-ui` the primitive components every UI needs beyond a button.  
 > **Package affected:** `tast-ui`  
@@ -581,16 +594,16 @@ All 7 components render in `ComponentsDemoPage`. Theme toggle changes them all. 
 
 ### Phase Overview
 
-| Phase | Name | Items | Scope | Est. effort |
-|---|---|---|---|---|
-| 1 ✅ | Safety & Correctness | I1, I2 | Config | Done |
-| 2 | Quality Gates | I3, I8 | Template + deps | 1–2 days |
-| 3 | Hook Library Expansion | I5 | `tast-hooks` package | 2–3 days |
-| 4 | App Patterns Foundation | I4, I6, I7 | Template shell | 3–4 days |
-| 5 | Component Library Expansion | I9 | `tast-ui` package | 5–7 days |
-| 6 | Storybook & Visual Dev | I10 | `tast-ui` tooling | 2–3 days |
-| 7 | Accessibility & i18n | I14, I15 | Template + `tast-ui` | 3–4 days |
-| 8 | DX Tooling | I11, I12, I13 | Infra + scripts | 3–5 days |
+| Phase | Name | Items | Scope | Est. effort | Status |
+|---|---|---|---|---|---|
+| 1 | Safety & Correctness | I1, I2 | Config | Done | ✅ Done |
+| 2 | Quality Gates | I3, I8 | Template + deps | 1–2 days | ✅ Done |
+| 3 | Hook Library Expansion | I5 | `tast-hooks` package | 2–3 days | ✅ Done |
+| 4 | App Patterns Foundation | I4, I6, I7 | Template shell | 3–4 days | ✅ Done |
+| 5 | Component Library Expansion | I9 | `tast-ui` package | 5–7 days | ✅ Done |
+| 6 | Storybook & Visual Dev | I10 | `tast-ui` tooling | 2–3 days | ⬜ Todo |
+| 7 | Accessibility & i18n | I14, I15 | Template + `tast-ui` | 3–4 days | ⬜ Todo |
+| 8 | DX Tooling | I11, I12, I13 | Infra + scripts | 3–5 days | ⬜ Todo |
 
 Phases 2–4 can be worked in parallel (no cross-dependencies). Phase 5 depends on Phase 4 (`Field` uses `Input`). Phase 6 depends on Phase 5 (Storybook needs all components). Phase 7 and 8 are independent.
 
