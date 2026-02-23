@@ -42,6 +42,10 @@
     "setup:testing": "node scripts/setup-testing.js",
     "setup:husky": "node scripts/setup-husky.js",
     "setup:docker": "node scripts/setup-docker.js",
+    "setup:add-pwa": "node scripts/setup-add-pwa.js",
+    "setup:add-testing": "node scripts/setup-add-testing.js",
+    "setup:add-husky": "node scripts/setup-add-husky.js",
+    "setup:add-docker": "node scripts/setup-add-docker.js",
     "prepare": "husky"
   },
   "dependencies": {
