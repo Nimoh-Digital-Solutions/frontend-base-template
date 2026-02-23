@@ -1,0 +1,15 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 1rem);
+  width: 100%;
+}
+
+.serverError {
+  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+  border-radius: var(--radius-2, 4px);
+  background-color: color-mix(in srgb, var(--error, #c53030) 12%, transparent);
+  color: var(--error, #c53030);
+  font-size: var(--font-size-sm, 0.875rem);
+  margin: 0;
+}

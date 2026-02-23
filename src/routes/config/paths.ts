@@ -11,6 +11,7 @@
 export const PATHS = {
   HOME: '/',
   COMPONENTS_DEMO: '/components',
+  LOGIN: '/login',
   NOT_FOUND: '*',
 } as const;
 
@@ -33,6 +34,10 @@ export const routeMetadata = {
   [PATHS.COMPONENTS_DEMO]: {
     title: 'Components Library',
     description: 'Comprehensive showcase of all reusable components and design patterns',
+  },
+  [PATHS.LOGIN]: {
+    title: 'Sign in',
+    description: 'Sign in to your account',
   },
   [PATHS.NOT_FOUND]: {
     title: 'Page Not Found',

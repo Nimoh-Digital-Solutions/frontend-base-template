@@ -23,6 +23,10 @@ const ComponentsDemoPage = lazy(() =>
 
 const NotFoundPage = lazy(() => import('@pages/NotFoundPage/NotFoundPage'));
 
+const LoginPage = lazy(() =>
+  import('@features/auth').then(m => ({ default: m.LoginPage }))
+);
+
 /**
  * Minimal loading state shown while a lazy page chunk is being fetched.
  * Replace with a proper <PageLoader /> component as the project grows.
@@ -47,6 +51,14 @@ export const routes: RouteObject[] = [
         element: (
           <Suspense fallback={<PageFallback />}>
             <ComponentsDemoPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: PATHS.LOGIN,
+        element: (
+          <Suspense fallback={<PageFallback />}>
+            <LoginPage />
           </Suspense>
         ),
       },
