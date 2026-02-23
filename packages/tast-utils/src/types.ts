@@ -6,7 +6,7 @@ export interface ApiResponse<T = unknown> {
   message?: string;
 }
 
-export type Theme = 'light' | 'dark';
+export type Theme = 'light' | 'dark' | 'dim';
 
 // ---------------------------------------------------------------------------
 // PWA Types

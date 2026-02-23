@@ -9,32 +9,39 @@ const HomePage = (): ReactElement => {
 
   return (
     <div className={styles.root}>
-      <section className={styles.hero}>
-        <h1 className={styles.heroTitle}>Welcome to React Starter Kit</h1>
-        <p className={styles.heroSubtitle}>
-          A modern React foundation with TypeScript, Vite, and comprehensive tooling
-        </p>
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>Surfaces</h2>
+        <div className={styles.surfaceSamples}>
+          <div className={`${styles.surface} ${styles.surface1} ${styles.radShadow}`}>1</div>
+          <div className={`${styles.surface} ${styles.surface2} ${styles.radShadow}`}>2</div>
+          <div className={`${styles.surface} ${styles.surface3} ${styles.radShadow}`}>3</div>
+          <div className={`${styles.surface} ${styles.surface4} ${styles.radShadow}`}>4</div>
+        </div>
       </section>
 
-      <section className={styles.features}>
-        <h2>Key Features</h2>
-        <div className={styles.featuresGrid}>
-          <div className={styles.featureCard}>
-            <h3>React 19 + TypeScript</h3>
-            <p>Latest React with full TypeScript support for type safety</p>
-          </div>
-          <div className={styles.featureCard}>
-            <h3>Vite Build Tool</h3>
-            <p>Lightning-fast development and optimized production builds</p>
-          </div>
-          <div className={styles.featureCard}>
-            <h3>CSS Modules</h3>
-            <p>Scoped styling with TypeScript support and no naming conflicts</p>
-          </div>
-          <div className={styles.featureCard}>
-            <h3>PWA Ready</h3>
-            <p>Progressive Web App support with offline capabilities</p>
-          </div>
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>Typography</h2>
+        <div className={styles.textSamples}>
+          <h1 className={styles.text1}>
+            <span className={`${styles.swatch} ${styles.brandSwatch} ${styles.radShadow}`} />
+            Brand
+          </h1>
+          <h1 className={styles.text1}>
+            <span className={`${styles.swatch} ${styles.text1Swatch} ${styles.radShadow}`} />
+            Text 1
+          </h1>
+          <h1 className={styles.text2}>
+            <span className={`${styles.swatch} ${styles.text2Swatch} ${styles.radShadow}`} />
+            Text 2
+          </h1>
+          <p className={styles.text1}>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+            tempor incididunt ut labore et dolore magna aliqua.
+          </p>
+          <p className={styles.text2}>
+            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi
+            ut aliquip ex ea commodo consequat.
+          </p>
         </div>
       </section>
     </div>

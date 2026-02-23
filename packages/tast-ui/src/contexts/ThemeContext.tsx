@@ -49,7 +49,7 @@ interface ThemeProviderProps {
 export const ThemeProvider = ({ children, defaultTheme = 'light' }: ThemeProviderProps): ReactElement => {
   const [theme, setThemeState] = useState<Theme>(() => {
     const stored = getStorageItem<string>('app-theme');
-    if (stored === 'light' || stored === 'dark') return stored;
+    if (stored === 'light' || stored === 'dark' || stored === 'dim') return stored;
     // Respect OS preference if no stored value
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     return prefersDark ? 'dark' : defaultTheme;
@@ -75,7 +75,9 @@ export const ThemeProvider = ({ children, defaultTheme = 'light' }: ThemeProvide
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [defaultTheme]);
 
-  const toggleTheme = useCallback(() => setThemeState(t => (t === 'light' ? 'dark' : 'light')), []);
+  const toggleTheme = useCallback(() =>
+    setThemeState(t => t === 'light' ? 'dim' : t === 'dim' ? 'dark' : 'light'),
+  []);
   const setTheme = useCallback((t: Theme) => setThemeState(t), []);
 
   return (

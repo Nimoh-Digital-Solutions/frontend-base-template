@@ -43,6 +43,21 @@ html {
   --surface-shadow-dark: var(--brand-hue) 50% 3%;
   --shadow-strength-dark: .8;
 
+  /* ── Dim Palette (between light and dark) ── */
+  --brand-dim: hsl(
+    var(--brand-hue)
+    calc(var(--brand-saturation) / 1.25)
+    calc(var(--brand-lightness) / 1.25)
+  );
+  --text1-dim: hsl(var(--brand-hue) 15% 75%);
+  --text2-dim: hsl(var(--brand-hue) 10% 61%);
+  --surface1-dim: hsl(var(--brand-hue) 10% 20%);
+  --surface2-dim: hsl(var(--brand-hue) 10% 25%);
+  --surface3-dim: hsl(var(--brand-hue) 5% 30%);
+  --surface4-dim: hsl(var(--brand-hue) 5% 35%);
+  --surface-shadow-dim: var(--brand-hue) 30% 13%;
+  --shadow-strength-dim: .2;
+
   /* ── Brand-Specific Colors ── */
   --brand-secondary: hsl(264deg 48% 51%);
   --brand-accent: hsl(75deg 80% 50%);
@@ -156,6 +171,58 @@ html {
   --surface-4: var(--surface4-dark);
   --surface-shadow: var(--surface-shadow-dark);
   --shadow-strength: var(--shadow-strength-dark);
+
+  --link-color: var(--link-color-dark);
+  --border-subtle: var(--border-subtle-dark);
+  --border-medium: var(--border-medium-dark);
+
+  /* Shadows */
+  --shadow-1: 0 1px 2px hsl(var(--surface-shadow) / calc(var(--shadow-strength) + .05));
+  --shadow-2:
+    0 3px 5px hsl(var(--surface-shadow) / calc(var(--shadow-strength) + .1)),
+    0 1px 2px hsl(var(--surface-shadow) / calc(var(--shadow-strength) + .05));
+  --shadow-3:
+    0 10px 20px hsl(var(--surface-shadow) / calc(var(--shadow-strength) + .15)),
+    0 3px 6px hsl(var(--surface-shadow) / calc(var(--shadow-strength) + .1));
+  --shadow-4:
+    0 15px 30px hsl(var(--surface-shadow) / calc(var(--shadow-strength) + .2)),
+    0 5px 10px hsl(var(--surface-shadow) / calc(var(--shadow-strength) + .15));
+
+  /* Gradients */
+  --gradient-brand: linear-gradient(135deg, var(--brand) 0%, var(--brand) 100%);
+  --gradient-accent: linear-gradient(135deg, var(--brand) 0%, var(--accent) 100%);
+  --gradient-surface: linear-gradient(135deg, var(--surface-1) 0%, var(--surface-2) 100%);
+
+  /* Backwards compat */
+  --color-primary: var(--brand);
+  --color-primary-light: var(--surface-3);
+  --color-primary-dark: hsl(var(--brand-hue) var(--brand-saturation) 8%);
+  --color-secondary: var(--text-2);
+  --color-secondary-light: var(--surface-2);
+  --color-secondary-dark: var(--surface-4);
+  --bg-body: var(--surface-1);
+  --bg-card: var(--surface-2);
+  --text-main: var(--text-1);
+  --border-focus: var(--brand);
+}
+
+/* ============================================================================
+   DIM THEME — midpoint between light and dark
+   [data-theme="dim"] is set by ThemeProvider on 2nd toggle press.
+   ============================================================================ */
+
+[data-theme='dim'] {
+  color-scheme: dark;
+
+  --brand: var(--brand-dim);
+  --text-1: var(--text1-dim);
+  --text-2: var(--text2-dim);
+  --surface-1: var(--surface1-dim);
+  --surface-2: var(--surface2-dim);
+  --surface-3: var(--surface3-dim);
+  --surface-4: var(--surface4-dim);
+  --surface-shadow: var(--surface-shadow-dim);
+  --shadow-strength: var(--shadow-strength-dim);
 
   --link-color: var(--link-color-dark);
   --border-subtle: var(--border-subtle-dark);
