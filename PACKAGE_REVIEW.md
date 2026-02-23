@@ -301,12 +301,12 @@ There is no `src/i18n/` directory, no `i18next` or similar setup, and no guidanc
 | I7 | Add `react-hook-form` + `zod` form boilerplate | 🟠 Medium | Medium | ✅ Done |
 | I8 | Add env var Zod validation in `APP_CONFIG` | 🔴 High | Small | ✅ Done |
 | I9 | Add `Input`, `Textarea`, `Badge`, `Spinner`, `Card`, `Modal`, `Toast` to `tast-ui` | 🟠 Medium | Large | ✅ Done |
-| I10 | Add Storybook to `packages/tast-ui/` | 🟡 Low | Medium | ⬜ Todo |
+| I10 | Add Storybook to `packages/tast-ui/` | 🟡 Low | Medium | ✅ Done |
 | I11 | Migrate Yarn v1 → Yarn v4 Berry | 🟡 Low | Large | ✅ Done |
 | I12 | Add opt-in path to setup scripts | 🟡 Low | Medium | ✅ Done |
 | I13 | OS preference path for `dim` theme | 🟡 Low | Small | ✅ Done |
-| I14 | Add `jest-axe` + `@axe-core/react` for a11y testing | 🟠 Medium | Small | ⬜ Todo |
-| I15 | Add `i18n` stub (opt-out) | 🟡 Low | Medium | ⬜ Todo |
+| I14 | Add `jest-axe` + `@axe-core/react` for a11y testing | 🟠 Medium | Small | ✅ Done |
+| I15 | Add `i18n` stub (opt-out) | 🟡 Low | Medium | ✅ Done |
 
 ---
 
