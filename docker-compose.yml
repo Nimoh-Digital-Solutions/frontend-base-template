@@ -24,7 +24,14 @@ services:
       # Optional: enable PWA during dev in Docker
       # - VITE_PWA=true
 
-    command: sh -c "yarn install && yarn dev"
+      # GitHub Packages auth — set NPM_TOKEN in your shell or a .env file:
+      #   export NPM_TOKEN=ghp_yourtoken   OR   echo 'NPM_TOKEN=ghp_...' > .env
+      - NPM_TOKEN=${NPM_TOKEN}
+
+    command: >-
+      sh -c "echo '//npm.pkg.github.com/:_authToken='\$NPM_TOKEN >> ~/.npmrc
+      && yarn install
+      && yarn dev"
     stdin_open: true
     tty: true
     security_opt:
@@ -35,6 +42,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      # Pass GitHub Packages token as a BuildKit secret so it never lands in
+      # any image layer. Requires DOCKER_BUILDKIT=1 (default in Docker 23+).
+      secrets:
+        - npm_token
     container_name: react-starter-kit-prod
     ports:
       - '8080:8080'
@@ -50,3 +61,8 @@ services:
 
 volumes:
   yarn_cache:
+
+# Read NPM_TOKEN from the host environment (or .env file at project root)
+secrets:
+  npm_token:
+    environment: NPM_TOKEN
