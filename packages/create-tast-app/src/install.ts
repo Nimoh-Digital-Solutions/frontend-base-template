@@ -1,4 +1,4 @@
-import { exec, commandExists, logStep, logOk, logError } from './utils.js';
+import { exec, commandExists, resolveNpmToken, logStep, logOk, logError } from './utils.js';
 
 export type PackageManager = 'yarn' | 'npm' | 'pnpm';
 
@@ -12,20 +12,33 @@ export async function install(destDir: string, manager: PackageManager): Promise
 
   logStep(`Installing dependencies with ${resolvedManager}`);
 
-  // @nimoh-digital-solutions/* packages are on GitHub Packages which requires auth
-  // even for reads. Yarn 4 reads the token via ${NPM_TOKEN:-} in .yarnrc.yml — when
-  // the var is absent the registry returns 401 (anonymous). Bail immediately so the
-  // user gets a clear message rather than a confusing Yarn error.
-  if (resolvedManager === 'yarn' && !process.env['NPM_TOKEN']) {
-    console.warn('');
-    console.warn('  ⚠️  Skipping install — NPM_TOKEN is not set.');
-    console.warn('  ⚠️  @nimoh-digital-solutions/* packages require a GitHub personal access');
-    console.warn('  ⚠️  token with read:packages scope. See next steps below.');
-    console.warn('');
-    return false;
+  // @nimoh-digital-solutions/* packages are hosted on GitHub Packages which
+  // requires auth even for reads. Yarn 4 reads the token via ${NPM_TOKEN:-}
+  // interpolation in .yarnrc.yml.
+  //
+  // Resolution order (handled by resolveNpmToken):
+  //   1. NPM_TOKEN env var   — already exported in the shell / CI / Docker
+  //   2. ~/.npmrc            — //npm.pkg.github.com/:_authToken=<value>
+  //
+  // The resolved token is injected as NPM_TOKEN into the subprocess env so
+  // Yarn 4 picks it up, even if the user never ran `export NPM_TOKEN`.
+  const extraEnv: Record<string, string> = {};
+
+  if (resolvedManager === 'yarn') {
+    const token = resolveNpmToken();
+    if (!token) {
+      console.warn('');
+      console.warn('  ⚠️  Skipping install — no GitHub Packages token found.');
+      console.warn('  ⚠️  Set NPM_TOKEN or add the following line to ~/.npmrc:');
+      console.warn('  ⚠️    //npm.pkg.github.com/:_authToken=<your-token>');
+      console.warn('  ⚠️  Get a token (read:packages scope): https://github.com/settings/tokens');
+      console.warn('');
+      return false;
+    }
+    extraEnv['NPM_TOKEN'] = token;
   }
 
-  const result = exec(installCmd, destDir, 'inherit');
+  const result = exec(installCmd, destDir, 'inherit', extraEnv);
 
   if (!result.success) {
     logError(`Install failed: ${result.error ?? 'unknown error'}`);

@@ -241,22 +241,17 @@ function buildPmChoices(): Array<{ title: string; value: PackageManager }> {
 }
 
 function printNextSteps(appName: string, pm: PackageManager, installed: boolean): void {
-  const needsToken = pm === 'yarn' && !process.env['NPM_TOKEN'];
   console.log('');
   console.log('  ✅  Your project is ready!\n');
   console.log('  Next steps:\n');
   console.log(`    cd ${appName}`);
   if (!installed) {
-    if (needsToken) {
-      console.log('');
-      console.log('  First, create a GitHub token with read:packages scope:');
-      console.log('    https://github.com/settings/tokens\n');
-      console.log(`    export NPM_TOKEN=<your-github-token>`);
-      console.log('');
-    }
     console.log(`    ${pm} install`);
   }
   console.log(`    ${devCommand(pm)}`);
+  console.log('');
+  console.log('  For Docker (make docker-dev / make docker-prod):');
+  console.log(`    Add NPM_TOKEN=<your-token> to your .env file`);
   console.log('');
   console.log('  Docs: https://github.com/Nimoh-Digital-Solutions/frontend-base-template');
   console.log('');
