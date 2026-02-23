@@ -495,7 +495,7 @@ All 7 components render in `ComponentsDemoPage`. Theme toggle changes them all. 
 
 ---
 
-### Phase 6 — Storybook & Visual Development
+### Phase 6 — Storybook & Visual Development ✅ DONE
 
 > **Goal:** Make component development in `tast-ui` fully isolated, documented, and visually regression-tested.  
 > **Package affected:** `tast-ui` (devDependency only)  
@@ -520,7 +520,9 @@ All 7 components render in `ComponentsDemoPage`. Theme toggle changes them all. 
 
 ---
 
-### Phase 7 — Accessibility & Internationalisation
+### Phase 7 — Accessibility & Internationalisation ✅ DONE
+
+> **Completed:** `jest-axe` + `@axe-core/react` installed; `src/test/a11y.setup.ts` shared helper; axe WCAG 2.1 AA describe blocks in Button, Input, Modal, ProtectedRoute, and ErrorBoundary (300 tests passing). `@axe-core/react` wired into `main.tsx` behind `import.meta.env.DEV`. `i18next` + `react-i18next` installed; `src/i18n/` with init and `locales/en.json`; App wrapped in `<I18nextProvider>`; setup.js extended with i18n opt-out; i18n section added to README. CI updated to `--reporter=verbose`. Commit `592bd01`.
 
 > **Goal:** Ensure apps built from this template pass WCAG 2.1 AA by default and have a clear i18n path.  
 > **Files affected:** `src/` shell + `packages/tast-ui/`  
@@ -601,8 +603,8 @@ All 7 components render in `ComponentsDemoPage`. Theme toggle changes them all. 
 | 3 | Hook Library Expansion | I5 | `tast-hooks` package | 2–3 days | ✅ Done |
 | 4 | App Patterns Foundation | I4, I6, I7 | Template shell | 3–4 days | ✅ Done |
 | 5 | Component Library Expansion | I9 | `tast-ui` package | 5–7 days | ✅ Done |
-| 6 | Storybook & Visual Dev | I10 | `tast-ui` tooling | 2–3 days | ⬜ Todo |
-| 7 | Accessibility & i18n | I14, I15 | Template + `tast-ui` | 3–4 days | ⬜ Todo |
+| 6 | Storybook & Visual Dev | I10 | `tast-ui` tooling | 2–3 days | ✅ Done |
+| 7 | Accessibility & i18n | I14, I15 | Template + `tast-ui` | 3–4 days | ✅ Done |
 | 8 | DX Tooling | I11, I12, I13 | Infra + scripts | 3–5 days | ⬜ Todo |
 
 Phases 2–4 can be worked in parallel (no cross-dependencies). Phase 5 depends on Phase 4 (`Field` uses `Input`). Phase 6 depends on Phase 5 (Storybook needs all components). Phase 7 and 8 are independent.
