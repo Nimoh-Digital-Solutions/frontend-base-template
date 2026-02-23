@@ -35,6 +35,7 @@ $colors: (
     // Whites & Blacks
     'white': #fff,
     'whiteish': #F7F7FA,
+    'bg': var(--surface-1),
 
     'black': #000,
     'blackish': #252525,
@@ -96,44 +97,48 @@ $colors: (
     // ==========================================================================
 
     // Core Semantic Colors
+    // --color-primary / primary-light / primary-dark are compat aliases in _base.scss
+    // pointing at --brand / --surface-3 / brand-dark
     'primary': var(--color-primary),
     'primary-light': var(--color-primary-light),
     'primary-dark': var(--color-primary-dark),
 
+    // --color-secondary* compat aliases: --text-2 / --surface-2 / --surface-4
     'secondary': var(--color-secondary),
     'secondary-light': var(--color-secondary-light),
     'secondary-dark': var(--color-secondary-dark),
 
-    'tertiary': var(--color-tertiary),
-    'tertiary-light': var(--color-tertiary-light),
-    'tertiary-dark': var(--color-tertiary-dark),
+    // No separate tertiary in the new system — mapped to brand accent surface stops
+    'tertiary': var(--brand),
+    'tertiary-light': var(--surface-3),
+    'tertiary-dark': var(--surface-4),
 
-    // Semantic States
-    'success': var(--color-success),
-    'success-light': var(--color-success-light),
-    'success-dark': var(--color-success-dark),
+    // Semantic States — _base.scss uses --*-color naming (not --color-*)
+    'success': var(--success-color),
+    'success-light': var(--success-color-light),
+    'success-dark': var(--success-color-dark),
 
-    'warning': var(--color-warning),
-    'warning-light': var(--color-warning-light),
-    'warning-dark': var(--color-warning-dark),
+    'warning': var(--warning-color),
+    'warning-light': var(--warning-color-light),
+    'warning-dark': var(--warning-color-text),
 
-    'error': var(--color-error),
-    'error-light': var(--color-error-light),
-    'error-dark': var(--color-error-dark),
+    'error': var(--error-color),
+    'error-light': var(--error-color-light),
+    'error-dark': var(--error-color-dark),
 
-    // Semantic Backgrounds
+    // Semantic Backgrounds — compat aliases in _base.scss (--bg-body → --surface-1 etc.)
     'bg-body': var(--bg-body),
     'bg-card': var(--bg-card),
-    'bg-primary': var(--bg-primary),
-    'bg-secondary': var(--bg-secondary),
+    'bg-primary': var(--brand),
+    'bg-secondary': var(--surface-3),
 
-    // Semantic Text
+    // Semantic Text — --text-main compat alias exists; others mapped directly
     'text-main': var(--text-main),
-    'text-inverted': var(--text-inverted),
-    'text-primary': var(--text-primary),
-    'text-secondary': var(--text-secondary),
+    'text-inverted': var(--surface-1),
+    'text-primary': var(--text-1),
+    'text-secondary': var(--text-2),
 
-    // Semantic Borders
+    // Semantic Borders — compat aliases in _base.scss
     'border-subtle': var(--border-subtle),
     'border-focus': var(--border-focus)
 ) !default;

@@ -124,13 +124,13 @@
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
-    background: func.color('white');
+    background: func.color('bg');
 }
 
 /// Bordered card block with background, radius and padding
 @mixin card-block($padding-key: '4', $radius-key: 'sm') {
     border: 1px solid func.color('primary-light');
-    background: func.color('white');
+    background: func.color('bg');
     border-radius: func.border-radius($radius-key);
     padding: func.spacing($padding-key);
 }
