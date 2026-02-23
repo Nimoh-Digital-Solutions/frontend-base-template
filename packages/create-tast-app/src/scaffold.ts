@@ -70,6 +70,9 @@ export async function scaffold(opts: ScaffoldOptions): Promise<void> {
 
   // 5. Remove setup scripts that are no longer needed
   cleanupSetupScripts(destDir, { enablePwa, enableDocker, enableHusky });
+
+  // 6. Remove template-only docs that are not relevant to a scaffolded app
+  cleanupTemplateDocs(destDir);
 }
 
 // ─── Clone ───────────────────────────────────────────────────────────────────
@@ -469,6 +472,30 @@ function cleanupSetupScripts(
       logOk(`scripts/${script} — removed`);
     }
   }
+}
+
+// ─── Template-only docs cleanup ──────────────────────────────────────────────
+
+/**
+ * Removes markdown files that belong to the template repo itself and have
+ * no meaning inside a freshly-scaffolded consumer app.
+ */
+function cleanupTemplateDocs(destDir: string): void {
+  const docFiles = [
+    'TEMPLATE_ANALYSIS.md',
+    'REFACTORING.md',
+    'GETTING_STARTED.md',
+  ];
+
+  logStep('Removing template documentation files');
+  let removed = 0;
+  for (const f of docFiles) {
+    if (safeUnlink(path.join(destDir, f))) {
+      logOk(`${f} — removed`);
+      removed++;
+    }
+  }
+  if (removed === 0) logInfo('No template docs found to remove');
 }
 
 // ─── Shared helpers ──────────────────────────────────────────────────────────
