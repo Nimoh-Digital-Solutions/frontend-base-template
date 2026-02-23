@@ -50,11 +50,13 @@ async function main(): Promise<void> {
         initial: '',
       },
 
-      // Brand colours
+      // Brand colours — primary drives --brand-hue/saturation/lightness (the
+      // whole light+dark palette derives from these). Secondary and tertiary
+      // set --brand-secondary and --brand-accent respectively.
       {
         type: 'text',
         name: 'brandPrimary',
-        message: 'Brand primary colour (hex, e.g. #3b82f6 — leave blank for default blue):',
+        message: 'Brand primary colour (hex, e.g. #415385 — sets brand hue, saturation & lightness; leave blank to keep default):',
         initial: '',
         validate: (v: string) =>
           !v || /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v)
@@ -63,7 +65,7 @@ async function main(): Promise<void> {
       {
         type: 'text',
         name: 'brandSecondary',
-        message: 'Brand secondary colour (hex — leave blank for default gray):',
+        message: 'Brand secondary colour (hex — sets --brand-secondary; leave blank for default):',
         initial: '',
         validate: (v: string) =>
           !v || /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v) || 'Must be a valid hex colour',
@@ -71,7 +73,7 @@ async function main(): Promise<void> {
       {
         type: 'text',
         name: 'brandTertiary',
-        message: 'Brand tertiary/accent colour (hex — leave blank for default teal):',
+        message: 'Brand accent / tertiary colour (hex — sets --brand-accent; leave blank for default):',
         initial: '',
         validate: (v: string) =>
           !v || /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v) || 'Must be a valid hex colour',
