@@ -1,0 +1,64 @@
+@use '@styles/abstracts/functions' as func;
+
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: func.spacing('1');
+}
+
+.label {
+    font-size: func.font-size('sm');
+    font-weight: func.font-weight('medium');
+    color: func.color('text-secondary');
+    cursor: pointer;
+}
+
+.textarea {
+    width: 100%;
+    padding: func.spacing('2') func.spacing('3');
+    border: 1px solid func.color('border-subtle');
+    border-radius: func.border-radius('sm');
+    background-color: func.color('bg-body');
+    color: func.color('text-main');
+    font-family: inherit;
+    font-size: func.font-size('base');
+    line-height: 1.6;
+    outline: none;
+    transition: func.transition('fast');
+    min-height: 6rem;
+
+    &::placeholder {
+        color: func.color('gray-400');
+    }
+
+    &:focus {
+        border-color: func.color('primary');
+        box-shadow: 0 0 0 3px func.tint(func.color('primary'), 80%);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background-color: func.color('gray-50');
+    }
+}
+
+.hasError .textarea {
+    border-color: func.color('error');
+
+    &:focus {
+        box-shadow: 0 0 0 3px func.tint(func.color('error'), 80%);
+    }
+}
+
+.error {
+    font-size: func.font-size('sm');
+    color: func.color('error');
+    margin: 0;
+}
+
+.hint {
+    font-size: func.font-size('sm');
+    color: func.color('text-secondary');
+    margin: 0;
+}

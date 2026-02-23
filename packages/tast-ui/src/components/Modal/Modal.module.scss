@@ -1,0 +1,64 @@
+@use '@styles/abstracts/functions' as func;
+@use '@styles/abstracts/mixins' as mixin;
+
+.dialog {
+    padding: 0;
+    border: none;
+    border-radius: func.border-radius('xl');
+    box-shadow: func.shadow('xl');
+    max-width: min(90vw, 34rem);
+    width: 100%;
+    background-color: func.color('bg-card');
+
+    &::backdrop {
+        background-color: rgb(0 0 0 / 0.5);
+    }
+
+    &:not([open]) {
+        display: none;
+    }
+}
+
+.panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: func.spacing('4') func.spacing('6');
+    border-bottom: 1px solid func.color('border-subtle');
+}
+
+.title {
+    margin: 0;
+    font-size: func.font-size('lg');
+    font-weight: func.font-weight('semibold');
+    color: func.color('text-main');
+}
+
+.closeBtn {
+    @include mixin.bare-button;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: func.border-radius('md');
+    color: func.color('text-secondary');
+    transition: func.transition('fast');
+
+    &:hover {
+        background-color: func.color('gray-200');
+        color: func.color('text-main');
+    }
+
+    @include mixin.focus-ring(2px);
+}
+
+.body {
+    padding: func.spacing('6');
+    color: func.color('text-main');
+}

@@ -1,8 +1,8 @@
 import { useState, type ReactElement } from 'react';
 import { LuDownload, LuHeart, LuTrash2, LuCheck, LuX } from 'react-icons/lu';
 
-import { Button } from '@components';
-import { useDocumentTitle } from '@hooks';
+import { Button, Input, Textarea, Badge, Spinner, Card, Modal, Toast } from '@components';
+import { useDocumentTitle, useToast } from '@hooks';
 import { PATHS, routeMetadata } from '@routes/config/paths';
 
 import styles from './ComponentsDemoPage.module.scss';
@@ -17,6 +17,10 @@ export const ComponentsDemoPage = (): ReactElement => {
   useDocumentTitle(routeMetadata[PATHS.COMPONENTS_DEMO].title);
 
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
+  const [inputValue, setInputValue] = useState('');
+  const [textareaValue, setTextareaValue] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { toasts, addToast, dismissToast } = useToast();
 
   const handleLoadingClick = (buttonId: string) => {
     setLoadingStates(prev => ({ ...prev, [buttonId]: true }));
@@ -243,6 +247,232 @@ export const ComponentsDemoPage = (): ReactElement => {
               <li>High contrast color schemes</li>
             </ul>
           </div>
+        </section>
+
+        {/* Input Component Section */}
+        <section className={styles.section}>
+          <h2>Input Component</h2>
+          <p>A labelled text input with optional error and helper text.</p>
+
+          <div className={styles.subsection}>
+            <h3>Basic inputs</h3>
+            <div className={styles.buttonGrid}>
+              <div className={styles.buttonExample}>
+                <h4>Default</h4>
+                <Input label="Email address" placeholder="you@example.com" />
+              </div>
+              <div className={styles.buttonExample}>
+                <h4>With helper text</h4>
+                <Input
+                  label="Password"
+                  type="password"
+                  helperText="Must be at least 8 characters"
+                />
+              </div>
+              <div className={styles.buttonExample}>
+                <h4>With error</h4>
+                <Input label="Username" error="Username is already taken" value="john_doe" readOnly />
+              </div>
+              <div className={styles.buttonExample}>
+                <h4>Disabled</h4>
+                <Input label="Locked field" disabled value="Read only" readOnly />
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.subsection}>
+            <h3>Sizes</h3>
+            <div className={styles.buttonGrid}>
+              {(['sm', 'md', 'lg'] as const).map((sz) => (
+                <div key={sz} className={styles.buttonExample}>
+                  <h4>Size {sz}</h4>
+                  <Input label={`Size ${sz}`} size={sz} placeholder={sz} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className={styles.subsection}>
+            <h3>Controlled</h3>
+            <Input
+              label="Type something"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              helperText={`${inputValue.length} characters`}
+            />
+          </div>
+        </section>
+
+        {/* Textarea Component Section */}
+        <section className={styles.section}>
+          <h2>Textarea Component</h2>
+          <p>A multi-line text area with the same label / error / helper-text system as Input.</p>
+
+          <div className={styles.buttonGrid}>
+            <div className={styles.buttonExample}>
+              <h4>Default</h4>
+              <Textarea label="Description" placeholder="Enter a description…" />
+            </div>
+            <div className={styles.buttonExample}>
+              <h4>With error</h4>
+              <Textarea label="Bio" error="Must be at least 20 characters" />
+            </div>
+            <div className={styles.buttonExample}>
+              <h4>Controlled</h4>
+              <Textarea
+                label="Notes"
+                value={textareaValue}
+                rows={5}
+                onChange={(e) => setTextareaValue(e.target.value)}
+                helperText={`${textareaValue.length} / 500`}
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Badge Component Section */}
+        <section className={styles.section}>
+          <h2>Badge Component</h2>
+          <p>Small pill-shaped status indicators.</p>
+
+          <div className={styles.subsection}>
+            <h3>Variants</h3>
+            <div className={styles.buttonGrid}>
+              {(['success', 'warning', 'error', 'neutral', 'info'] as const).map((v) => (
+                <div key={v} className={styles.buttonExample}>
+                  <h4 style={{ textTransform: 'capitalize' }}>{v}</h4>
+                  <Badge variant={v} style={{ textTransform: 'capitalize' }}>
+                    {v}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className={styles.subsection}>
+            <h3>Sizes</h3>
+            <div className={styles.buttonGrid}>
+              <div className={styles.buttonExample}>
+                <h4>Small</h4>
+                <Badge size="sm" variant="info">Small badge</Badge>
+              </div>
+              <div className={styles.buttonExample}>
+                <h4>Medium (default)</h4>
+                <Badge size="md" variant="success">Medium badge</Badge>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Spinner Component Section */}
+        <section className={styles.section}>
+          <h2>Spinner Component</h2>
+          <p>An animated loading indicator that respects reduced-motion preferences.</p>
+
+          <div className={styles.buttonGrid}>
+            {(['sm', 'md', 'lg'] as const).map((sz) => (
+              <div key={sz} className={styles.buttonExample}>
+                <h4>Size {sz}</h4>
+                <Spinner size={sz} label={`Loading (${sz})…`} />
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Card Component Section */}
+        <section className={styles.section}>
+          <h2>Card Component</h2>
+          <p>A surface element that groups related content with configurable padding and shadow.</p>
+
+          <div className={styles.subsection}>
+            <h3>Padding variants</h3>
+            <div className={styles.buttonGrid}>
+              {(['none', 'sm', 'md', 'lg'] as const).map((p) => (
+                <div key={p} className={styles.buttonExample}>
+                  <h4>padding="{p}"</h4>
+                  <Card padding={p}>
+                    <p style={{ margin: 0, fontSize: '0.875rem' }}>Card content</p>
+                  </Card>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className={styles.subsection}>
+            <h3>Shadow variants</h3>
+            <div className={styles.buttonGrid}>
+              {(['none', 'sm', 'md', 'lg'] as const).map((sh) => (
+                <div key={sh} className={styles.buttonExample}>
+                  <h4>shadow="{sh}"</h4>
+                  <Card shadow={sh} padding="md">
+                    <p style={{ margin: 0, fontSize: '0.875rem' }}>Card content</p>
+                  </Card>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Modal Component Section */}
+        <section className={styles.section}>
+          <h2>Modal Component</h2>
+          <p>
+            A native <code>&lt;dialog&gt;</code>-based modal with title, backdrop dismiss, and
+            keyboard close support.
+          </p>
+
+          <div className={styles.buttonGrid}>
+            <div className={styles.buttonExample}>
+              <h4>Open modal</h4>
+              <Button variant="primary" onClick={() => setIsModalOpen(true)}>
+                Open Modal
+              </Button>
+            </div>
+          </div>
+
+          <Modal open={isModalOpen} onClose={() => setIsModalOpen(false)} title="Example Dialog">
+            <p>This is a modal dialog. Click outside or press the close button to dismiss.</p>
+            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
+              <Button variant="ghost" onClick={() => setIsModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button variant="primary" onClick={() => setIsModalOpen(false)}>
+                Confirm
+              </Button>
+            </div>
+          </Modal>
+        </section>
+
+        {/* Toast Component Section */}
+        <section className={styles.section}>
+          <h2>Toast / useToast</h2>
+          <p>
+            Individual notification strips driven by the{' '}
+            <code>useToast()</code> hook from{' '}
+            <code>tast-hooks</code>.
+          </p>
+
+          <div className={styles.buttonGrid}>
+            {(['info', 'success', 'warning', 'error'] as const).map((v) => (
+              <div key={v} className={styles.buttonExample}>
+                <h4 style={{ textTransform: 'capitalize' }}>{v}</h4>
+                <Button
+                  variant={v === 'info' ? 'primary' : v === 'success' ? 'success' : v === 'error' ? 'danger' : 'outline'}
+                  onClick={() => addToast(`This is a ${v} message`, v, 0)}
+                >
+                  Add {v}
+                </Button>
+              </div>
+            ))}
+          </div>
+
+          {toasts.length > 0 && (
+            <div className={styles.subsection} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1rem' }}>
+              {toasts.map((t) => (
+                <Toast key={t.id} id={t.id} message={t.message} variant={t.variant} onDismiss={dismissToast} />
+              ))}
+            </div>
+          )}
         </section>
       </section>
     </div>

@@ -9,3 +9,5 @@ export { useWindowSize } from './useWindowSize';
 export type { WindowSize } from './useWindowSize';
 export { usePrevious } from './usePrevious';
 export { useToggle } from './useToggle';
+export { useToast } from './useToast';
+export type { ToastItem, ToastVariant, UseToastReturn } from './useToast';

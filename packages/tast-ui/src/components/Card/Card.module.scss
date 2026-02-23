@@ -1,0 +1,21 @@
+@use '@styles/abstracts/functions' as func;
+
+.card {
+    background-color: func.color('bg-card');
+    border: 1px solid func.color('border-subtle');
+    border-radius: func.border-radius('lg');
+
+    /* ---- Padding variants ---- */
+
+    &--padding-none { padding: 0; }
+    &--padding-sm   { padding: func.spacing('3'); }
+    &--padding-md   { padding: func.spacing('6'); }
+    &--padding-lg   { padding: func.spacing('8'); }
+
+    /* ---- Shadow variants ---- */
+
+    &--shadow-none { box-shadow: none; }
+    &--shadow-sm   { box-shadow: func.shadow('sm'); }
+    &--shadow-md   { box-shadow: func.shadow('md'); }
+    &--shadow-lg   { box-shadow: func.shadow('lg'); }
+}

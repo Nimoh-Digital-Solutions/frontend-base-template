@@ -1,0 +1,68 @@
+@use '@styles/abstracts/functions' as func;
+@use '@styles/abstracts/mixins' as mixin;
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: func.spacing('3');
+    padding: func.spacing('3') func.spacing('4');
+    border-radius: func.border-radius('md');
+    border-width: 1px;
+    border-style: solid;
+    font-size: func.font-size('sm');
+    font-weight: func.font-weight('medium');
+
+    /* ---- Variants ---- */
+
+    &--info {
+        background-color: func.color('primary-light');
+        color: func.color('primary-dark');
+        border-color: func.color('primary');
+    }
+
+    &--success {
+        background-color: func.color('success-light');
+        color: func.color('success-dark');
+        border-color: func.color('success');
+    }
+
+    &--warning {
+        background-color: func.color('warning-light');
+        color: func.color('warning-dark');
+        border-color: func.color('warning');
+    }
+
+    &--error {
+        background-color: func.color('error-light');
+        color: func.color('error-dark');
+        border-color: func.color('error');
+    }
+}
+
+.icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    font-size: 1rem;
+}
+
+.message {
+    flex: 1;
+}
+
+.dismissBtn {
+    @include mixin.bare-button;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: func.spacing('1');
+    border-radius: func.border-radius('sm');
+    opacity: 0.7;
+    transition: func.transition('fast');
+
+    &:hover {
+        opacity: 1;
+    }
+
+    @include mixin.focus-ring(1px);
+}

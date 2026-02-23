@@ -1,0 +1,49 @@
+@use '@styles/abstracts/functions' as func;
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: func.border-radius('pill');
+    font-weight: func.font-weight('medium');
+    line-height: 1;
+    white-space: nowrap;
+
+    /* ---- Variants ---- */
+
+    &--success {
+        background-color: func.color('success-light');
+        color: func.color('success-dark');
+    }
+
+    &--warning {
+        background-color: func.color('warning-light');
+        color: func.color('warning-dark');
+    }
+
+    &--error {
+        background-color: func.color('error-light');
+        color: func.color('error-dark');
+    }
+
+    &--neutral {
+        background-color: func.color('gray-200');
+        color: func.color('gray-700');
+    }
+
+    &--info {
+        background-color: func.color('primary-light');
+        color: func.color('primary-dark');
+    }
+
+    /* ---- Sizes ---- */
+
+    &--sm {
+        padding: func.spacing('1') func.spacing('2');
+        font-size: func.font-size('xs');
+    }
+
+    &--md {
+        padding: func.spacing('1') func.spacing('2.5');
+        font-size: func.font-size('sm');
+    }
+}
