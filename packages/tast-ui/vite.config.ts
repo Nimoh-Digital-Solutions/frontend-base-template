@@ -41,7 +41,7 @@ export default defineConfig({
         '@nimoh-digital-solutions/tast-utils',
       ],
     },
-    // Emit CSS bundle (dist/style.css)
+    // Emit single CSS bundle (dist/index.css — exported as ./style.css)
     cssCodeSplit: false,
   },
 });

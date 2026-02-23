@@ -109,8 +109,31 @@ function replaceTokens(destDir: string, appName: string, description: string): v
     // Remove the "private" field if publishing; keep it if not
     // Optionally init version to 0.1.0
     pkg['version'] = '0.1.0';
+
+    // Strip monorepo-only fields that must not exist in a scaffolded app.
+    // Leaving "workspaces" causes Yarn to treat the new project as a workspace
+    // root, which makes it resolve @nimoh-digital-solutions/* packages to local
+    // symlinks (no dist/) instead of the published npm registry packages.
+    delete pkg['workspaces'];
+
+    const scripts = pkg['scripts'] as Record<string, string> | undefined;
+    if (scripts) {
+      delete scripts['packages:build'];
+      delete scripts['packages:typecheck'];
+      delete scripts['changeset'];
+      delete scripts['changeset:version'];
+      delete scripts['changeset:publish'];
+    }
+
+    const devDeps = pkg['devDependencies'] as Record<string, string> | undefined;
+    if (devDeps) {
+      delete devDeps['@changesets/cli'];
+      delete devDeps['prompts'];
+      delete devDeps['@types/prompts'];
+    }
+
     writeJson(pkgPath, pkg);
-    logOk('package.json — name, description, version');
+    logOk('package.json — name, description, version, stripped monorepo fields');
   }
 
   // index.html — title + meta tags
