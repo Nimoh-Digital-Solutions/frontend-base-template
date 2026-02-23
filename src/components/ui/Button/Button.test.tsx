@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createRef } from 'react';
 import { Button } from './Button';
+import { axe } from '../../../test/a11y.setup';
 
 describe('Button', () => {
   describe('Rendering', () => {
@@ -202,6 +203,25 @@ describe('Button', () => {
 
       expect(ref.current).toBeInstanceOf(HTMLButtonElement);
       expect(ref.current?.tagName.toLowerCase()).toBe('button');
+    });
+  });
+
+  describe('Accessibility (axe)', () => {
+    it('has no violations for a default button', async () => {
+      const { container } = render(<Button>Submit</Button>);
+      expect(await axe(container)).toHaveNoViolations();
+    });
+
+    it('has no violations for a disabled button', async () => {
+      const { container } = render(<Button disabled>Disabled</Button>);
+      expect(await axe(container)).toHaveNoViolations();
+    });
+
+    it('has no violations while loading', async () => {
+      const { container } = render(
+        <Button loading loadingLabel="Saving changes…">Save</Button>
+      );
+      expect(await axe(container)).toHaveNoViolations();
     });
   });
 });

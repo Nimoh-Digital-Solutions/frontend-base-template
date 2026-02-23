@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { createRef } from 'react';
 import { Input } from './Input';
+import { axe } from '../../../test/a11y.setup';
 
 describe('Input', () => {
   describe('Rendering', () => {
@@ -63,6 +64,25 @@ describe('Input', () => {
     it('renders with size lg', () => {
       render(<Input label="Test" size="lg" />);
       expect(screen.getByRole('textbox')).toBeInTheDocument();
+    });
+  });
+
+  describe('Accessibility (axe)', () => {
+    it('has no violations for a labelled input', async () => {
+      const { container } = render(<Input label="Email address" />);
+      expect(await axe(container)).toHaveNoViolations();
+    });
+
+    it('has no violations when an error is shown', async () => {
+      const { container } = render(
+        <Input label="Email address" error="Enter a valid email" />
+      );
+      expect(await axe(container)).toHaveNoViolations();
+    });
+
+    it('has no violations when disabled', async () => {
+      const { container } = render(<Input label="Read-only field" disabled />);
+      expect(await axe(container)).toHaveNoViolations();
     });
   });
 });

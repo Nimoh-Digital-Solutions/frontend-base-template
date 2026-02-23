@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
 import { PATHS } from '@routes/config/paths';
+import { axe } from '../../../test/a11y.setup';
 
 // ---------------------------------------------------------------------------
 // Test helpers
@@ -110,5 +111,17 @@ describe('ProtectedRoute', () => {
 
     expect(screen.getByText('Authenticated content')).toBeInTheDocument();
     expect(screen.queryByText('Custom login page')).not.toBeInTheDocument();
+  });
+
+  describe('Accessibility (axe)', () => {
+    it('has no violations rendering protected content', async () => {
+      const { container } = renderProtectedRoute({ isAuthenticated: true });
+      expect(await axe(container)).toHaveNoViolations();
+    });
+
+    it('has no violations for the redirect destination', async () => {
+      const { container } = renderProtectedRoute({ isAuthenticated: false });
+      expect(await axe(container)).toHaveNoViolations();
+    });
   });
 });

@@ -405,6 +405,35 @@ Tests are colocated next to components, hooks, and utilities.
 
 <!-- OPTIONAL:TESTING:END -->
 
+## 🌐 Internationalisation (i18n)
+
+The template ships with a ready-to-use i18next integration. All UI strings are
+extracted into `src/i18n/locales/en.json` so they can be translated without
+touching component code.
+
+### Adding a new locale
+
+1. Create `src/i18n/locales/<code>.json` (copy `en.json` as a starting point).
+2. Import it in `src/i18n/index.ts` and add it to the `resources` map.
+3. Set `lng` to your desired default, or use a language detector plugin.
+
+### Using translations in a component
+
+```tsx
+import { useTranslation } from 'react-i18next';
+
+function MyComponent() {
+  const { t } = useTranslation();
+  return <h1>{t('notFound.title')}</h1>;
+}
+```
+
+### Removing i18n
+
+Run `yarn setup` and deselect **Internationalisation (i18n)**. The setup script
+will delete `src/i18n/`, revert `App.tsx`, and remove the `i18next` and
+`react-i18next` packages.
+
 ## 📄 License
 
 Private and proprietary.

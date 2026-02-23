@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Modal } from './Modal';
+import { axe } from '../../../test/a11y.setup';
 
 beforeEach(() => {
   // JSDOM does not implement HTMLDialogElement methods
@@ -71,6 +72,26 @@ describe('Modal', () => {
         </Modal>,
       );
       expect(HTMLDialogElement.prototype.showModal).toHaveBeenCalled();
+    });
+  });
+
+  describe('Accessibility (axe)', () => {
+    it('has no violations when open with a title', async () => {
+      const { container } = render(
+        <Modal open onClose={vi.fn()} title="Confirm action">
+          <p>Are you sure you want to proceed?</p>
+        </Modal>,
+      );
+      expect(await axe(container)).toHaveNoViolations();
+    });
+
+    it('has no violations when open without a title', async () => {
+      const { container } = render(
+        <Modal open onClose={vi.fn()}>
+          <p>Content without a title header</p>
+        </Modal>,
+      );
+      expect(await axe(container)).toHaveNoViolations();
     });
   });
 });

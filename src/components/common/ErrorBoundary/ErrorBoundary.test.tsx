@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ErrorBoundary } from './ErrorBoundary';
+import { axe } from '../../../test/a11y.setup';
 
 // ---------------------------------------------------------------------------
 // Test helpers
@@ -76,5 +77,25 @@ describe('ErrorBoundary', () => {
     );
 
     expect(screen.queryByTestId('sibling')).not.toBeInTheDocument();
+  });
+
+  describe('Accessibility (axe)', () => {
+    it('has no violations rendering healthy children', async () => {
+      const { container } = render(
+        <ErrorBoundary>
+          <p>All good</p>
+        </ErrorBoundary>
+      );
+      expect(await axe(container)).toHaveNoViolations();
+    });
+
+    it('has no violations in the error fallback UI', async () => {
+      const { container } = render(
+        <ErrorBoundary>
+          <BrokenComponent />
+        </ErrorBoundary>
+      );
+      expect(await axe(container)).toHaveNoViolations();
+    });
   });
 });

@@ -150,7 +150,78 @@ function hasDocker() {
 }
 
 /**
- * Remove setup section from README when all features are removed
+ * Check if i18n (i18next) is present in the project
+ * @returns {boolean} True if i18n features are detected
+ */
+function hasI18n() {
+  // Check for the i18n directory created by this template
+  if (exists(path.join(rootDir, 'src/i18n'))) return true;
+
+  // Check package.json for i18next
+  const pkgPath = path.join(rootDir, 'package.json');
+  if (exists(pkgPath)) {
+    const pkg = readJson(pkgPath);
+    if (pkg.dependencies?.i18next || pkg.devDependencies?.i18next) return true;
+  }
+
+  return false;
+}
+
+/**
+ * Remove i18n integration from the project.
+ * - Deletes src/i18n/
+ * - Reverts App.tsx (removes I18nextProvider wrapper)
+ * - Removes i18next + react-i18next from package.json dependencies
+ * @param {string} rootDir
+ */
+function removeI18n(rootDir) {
+  const { rmRecursive } = JSON.parse('{}') || {}; // placeholder to keep jsdoc happy
+
+  // 1. Remove src/i18n directory
+  const i18nDir = path.join(rootDir, 'src/i18n');
+  if (exists(i18nDir)) {
+    fs.rmSync(i18nDir, { recursive: true, force: true });
+    logOk('src/i18n/ — removed');
+  }
+
+  // 2. Revert App.tsx — strip I18nextProvider import + wrapper
+  const appPath = path.join(rootDir, 'src/App.tsx');
+  if (exists(appPath)) {
+    let src = readText(appPath);
+    const before = src;
+
+    // Remove the I18nextProvider import line
+    src = src.replace(/^import \{ I18nextProvider \} from 'react-i18next';\s*\n/m, '');
+    // Remove the i18n default import line
+    src = src.replace(/^import i18n from '\.\/.*/m, '');
+    // Remove the <I18nextProvider> wrapper opening and closing tags
+    src = src.replace(/\s*<I18nextProvider i18n=\{i18n\}>\s*\n(\s*)/m, '$1');
+    src = src.replace(/\n\s*<\/I18nextProvider>/m, '');
+    // Clean up any trailing blank lines inside the return block
+    src = src.replace(/\n{3,}/g, '\n\n');
+
+    if (src !== before) {
+      writeText(appPath, src);
+      logOk('src/App.tsx — I18nextProvider removed');
+    }
+  }
+
+  // 3. Remove i18next + react-i18next from package.json
+  const pkgPath = path.join(rootDir, 'package.json');
+  if (exists(pkgPath)) {
+    const pkg = readJson(pkgPath);
+    let changed = false;
+    for (const key of ['i18next', 'react-i18next']) {
+      if (pkg.dependencies?.[key]) { delete pkg.dependencies[key]; changed = true; }
+      if (pkg.devDependencies?.[key]) { delete pkg.devDependencies[key]; changed = true; }
+    }
+    if (changed) {
+      writeJson(pkgPath, pkg);
+      logOk('Removed i18next + react-i18next from package.json');
+    }
+  }
+}
+ when all features are removed
  * @returns {boolean} True if changes were made
  */
 function cleanupReadme() {
@@ -181,15 +252,16 @@ function cleanupReadme() {
  */
 async function run() {
   console.log('🚀 ReactStarterKit Setup\n');
-  console.log('Configure optional features (PWA, Testing, Husky, Docker).\n');
+  console.log('Configure optional features (PWA, Testing, Husky, Docker, i18n).\n');
 
   let pwaPresent = hasPWA();
   let testingPresent = hasTesting();
   let huskyPresent = hasHusky();
   let dockerPresent = hasDocker();
+  let i18nPresent = hasI18n();
 
   // If no features detected, clean up and exit
-  if (!pwaPresent && !testingPresent && !huskyPresent && !dockerPresent) {
+  if (!pwaPresent && !testingPresent && !huskyPresent && !dockerPresent && !i18nPresent) {
     logInfo('No optional features detected. Removing setup script.');
     removePkgScript(rootDir, 'setup');
     safeUnlink(thisFile);
@@ -204,6 +276,7 @@ async function run() {
       choices.push({ title: 'Testing Infrastructure', value: 'testing', selected: true });
     if (huskyPresent) choices.push({ title: 'Git Hooks (Husky)', value: 'husky', selected: true });
     if (dockerPresent) choices.push({ title: 'Docker Support', value: 'docker', selected: true });
+    if (i18nPresent) choices.push({ title: 'Internationalisation (i18n)', value: 'i18n', selected: true });
 
     // Show multi-select prompt
     const prompts = (await import('prompts')).default;
@@ -229,6 +302,7 @@ async function run() {
     if (testingPresent && !selectedFeatures.has('testing')) toRemove.push('Testing Infrastructure');
     if (huskyPresent && !selectedFeatures.has('husky')) toRemove.push('Git Hooks (Husky)');
     if (dockerPresent && !selectedFeatures.has('docker')) toRemove.push('Docker Support');
+    if (i18nPresent && !selectedFeatures.has('i18n')) toRemove.push('Internationalisation (i18n)');
 
     // If nothing to remove, exit
     if (toRemove.length === 0) {
@@ -271,6 +345,11 @@ async function run() {
       await docker.apply({ rootDir, keep: false, selfDestruct: true });
       logOk('Docker configuration removed');
     }
+
+    if (i18nPresent && !selectedFeatures.has('i18n')) {
+      removeI18n(rootDir);
+      logOk('i18n removed');
+    }
   } catch (err) {
     console.error('\nError during setup:', err);
   }
@@ -280,6 +359,7 @@ async function run() {
   testingPresent = hasTesting();
   huskyPresent = hasHusky();
   dockerPresent = hasDocker();
+  i18nPresent = hasI18n();
 
   console.log('\n✓ Setup complete!');
   console.log(
@@ -287,7 +367,7 @@ async function run() {
   );
 
   // Self-destruct if all features are gone
-  if (!pwaPresent && !testingPresent && !huskyPresent && !dockerPresent) {
+  if (!pwaPresent && !testingPresent && !huskyPresent && !dockerPresent && !i18nPresent) {
     logStep('Cleaning up master setup');
 
     if (cleanupReadme()) {
@@ -324,7 +404,7 @@ async function run() {
   }
 
   // If features remain, inform user they can run again
-  if (pwaPresent || testingPresent || huskyPresent || dockerPresent) {
+  if (pwaPresent || testingPresent || huskyPresent || dockerPresent || i18nPresent) {
     logInfo('You can run "yarn setup" again later to configure remaining features.');
   } else {
     logWarn('Unexpected: features not detected but master did not self remove.');
