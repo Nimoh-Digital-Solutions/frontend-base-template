@@ -2,7 +2,7 @@
 @use '@styles/abstracts/mixins' as mixin;
 
 .root {
-    max-width: 1200px;
+    min-width: 100%;
     margin: 0 auto;
     padding: func.spacing('6');
 }
