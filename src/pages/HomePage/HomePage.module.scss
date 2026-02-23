@@ -2,22 +2,33 @@
 @use '@styles/abstracts/mixins' as mixin;
 
 .root {
-    display: flex;
+    // display: flex;
+    // align-items: flex-start;
+    // gap: 0rem 6rem;
+    // padding: func.spacing('6');
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    inline-size: 100%;
+    align-self: center;
     flex-flow: row wrap;
-    align-items: flex-start;
     justify-content: center;
-    gap: 4rem 6rem;
-    padding: func.spacing('6');
+    align-items: flex-start;
 }
 
 .section {
     display: grid;
     gap: 1.5rem;
-    min-width: 0;
+    min-width: 600px;
+    align-content: start;
+
+
+    &:nth-child(1) h2 {
+        padding-inline-start: var(--size-10);
+    }
 }
 
 .sectionTitle {
-    font-size: func.font-size('sm');
+    font-size: func.font-size('md');
     font-weight: func.font-weight('semibold');
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -27,12 +38,13 @@
 /* ── Surface samples ── */
 
 .surfaceSamples {
-    --tile: 18ch;
+    --tile: 30ch;
 
     display: grid;
     grid-template-columns: var(--tile) var(--tile);
     grid-auto-rows: var(--tile);
     gap: 1.5ch;
+    justify-content: center;
 
     @media (width <= 480px) {
         --tile: 38vw;

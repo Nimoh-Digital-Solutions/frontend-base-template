@@ -23,6 +23,13 @@
 
 .main {
     flex: 1;
+    display: flex;
+
+
+    // TODO: Remove this once oyu are building a new application
+    // display: flex;
+    // place-content: center;
+    // place-items: center;
 }
 
 // Skip navigation link — visually hidden until focused.
