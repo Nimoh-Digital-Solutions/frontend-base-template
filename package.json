@@ -43,10 +43,10 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@nimoh-digital-solutions/tast-hooks": "*",
-    "@nimoh-digital-solutions/tast-styles": "*",
-    "@nimoh-digital-solutions/tast-ui": "*",
-    "@nimoh-digital-solutions/tast-utils": "*",
+    "@nimoh-digital-solutions/tast-hooks": "^1.0.0",
+    "@nimoh-digital-solutions/tast-styles": "^1.0.0",
+    "@nimoh-digital-solutions/tast-ui": "^1.0.0",
+    "@nimoh-digital-solutions/tast-utils": "^1.0.0",
     "clsx": "^2.1.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

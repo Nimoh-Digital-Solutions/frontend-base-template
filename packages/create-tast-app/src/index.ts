@@ -1,4 +1,5 @@
 import path from 'path';
+import fs from 'fs';
 import prompts from 'prompts';
 import { scaffold } from './scaffold.js';
 import { install, devCommand, type PackageManager } from './install.js';
@@ -20,6 +21,7 @@ interface Answers {
 
 async function main(): Promise<void> {
   printBanner();
+  warnIfInsideWorkspace();
 
   // Allow app name to be passed as the first argument:
   //   npx create-tast-app my-app
@@ -140,6 +142,39 @@ function printBanner(): void {
   console.log('  ║     create-tast-app  v1.0.0    ║');
   console.log('  ╚════════════════════════════════╝');
   console.log('');
+}
+
+/**
+ * Warn if the CWD is inside a Yarn workspace root.
+ * Apps created inside a workspace will have their scoped packages resolved
+ * to local workspace symlinks (no dist/) instead of the published registry.
+ */
+function warnIfInsideWorkspace(): void {
+  let dir = process.cwd();
+  const root = path.parse(dir).root;
+
+  while (dir !== root) {
+    const pkgPath = path.join(dir, 'package.json');
+    if (fs.existsSync(pkgPath)) {
+      try {
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8')) as Record<string, unknown>;
+        if (pkg.workspaces) {
+          console.log('  ⚠️  Warning: You are running this inside a Yarn workspace.');
+          console.log('  ⚠️  The new app should be created OUTSIDE the monorepo directory.');
+          console.log(`  ⚠️  Workspace root detected at: ${dir}`);
+          console.log('  ⚠️  Yarn will resolve @nimoh-digital-solutions/* to local workspace');
+          console.log('  ⚠️  symlinks instead of the published packages. yarn dev will fail.');
+          console.log('');
+          return;
+        }
+      } catch {
+        // ignore parse errors
+      }
+    }
+    const parent = path.dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
 }
 
 function buildPmChoices(): Array<{ title: string; value: PackageManager }> {
