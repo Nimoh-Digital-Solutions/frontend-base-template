@@ -1,6 +1,6 @@
 {
   "name": "@nimoh-digital-solutions/tast-hooks",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Reusable React hooks for tast projects",
   "keywords": [
     "react",
