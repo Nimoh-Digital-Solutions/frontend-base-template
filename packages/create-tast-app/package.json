@@ -1,6 +1,6 @@
 {
   "name": "@nimoh-digital-solutions/create-tast-app",
-  "version": "1.1.9",
+  "version": "1.1.10",
   "description": "Create a new TAST frontend app",
   "type": "module",
   "bin": "./dist/index.cjs",
