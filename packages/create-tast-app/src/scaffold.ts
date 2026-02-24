@@ -136,11 +136,35 @@ function replaceTokens(destDir: string, appName: string, description: string): v
     // Optionally init version to 0.1.0
     pkg['version'] = '0.1.0';
 
-    // Strip monorepo-only fields that must not exist in a scaffolded app.
-    // Leaving "workspaces" causes Yarn to treat the new project as a workspace
-    // root, which makes it resolve @nimoh-digital-solutions/* packages to local
-    // symlinks (no dist/) instead of the published npm registry packages.
-    delete pkg['workspaces'];
+    // Set workspaces to an EMPTY array rather than deleting the field.
+    //
+    // Yarn 4 finds the nearest workspace root by walking UP the directory tree.
+    // If the scaffolded app is accidentally created inside a monorepo (e.g.
+    // tast-fe-app), deleting the workspaces field means Yarn keeps walking up,
+    // finds the monorepo root, then resolves @nimoh-digital-solutions/* from the
+    // local packages/ symlinks which contain workspace:^ cross-references that
+    // don't exist outside the monorepo.
+    //
+    // An EMPTY workspaces array signals "I am a workspace root with no members".
+    // Yarn stops traversal here and installs everything from the registry.
+    pkg['workspaces'] = [];
+
+    // Strip workspace: protocol from any dependency that slipped in — replace
+    // with a bare ^ range Yarn can resolve from the registry.
+    for (const section of ['dependencies', 'devDependencies', 'peerDependencies'] as const) {
+      const deps = pkg[section] as Record<string, string> | undefined;
+      if (deps) {
+        for (const [name, version] of Object.entries(deps)) {
+          if (typeof version === 'string' && version.startsWith('workspace:')) {
+            // workspace:^  → ^0.0.0 (resolve latest compatible from registry)
+            // workspace:*  → *
+            // workspace:~1.0.0 → ~1.0.0
+            const bare = version.replace(/^workspace:/, '') || '*';
+            deps[name] = bare === '^' ? '*' : bare;
+          }
+        }
+      }
+    }
 
     const scripts = pkg['scripts'] as Record<string, string> | undefined;
     if (scripts) {
@@ -149,6 +173,10 @@ function replaceTokens(destDir: string, appName: string, description: string): v
       delete scripts['changeset'];
       delete scripts['changeset:version'];
       delete scripts['changeset:publish'];
+      // Storybook scripts reference `yarn workspace @nimoh-digital-solutions/tast-ui`
+      // which doesn't exist in a standalone app.
+      delete scripts['storybook'];
+      delete scripts['storybook:build'];
     }
 
     const devDeps = pkg['devDependencies'] as Record<string, string> | undefined;
