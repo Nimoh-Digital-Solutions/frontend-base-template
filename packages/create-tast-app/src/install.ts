@@ -38,6 +38,13 @@ export async function install(destDir: string, manager: PackageManager): Promise
     extraEnv['NPM_TOKEN'] = token;
   }
 
+  // Ensure Corepack is enabled so the packageManager field in package.json
+  // activates Yarn 4 instead of the system Yarn 1. Runs silently; ignored if
+  // corepack is unavailable (e.g. very old Node).
+  if (resolvedManager === 'yarn') {
+    exec('corepack enable', destDir, 'pipe');
+  }
+
   const result = exec(installCmd, destDir, 'inherit', extraEnv);
 
   if (!result.success) {
