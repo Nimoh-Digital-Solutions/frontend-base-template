@@ -1,4 +1,9 @@
 import { defineConfig } from 'tsup';
+import { readFileSync } from 'fs';
+
+const { version: pkgVersion } = JSON.parse(
+  readFileSync(new URL('./package.json', import.meta.url), 'utf-8')
+) as { version: string };
 
 export default defineConfig({
   entry: ['src/index.ts'],
@@ -11,4 +16,7 @@ export default defineConfig({
   clean: true,
   shims: true,
   noExternal: ['prompts'],
+  define: {
+    __PACKAGE_VERSION__: JSON.stringify(pkgVersion),
+  },
 });

@@ -1,6 +1,8 @@
 import path from 'path';
 import fs from 'fs';
 import prompts from 'prompts';
+
+declare const __PACKAGE_VERSION__: string;
 import { scaffold } from './scaffold.js';
 import { install, devCommand, type PackageManager } from './install.js';
 import { logStep, logError, toPackageName, getDestDir, commandExists } from './utils.js';
@@ -176,7 +178,7 @@ async function main(): Promise<void> {
 function printBanner(): void {
   console.log('');
   console.log('  ╔════════════════════════════════╗');
-  console.log('  ║     create-tast-app  v1.0.0    ║');
+  console.log(`  ║     create-tast-app  v${__PACKAGE_VERSION__}    ║`);
   console.log('  ╚════════════════════════════════╝');
   console.log('');
 }

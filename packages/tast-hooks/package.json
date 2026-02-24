@@ -9,7 +9,8 @@
   ],
   "license": "MIT",
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "registry": "https://npm.pkg.github.com",
+    "tag": "latest"
   },
   "type": "module",
   "main": "./dist/index.js",
@@ -31,7 +32,7 @@
     "react": "^18.0.0 || ^19.0.0"
   },
   "dependencies": {
-    "@nimoh-digital-solutions/tast-utils": "workspace:^"
+    "@nimoh-digital-solutions/tast-utils": "^1.1.0"
   },
   "devDependencies": {
     "@nimoh-digital-solutions/tsconfig": "workspace:^",
