@@ -1,5 +1,21 @@
 # @nimoh-digital-solutions/tast-ui
 
+## 1.3.0
+
+### Minor Changes
+
+- 27506fa: feat(tast-ui): add EmptyState, Pagination, Skeleton components; fix ErrorBoundary
+  - New `EmptyState` component with illustration, title, description, and action slots
+  - New `Pagination` component with page navigation, page-size selector, and a11y support
+  - New `Skeleton` component with variant shapes (text, circular, rectangular, rounded)
+  - `ErrorBoundary` updated to use `EmptyState` for fallback rendering
+  - All components include SCSS Modules, TypeScript interfaces, and barrel exports
+
+### Patch Changes
+
+- Updated dependencies [27506fa]
+  - @nimoh-digital-solutions/tast-utils@1.1.1
+
 ## 1.2.3
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # @nimoh-digital-solutions/tast-styles
 
+## 1.1.1
+
+### Patch Changes
+
+- 27506fa: feat(tast-styles): add animation keyframes and layout mixins
+  - New `_animations.scss` partial with reusable keyframe definitions
+  - Extended `_mixins.scss` with additional layout and responsive helpers
+
 ## 1.1.0
 
 ### Minor Changes

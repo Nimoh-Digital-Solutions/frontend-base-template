@@ -1,11 +1,18 @@
 # @nimoh-digital-solutions/tast-utils
 
+## 1.1.1
+
+### Patch Changes
+
+- 27506fa: fix(tast-utils): update HTTP utility types and exports
+  - Updated HTTP utility types for generic auth token handling
+  - Adjusted exports for consistency with app-level service layer
+
 ## 1.1.0
 
 ### Minor Changes
 
 - 44e6d12: feat: add 'dim' theme to Theme type and 3-way toggle cycle
-
   - tast-utils: Theme type extended to 'light' | 'dark' | 'dim'
   - tast-ui: ThemeContext toggleTheme cycles light → dim → dark → light
     instead of the previous binary light ↔ dark toggle
