@@ -1,5 +1,11 @@
 # @nimoh-digital-solutions/create-tast-app
 
+## 1.1.15
+
+### Patch Changes
+
+- 0f46762: Republish packages with MIT LICENSE files included
+
 ## 1.1.14
 
 ### Patch Changes

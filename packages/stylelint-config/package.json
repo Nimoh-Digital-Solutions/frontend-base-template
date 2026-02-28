@@ -1,6 +1,6 @@
 {
   "name": "@nimoh-digital-solutions/stylelint-config",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Shared Stylelint config for Nimoh Digital Solutions React/SCSS projects",
   "license": "MIT",
   "main": "index.json",
