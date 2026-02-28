@@ -1,6 +1,6 @@
 {
   "name": "@nimoh-digital-solutions/stylelint-config",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Shared Stylelint config for Nimoh Digital Solutions React/SCSS projects",
   "main": "index.json",
   "exports": {

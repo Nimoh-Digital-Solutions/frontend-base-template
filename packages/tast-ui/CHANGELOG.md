@@ -1,5 +1,13 @@
 # @nimoh-digital-solutions/tast-ui
 
+## 1.3.1
+
+### Patch Changes
+
+- d7e3f4d: docs: add comprehensive README documentation for all packages
+- Updated dependencies [d7e3f4d]
+  - @nimoh-digital-solutions/tast-utils@1.1.2
+
 ## 1.3.0
 
 ### Minor Changes

@@ -1,6 +1,6 @@
 {
   "name": "@nimoh-digital-solutions/eslint-config",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Shared ESLint flat config for Nimoh Digital Solutions React projects",
   "type": "module",
   "main": "index.js",

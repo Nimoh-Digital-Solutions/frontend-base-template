@@ -1,5 +1,11 @@
 # @nimoh-digital-solutions/tast-styles
 
+## 1.1.2
+
+### Patch Changes
+
+- d7e3f4d: docs: add comprehensive README documentation for all packages
+
 ## 1.1.1
 
 ### Patch Changes

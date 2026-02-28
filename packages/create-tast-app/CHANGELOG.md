@@ -1,5 +1,11 @@
 # @nimoh-digital-solutions/create-tast-app
 
+## 1.1.13
+
+### Patch Changes
+
+- d7e3f4d: docs: add comprehensive README documentation for all packages
+
 ## 1.1.12
 
 ### Patch Changes
