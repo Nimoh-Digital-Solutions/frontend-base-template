@@ -1,5 +1,13 @@
 # @nimoh-digital-solutions/tast-ui
 
+## 1.3.4
+
+### Patch Changes
+
+- 66f32de: CI: auto-update lockfile after changesets version bump
+- Updated dependencies [66f32de]
+  - @nimoh-digital-solutions/tast-utils@1.1.5
+
 ## 1.3.3
 
 ### Patch Changes

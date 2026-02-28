@@ -1,6 +1,6 @@
 {
   "name": "@nimoh-digital-solutions/tast-hooks",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "Reusable React hooks for tast projects",
   "keywords": [
     "react",
@@ -33,7 +33,7 @@
     "react": "^18.0.0 || ^19.0.0"
   },
   "dependencies": {
-    "@nimoh-digital-solutions/tast-utils": "^1.1.4"
+    "@nimoh-digital-solutions/tast-utils": "^1.1.5"
   },
   "devDependencies": {
     "@nimoh-digital-solutions/tsconfig": "workspace:^",

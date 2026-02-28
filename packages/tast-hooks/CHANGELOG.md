@@ -1,5 +1,13 @@
 # @nimoh-digital-solutions/tast-hooks
 
+## 1.2.6
+
+### Patch Changes
+
+- 66f32de: CI: auto-update lockfile after changesets version bump
+- Updated dependencies [66f32de]
+  - @nimoh-digital-solutions/tast-utils@1.1.5
+
 ## 1.2.5
 
 ### Patch Changes
