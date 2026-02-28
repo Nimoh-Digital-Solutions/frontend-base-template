@@ -1,4 +1,4 @@
-import { exec, commandExists, resolveNpmToken, logStep, logOk, logError } from './utils.js';
+import { exec, commandExists, logStep, logOk, logError } from './utils.js';
 
 export type PackageManager = 'yarn' | 'npm' | 'pnpm';
 
@@ -12,32 +12,6 @@ export async function install(destDir: string, manager: PackageManager): Promise
 
   logStep(`Installing dependencies with ${resolvedManager}`);
 
-  // @nimoh-digital-solutions/* packages are hosted on GitHub Packages which
-  // requires auth even for reads. Yarn 4 reads the token via ${NPM_TOKEN:-}
-  // interpolation in .yarnrc.yml.
-  //
-  // Resolution order (handled by resolveNpmToken):
-  //   1. NPM_TOKEN env var   — already exported in the shell / CI / Docker
-  //   2. ~/.npmrc            — //npm.pkg.github.com/:_authToken=<value>
-  //
-  // The resolved token is injected as NPM_TOKEN into the subprocess env so
-  // Yarn 4 picks it up, even if the user never ran `export NPM_TOKEN`.
-  const extraEnv: Record<string, string> = {};
-
-  if (resolvedManager === 'yarn') {
-    const token = resolveNpmToken();
-    if (!token) {
-      console.warn('');
-      console.warn('  ⚠️  Skipping install — no GitHub Packages token found.');
-      console.warn('  ⚠️  Set NPM_TOKEN or add the following line to ~/.npmrc:');
-      console.warn('  ⚠️    //npm.pkg.github.com/:_authToken=<your-token>');
-      console.warn('  ⚠️  Get a token (read:packages scope): https://github.com/settings/tokens');
-      console.warn('');
-      return false;
-    }
-    extraEnv['NPM_TOKEN'] = token;
-  }
-
   // Ensure Corepack is enabled so the packageManager field in package.json
   // activates Yarn 4 instead of the system Yarn 1. Runs silently; ignored if
   // corepack is unavailable (e.g. very old Node).
@@ -45,7 +19,7 @@ export async function install(destDir: string, manager: PackageManager): Promise
     exec('corepack enable', destDir, 'pipe');
   }
 
-  const result = exec(installCmd, destDir, 'inherit', extraEnv);
+  const result = exec(installCmd, destDir, 'inherit');
 
   if (!result.success) {
     logError(`Install failed: ${result.error ?? 'unknown error'}`);

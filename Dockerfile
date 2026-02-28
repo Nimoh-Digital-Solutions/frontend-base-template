@@ -18,13 +18,7 @@ COPY package.json yarn.lock ./
 
 # Install dependencies
 # Uses BuildKit cache for faster rebuilds.
-# The npm_token secret is mounted read-only at /run/secrets/npm_token and is
-# NEVER written into any image layer — it only lives for the duration of this RUN.
-# We export it as NPM_TOKEN so that .yarnrc.yml's ${NPM_TOKEN:-} interpolation
-# picks it up for the @nimoh-digital-solutions scope → GitHub Packages registry.
 RUN --mount=type=cache,target=/root/.yarn/berry/cache \
-    --mount=type=secret,id=npm_token,required=false \
-    export NPM_TOKEN=$(cat /run/secrets/npm_token 2>/dev/null || echo '') && \
     yarn install --immutable
 
 # Copy project files

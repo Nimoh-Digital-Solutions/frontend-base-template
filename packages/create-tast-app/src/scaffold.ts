@@ -63,7 +63,7 @@ export async function scaffold(opts: ScaffoldOptions): Promise<void> {
   //     packages via the workspace: protocol (e.g. workspace:^). Outside the
   //     monorepo those workspace references don't exist, causing Yarn to fail with
   //     "Workspace not found". Deleting it forces Yarn to generate a fresh
-  //     lockfile from the npm / GitHub Packages registry.
+  //     lockfile from the npm registry.
   //   - packages/: internal monorepo packages (tast-ui, tast-utils, etc.)
   //   - .changeset/: changeset config and pending changesets
   safeUnlink(path.join(destDir, 'yarn.lock'));

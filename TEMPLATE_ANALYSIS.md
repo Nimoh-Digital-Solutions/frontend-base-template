@@ -238,7 +238,7 @@ packages:build  Build all 4 runtime packages
 packages:typecheck  Typecheck tast-utils, tast-hooks, tast-ui
 changeset       Describe a package change (interactive)
 changeset:version   Bump versions + write changelogs
-changeset:publish   Build packages + publish to GitHub Packages
+changeset:publish   Build packages + publish to npm
 setup           Interactive opt-out of PWA / Docker / Husky / Testing
 setup:pwa       Remove PWA support
 setup:docker    Remove Docker support
@@ -272,12 +272,12 @@ Consistent formatting across editors: 2-space indent, LF line endings, UTF-8, tr
 1. Install → Build packages → Type-check → ESLint → Stylelint → Tests
 
 ### `release.yml` (on push to main)
-1. Install → Write GitHub Packages auth token to `$RUNNER_TEMP/.npmrc` → Build packages
+1. Install → Build packages
 2. `changesets/action@v1`:
    - If unreleased changesets exist → opens/updates **"Version Packages" PR**
-   - If Version Packages PR is merged → runs `yarn changeset:publish` → publishes to GitHub Packages
+   - If Version Packages PR is merged → runs `yarn changeset:publish` → publishes to npm
 
-**Auth note:** Requires `NPM_TOKEN` secret (classic PAT with `write:packages` scope). `GITHUB_TOKEN` alone cannot publish to packages when org-level write permissions are restricted.
+**Auth note:** Requires `NPM_TOKEN` secret (npm access token with publish permission).
 
 ---
 
@@ -301,7 +301,7 @@ Each setup script is also exported as `apply({ keep, selfDestruct })` — used i
 | Area | Detail |
 |---|---|
 | **Yarn v1** | Workspaces use `workspace:*` syntax unsupported in Yarn 1 — all cross-package refs use `"*"` instead |
-| **GitHub Packages auth** | Consumers need an `.npmrc` with `@nimoh-digital-solutions:registry=https://npm.pkg.github.com` + a PAT with `read:packages` scope |
+| **Public npm registry** | All `@nimoh-digital-solutions/*` packages are published to the public npm registry — no auth needed to install |
 | **SCSS in tast-ui** | Uses a `@styles` Vite alias pointing to `tast-styles/src`. Consumers that are not Vite-based would need to handle this alias manually |
 | **publish.yml removed** | The manual `workflow_dispatch` publish workflow was superseded by Changesets and removed |
 | **`src/utils/` duplication** | Local `formatters.ts`, `helpers.ts` etc. exist alongside the `tast-utils` re-export in `utils/index.ts`. The local files are the source of truth for the published package; the index re-exports them |

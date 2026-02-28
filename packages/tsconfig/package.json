@@ -7,9 +7,9 @@
     "react.json"
   ],
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com",
-    "tag": "latest",
-    "access": "public"
+    "registry": "https://registry.npmjs.org",
+    "access": "public",
+    "tag": "latest"
   },
   "repository": {
     "type": "git",

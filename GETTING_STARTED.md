@@ -11,29 +11,10 @@ Everything you need to go from zero to a running, production-ready React app.
 | Node.js | 22 | Use nvm: `nvm use 22` |
 | Yarn | 1.22 | `npm install -g yarn` |
 | Git | Any | — |
-| GitHub account | — | Needed to pull private packages |
 
 ---
 
-## 1. Authentication (one-time per machine)
-
-All packages are published to **GitHub Packages**. You need to authenticate before installing.
-
-**1a. Create a classic PAT:**
-- github.com → Settings → Developer settings → Personal access tokens → Tokens (classic)
-- Scope: ✅ `read:packages`
-- Copy the token (`ghp_...`)
-
-**1b. Add to your global `.npmrc`:**
-```bash
-echo "//npm.pkg.github.com/:_authToken=ghp_YOUR_TOKEN_HERE" >> ~/.npmrc
-```
-
-> This is a one-time setup per machine. You will not need to repeat it for each new project.
-
----
-
-## 2. Create a New App
+## 1. Create a New App
 
 ### Option A — CLI (recommended)
 ```bash
@@ -65,7 +46,7 @@ The CLI will:
 
 ---
 
-## 3. First-time Project Setup
+## 2. First-time Project Setup
 
 After the project is created:
 
@@ -87,7 +68,7 @@ App will be available at `http://localhost:5173`.
 
 ---
 
-## 4. Project Structure — Where Things Go
+## 3. Project Structure — Where Things Go
 
 ```
 src/
@@ -110,7 +91,7 @@ src/
 
 ---
 
-## 5. Adding a New Page
+## 4. Adding a New Page
 
 **1. Create the page component:**
 ```
@@ -146,7 +127,7 @@ const DashboardPage = lazy(() => import('@pages/DashboardPage/DashboardPage'));
 
 ---
 
-## 6. Adding a New Feature (Feature Slice)
+## 5. Adding a New Feature (Feature Slice)
 
 Use the `src/features/` directory for self-contained features (e.g. auth, billing, user-profile).
 
@@ -170,7 +151,7 @@ Import from the feature's public API barrel only. Do not import feature internal
 
 ---
 
-## 7. Making API Calls
+## 6. Making API Calls
 
 A typed HTTP client is pre-configured with your `VITE_API_URL`:
 
@@ -201,7 +182,7 @@ try {
 
 ---
 
-## 8. Auth / Protected Routes
+## 7. Auth / Protected Routes
 
 Use `ProtectedRoute` from `@components`:
 
@@ -223,7 +204,7 @@ import { ProtectedRoute } from '@components';
 
 ---
 
-## 9. Theming
+## 8. Theming
 
 Light/dark is already wired up via CSS custom properties.
 
@@ -249,7 +230,7 @@ All tokens are defined in `src/styles/themes/_base.scss` (light) and `_dark.scss
 
 ---
 
-## 10. Writing Tests
+## 9. Writing Tests
 
 Tests live alongside the code they test:
 
@@ -284,7 +265,7 @@ yarn test:coverage # coverage report
 
 ---
 
-## 11. Environment Variables
+## 10. Environment Variables
 
 | Variable | Required | Purpose |
 |---|---|---|
@@ -297,7 +278,7 @@ Always use `VITE_` prefix for variables you want available in the browser bundle
 
 ---
 
-## 12. Docker Deployment
+## 11. Docker Deployment
 
 ```bash
 # Development
@@ -316,7 +297,7 @@ The Nginx config in `nginx.conf` handles:
 
 ---
 
-## 13. Removing Optional Features
+## 12. Removing Optional Features
 
 Each feature can be permanently removed using its setup script. This removes all related files, dependencies, and configuration:
 
@@ -332,7 +313,7 @@ These scripts are destructive and self-delete after running. Run them before com
 
 ---
 
-## 14. Code Quality Checks
+## 13. Code Quality Checks
 
 ```bash
 # Run everything (slow — use before pushing)
@@ -352,7 +333,7 @@ Pre-commit hooks run ESLint + Prettier + Stylelint automatically on staged files
 
 ---
 
-## 15. Consuming Updated Packages
+## 14. Consuming Updated Packages
 
 When a package is updated and published, update your app:
 
@@ -367,7 +348,7 @@ Or if you have Dependabot enabled on the consuming repo, it will open a PR autom
 
 ---
 
-## 16. Publishing Package Updates
+## 15. Publishing Package Updates
 
 When you make changes to a package in this repo:
 
@@ -384,7 +365,7 @@ git push
 
 GitHub Actions will then:
 1. Detect the pending changeset and open a **"Version Packages"** PR
-2. When you merge that PR → automatically publish the updated packages to GitHub Packages
+2. When you merge that PR → automatically publish the updated packages to npm
 
 ---
 

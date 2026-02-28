@@ -58,7 +58,7 @@ Tests are structured around behaviour, not implementation. The `ThemeContext` te
 `ci.yml` runs on every push/PR to `main`: packages build → type-check → ESLint → Stylelint → Vitest. No merge without green CI.
 
 **12. Automated release pipeline with Changesets**  
-`release.yml` watches for changeset files and opens a versioning PR automatically. `yarn changeset:publish` builds all packages and publishes to GitHub Packages in one step. Semantic versioning is enforced by the changeset kind (`patch | minor | major`).
+`release.yml` watches for changeset files and opens a versioning PR automatically. `yarn changeset:publish` builds all packages and publishes to npm in one step. Semantic versioning is enforced by the changeset kind (`patch | minor | major`).
 
 **13. Commit quality enforced at the hook level**  
 Husky + commitlint enforce Conventional Commits on every `git commit`. The `prepare` script installs hooks automatically on `yarn install`. Husky setup is opt-out via `yarn setup`.

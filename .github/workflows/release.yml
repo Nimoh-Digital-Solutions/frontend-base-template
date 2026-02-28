@@ -13,7 +13,6 @@ jobs:
 
     permissions:
       contents: write
-      packages: write
       pull-requests: write
 
     steps:
@@ -31,22 +30,10 @@ jobs:
         with:
           node-version: 22
           cache: yarn
-          registry-url: https://npm.pkg.github.com
-          scope: "@nimoh-digital-solutions"
+          registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
         run: yarn install --immutable
-
-      - name: Authenticate with GitHub Packages
-        # changesets/action sets NPM_CONFIG_USERCONFIG=$RUNNER_TEMP/.npmrc and checks
-        # that specific file for auth. Writing to project .npmrc or ~/.npmrc is ignored.
-        # Pre-creating $RUNNER_TEMP/.npmrc with the scoped auth token means changesets
-        # finds it already exists and won't overwrite our entry.
-        # Yarn install has already run so it won't choke on this file.
-        run: |
-          echo "//npm.pkg.github.com/:_authToken=$NPM_TOKEN" >> "$RUNNER_TEMP/.npmrc"
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Build packages
         run: yarn packages:build
@@ -61,9 +48,6 @@ jobs:
           title: "chore: version packages"
           commit: "chore: version packages"
         env:
-          # Using NPM_TOKEN (classic PAT) instead of GITHUB_TOKEN for PR creation
-          # because the org restricts GITHUB_TOKEN from creating pull requests.
-          # The PAT bypasses that restriction and also handles npm publish auth.
-          GITHUB_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -34,10 +34,6 @@ WORKDIR /app
 COPY package.json yarn.lock ./
 
 RUN --mount=type=cache,target=/root/.yarn/berry/cache \\
-    --mount=type=secret,id=npm_token,required=false \\
-    if [ -f /run/secrets/npm_token ]; then \\
-      echo "//npm.pkg.github.com/:_authToken=$(cat /run/secrets/npm_token)" >> ~/.npmrc; \\
-    fi && \\
     yarn install --immutable
 
 COPY . .
@@ -81,10 +77,8 @@ const DOCKER_COMPOSE = `services:
       - DOCKER=true
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
-      - NPM_TOKEN=\${NPM_TOKEN}
     command: >-
-      sh -c "echo '//npm.pkg.github.com/:_authToken='\$NPM_TOKEN >> ~/.npmrc
-      && yarn install
+      sh -c "yarn install
       && yarn dev"
     stdin_open: true
     tty: true
@@ -96,8 +90,6 @@ const DOCKER_COMPOSE = `services:
     build:
       context: .
       dockerfile: Dockerfile
-      secrets:
-        - npm_token
     container_name: app-prod
     ports:
       - '8080:8080'
@@ -111,10 +103,6 @@ const DOCKER_COMPOSE = `services:
 
 volumes:
   yarn_cache:
-
-secrets:
-  npm_token:
-    environment: NPM_TOKEN
 `;
 
 const NGINX_CONF = `server {

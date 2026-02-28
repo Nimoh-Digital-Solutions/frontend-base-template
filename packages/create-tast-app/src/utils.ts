@@ -101,41 +101,6 @@ export function exec(
 }
 
 /**
- * Resolve a GitHub Packages auth token for @nimoh-digital-solutions/* packages.
- *
- * Resolution order:
- *   1. NPM_TOKEN environment variable (already exported in the shell)
- *   2. `//npm.pkg.github.com/:_authToken=<value>` entry in ~/.npmrc
- *
- * Returns the token string, or an empty string if nothing is found.
- * Never throws — missing auth is handled by callers.
- */
-export function resolveNpmToken(): string {
-  // 1. Env var — fastest, also used by CI and Docker.
-  if (process.env['NPM_TOKEN']) return process.env['NPM_TOKEN'];
-
-  // 2. Parse ~/.npmrc for the GitHub Packages auth line.
-  try {
-    const npmrcPath = path.join(
-      process.env['HOME'] ?? process.env['USERPROFILE'] ?? '',
-      '.npmrc',
-    );
-    if (!fs.existsSync(npmrcPath)) return '';
-    const lines = fs.readFileSync(npmrcPath, 'utf-8').split('\n');
-    for (const line of lines) {
-      // Matches: //npm.pkg.github.com/:_authToken=<token>
-      // RegExp constructor avoids the // regex literal ambiguity parsed by bundlers.
-      const match = line.match(new RegExp('^//npm\\.pkg\\.github\\.com/:_authToken=(.+)$'));
-      if (match && match[1]?.trim()) return match[1].trim();
-    }
-  } catch {
-    // Ignore read errors — caller handles missing token.
-  }
-
-  return '';
-}
-
-/**
  * Check if a command is available on PATH.
  */
 export function commandExists(cmd: string): boolean {
