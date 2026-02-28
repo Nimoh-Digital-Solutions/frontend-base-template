@@ -2434,7 +2434,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@nimoh-digital-solutions/tast-hooks@workspace:packages/tast-hooks"
   dependencies:
-    "@nimoh-digital-solutions/tast-utils": "npm:^1.1.1"
+    "@nimoh-digital-solutions/tast-utils": "npm:^1.1.2"
     "@nimoh-digital-solutions/tsconfig": "workspace:^"
     "@types/react": "npm:^19.1.5"
     tsup: "npm:^8.4.0"
@@ -2457,7 +2457,7 @@ __metadata:
   resolution: "@nimoh-digital-solutions/tast-ui@workspace:packages/tast-ui"
   dependencies:
     "@nimoh-digital-solutions/tast-styles": "workspace:^"
-    "@nimoh-digital-solutions/tast-utils": "npm:^1.1.1"
+    "@nimoh-digital-solutions/tast-utils": "npm:^1.1.2"
     "@nimoh-digital-solutions/tsconfig": "workspace:^"
     "@storybook/addon-a11y": "npm:^10.2.10"
     "@storybook/react": "npm:^10.2.10"
@@ -2480,7 +2480,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@nimoh-digital-solutions/tast-utils@npm:^1.1.0, @nimoh-digital-solutions/tast-utils@npm:^1.1.1, @nimoh-digital-solutions/tast-utils@workspace:packages/tast-utils":
+"@nimoh-digital-solutions/tast-utils@npm:^1.1.0, @nimoh-digital-solutions/tast-utils@npm:^1.1.2, @nimoh-digital-solutions/tast-utils@workspace:packages/tast-utils":
   version: 0.0.0-use.local
   resolution: "@nimoh-digital-solutions/tast-utils@workspace:packages/tast-utils"
   dependencies:
