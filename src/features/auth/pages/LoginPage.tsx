@@ -1,6 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import { useLocation,useNavigate } from 'react-router-dom';
 
+import { useDocumentTitle } from '@hooks';
+import { PATHS, routeMetadata } from '@routes/config/paths';
+
 import { LoginForm } from '../components/LoginForm/LoginForm';
 import { useAuth } from '../hooks/useAuth';
 import type { LoginPayload } from '../types/auth.types';
@@ -18,6 +21,7 @@ import styles from './LoginPage.module.scss';
  * ProtectedRoute) or the home page.
  */
 export function LoginPage() {
+  useDocumentTitle(routeMetadata[PATHS.LOGIN].title);
   const { t } = useTranslation();
   const { login, isLoading, error } = useAuth();
   const navigate = useNavigate();

@@ -64,12 +64,13 @@ test.describe('Login page', () => {
     await expect(page.getByText(/required|email|password/i).first()).toBeVisible();
   });
 
-  test('shows validation error for invalid email', async ({ page }) => {
-    await page.getByLabel(/email/i).fill('not-an-email');
+  test('shows validation error when credential field is empty', async ({ page }) => {
+    // Credential field is email_or_username — validation requires min 1 char
+    await page.getByLabel(/email/i).fill('');
     await page.getByLabel(/password/i).fill('validpassword123');
     await page.getByRole('button', { name: /sign in/i }).click();
 
-    await expect(page.getByText(/valid email/i)).toBeVisible();
+    await expect(page.getByText(/required/i)).toBeVisible();
   });
 
   test('shows validation error for short password', async ({ page }) => {
@@ -156,6 +157,9 @@ test.describe('Accessibility basics', () => {
   test('login page form has associated labels', async ({ page }) => {
     await page.goto('/login');
 
+    // Wait for the lazy-loaded login form to render
+    await expect(page.getByRole('heading', { name: /sign in/i })).toBeVisible();
+
     // All inputs should have a label
     const inputs = page.locator('input');
     const count = await inputs.count();
@@ -177,6 +181,9 @@ test.describe('Accessibility basics', () => {
 
   test('interactive elements are keyboard focusable', async ({ page }) => {
     await page.goto('/login');
+
+    // Wait for lazy-loaded form to render
+    await expect(page.getByRole('heading', { name: /sign in/i })).toBeVisible();
 
     await page.keyboard.press('Tab');
     const focused = await page.evaluate(() => document.activeElement?.tagName);
