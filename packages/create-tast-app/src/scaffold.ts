@@ -27,6 +27,7 @@ export interface ScaffoldOptions {
   description: string;
   /** Absolute path to create the project in */
   destDir: string;
+  enableTailwind: boolean;
   enablePwa: boolean;
   enableDocker: boolean;
   enableHusky: boolean;
@@ -45,7 +46,7 @@ export interface ScaffoldOptions {
 // ─── Main entry ──────────────────────────────────────────────────────────────
 
 export async function scaffold(opts: ScaffoldOptions): Promise<void> {
-  const { appName, description, destDir, enablePwa, enableDocker, enableHusky } = opts;
+  const { appName, description, destDir, enableTailwind, enablePwa, enableDocker, enableHusky } = opts;
 
   if (exists(destDir)) {
     throw new Error(`Directory "${path.basename(destDir)}" already exists.`);
@@ -94,7 +95,13 @@ export async function scaffold(opts: ScaffoldOptions): Promise<void> {
   // 5. Remove setup scripts that are no longer needed
   cleanupSetupScripts(destDir, { enablePwa, enableDocker, enableHusky });
 
-  // 6. Remove template-only docs that are not relevant to a scaffolded app
+  // 6. Optional Tailwind CSS v4 integration
+  if (enableTailwind) {
+    logStep('Adding Tailwind CSS v4');
+    addTailwind(destDir);
+  }
+
+  // 7. Remove template-only docs that are not relevant to a scaffolded app
   cleanupTemplateDocs(destDir);
 }
 
@@ -500,6 +507,181 @@ function removeHusky(destDir: string): void {
 
   removePkgScript(destDir, 'setup:husky');
   logOk('Husky configuration removed');
+}
+
+// ─── Tailwind CSS v4 integration ──────────────────────────────────────────────
+
+/**
+ * Add Tailwind CSS v4 to the scaffolded project.
+ *
+ * Tailwind runs **alongside** the existing SCSS Modules setup — it does NOT
+ * replace it.  Components keep their `.module.scss` files for scoped styles,
+ * and Tailwind utility classes are available everywhere via a CSS import.
+ *
+ * What this function does:
+ *  1. Adds `tailwindcss` + `@tailwindcss/vite` to devDependencies.
+ *  2. Injects the `@tailwindcss/vite` plugin into `vite.config.ts`.
+ *  3. Creates `src/styles/tailwind.css` with `@import "tailwindcss"` and
+ *     a `@theme` block that bridges the project's Open Props design tokens
+ *     so the Tailwind palette and spacing scales are in sync with the SCSS
+ *     token system.
+ *  4. Imports `tailwind.css` in `src/main.tsx`.
+ */
+function addTailwind(destDir: string): void {
+  addTailwindDeps(destDir);
+  addTailwindVitePlugin(destDir);
+  createTailwindCss(destDir);
+  importTailwindInMain(destDir);
+}
+
+/** 1. Add tailwindcss + @tailwindcss/vite to devDependencies */
+function addTailwindDeps(destDir: string): void {
+  const pkgPath = path.join(destDir, 'package.json');
+  if (!exists(pkgPath)) return;
+
+  const pkg = readJson(pkgPath);
+  const devDeps = (pkg['devDependencies'] ?? {}) as Record<string, string>;
+  devDeps['tailwindcss'] = '^4';
+  devDeps['@tailwindcss/vite'] = '^4';
+  pkg['devDependencies'] = devDeps;
+  writeJson(pkgPath, pkg);
+  logOk('package.json — added tailwindcss + @tailwindcss/vite');
+}
+
+/** 2. Inject @tailwindcss/vite plugin into vite.config.ts */
+function addTailwindVitePlugin(destDir: string): void {
+  const configPath = path.join(destDir, 'vite.config.ts');
+  if (!exists(configPath)) return;
+
+  let content = readText(configPath);
+
+  // Add the import — insert after the last existing import
+  if (!content.includes('@tailwindcss/vite')) {
+    // Find the last import line and append after it
+    const importRegex = /^import .+;\s*$/gm;
+    let lastImportEnd = 0;
+    let match: RegExpExecArray | null;
+    while ((match = importRegex.exec(content)) !== null) {
+      lastImportEnd = match.index + match[0].length;
+    }
+
+    if (lastImportEnd > 0) {
+      content =
+        content.slice(0, lastImportEnd) +
+        "\nimport tailwindcss from '@tailwindcss/vite';" +
+        content.slice(lastImportEnd);
+    }
+  }
+
+  // Add the plugin call right after react() in the plugins array
+  if (!content.includes('tailwindcss()')) {
+    content = content.replace(
+      /(\breact\(\))(,?\s*\n)/,
+      '$1,\n      tailwindcss()$2'
+    );
+  }
+
+  writeText(configPath, content);
+  logOk('vite.config.ts — added @tailwindcss/vite plugin');
+}
+
+/**
+ * 3. Create src/styles/tailwind.css
+ *
+ * The `@theme` block maps the project's Open Props CSS custom properties to
+ * Tailwind's design-token namespace so utility classes like `text-brand`,
+ * `bg-surface`, `p-size-2` etc. reference the same tokens as SCSS.
+ */
+function createTailwindCss(destDir: string): void {
+  const tailwindCss = `/* ─────────────────────────────────────────────────────────────────────────────
+ * Tailwind CSS v4 — imported alongside SCSS Modules.
+ *
+ * This file is the single entry-point for Tailwind.  The @theme block below
+ * bridges the project's Open Props / brand design tokens into Tailwind's
+ * utility-class namespace so both styling systems share the same palette.
+ *
+ * Usage:  apply Tailwind utilities directly on JSX elements:
+ *   <div className="flex items-center gap-2 text-brand bg-surface rounded-lg p-4">
+ *
+ * Scoped component styles still live in *.module.scss files — the two
+ * approaches coexist without conflict.
+ * ───────────────────────────────────────────────────────────────────────────── */
+@import "tailwindcss";
+
+/* ─── Theme bridge: map CSS custom properties → Tailwind tokens ───────────── */
+@theme {
+  /* Brand colours — driven by the same --brand-* vars that SCSS uses */
+  --color-brand: hsl(var(--brand-hue) var(--brand-saturation) var(--brand-lightness));
+  --color-brand-light: hsl(var(--brand-hue) var(--brand-saturation) calc(var(--brand-lightness) + 15%));
+  --color-brand-dark: hsl(var(--brand-hue) var(--brand-saturation) calc(var(--brand-lightness) - 15%));
+
+  /* Surface / background tokens */
+  --color-surface: var(--surface-1);
+  --color-surface-alt: var(--surface-2);
+  --color-surface-elevated: var(--surface-3);
+
+  /* Text tokens */
+  --color-text: var(--text-1);
+  --color-text-muted: var(--text-2);
+
+  /* Open Props size scale — available as p-size-1, gap-size-2, etc. */
+  --spacing-size-1: var(--size-1);
+  --spacing-size-2: var(--size-2);
+  --spacing-size-3: var(--size-3);
+  --spacing-size-4: var(--size-4);
+  --spacing-size-5: var(--size-5);
+  --spacing-size-6: var(--size-6);
+  --spacing-size-7: var(--size-7);
+  --spacing-size-8: var(--size-8);
+
+  /* Border radius tokens */
+  --radius-sm: var(--radius-2);
+  --radius-md: var(--radius-3);
+  --radius-lg: var(--radius-4);
+}
+`;
+
+  const stylesDir = path.join(destDir, 'src', 'styles');
+  writeText(path.join(stylesDir, 'tailwind.css'), tailwindCss);
+  logOk('src/styles/tailwind.css — created with theme bridge');
+}
+
+/** 4. Import tailwind.css in main.tsx (before the SCSS import) */
+function importTailwindInMain(destDir: string): void {
+  const mainPath = path.join(destDir, 'src', 'main.tsx');
+  if (!exists(mainPath)) return;
+
+  let content = readText(mainPath);
+
+  const tailwindImport = "import '@styles/tailwind.css';";
+  if (content.includes(tailwindImport)) return;
+
+  // Insert before the existing SCSS/styles import so Tailwind's base reset
+  // loads first and SCSS overrides can take precedence.
+  const scssImportRegex = /^(import\s+['"]@styles\/.*['"];?\s*)$/m;
+  const scssMatch = scssImportRegex.exec(content);
+
+  if (scssMatch) {
+    content = content.replace(
+      scssMatch[0],
+      `${tailwindImport}\n${scssMatch[0]}`
+    );
+  } else {
+    // Fallback: add after the last import
+    const importRegex = /^import .+;\s*$/gm;
+    let lastImportEnd = 0;
+    let match: RegExpExecArray | null;
+    while ((match = importRegex.exec(content)) !== null) {
+      lastImportEnd = match.index + match[0].length;
+    }
+    content =
+      content.slice(0, lastImportEnd) +
+      `\n${tailwindImport}` +
+      content.slice(lastImportEnd);
+  }
+
+  writeText(mainPath, content);
+  logOk('src/main.tsx — added tailwind.css import');
 }
 
 // ─── Setup script cleanup ─────────────────────────────────────────────────────

@@ -15,6 +15,7 @@ interface Answers {
   brandPrimary: string;
   brandSecondary: string;
   brandTertiary: string;
+  enableTailwind: boolean;
   enablePwa: boolean;
   enableDocker: boolean;
   enableHusky: boolean;
@@ -79,6 +80,16 @@ async function main(): Promise<void> {
         initial: '',
         validate: (v: string) =>
           !v || /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v) || 'Must be a valid hex colour',
+      },
+
+      // Styling — optional Tailwind CSS alongside SCSS Modules
+      {
+        type: 'toggle',
+        name: 'enableTailwind',
+        message: 'Enable Tailwind CSS v4? (works alongside SCSS Modules)',
+        initial: false,
+        active: 'Yes',
+        inactive: 'No',
       },
 
       // Features
@@ -146,6 +157,7 @@ async function main(): Promise<void> {
       appName,
       description: answers.description ?? '',
       destDir,
+      enableTailwind: answers.enableTailwind ?? false,
       enablePwa: answers.enablePwa ?? true,
       enableDocker: answers.enableDocker ?? true,
       enableHusky: answers.enableHusky ?? true,
