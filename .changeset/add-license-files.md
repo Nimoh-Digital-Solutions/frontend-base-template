@@ -6,7 +6,7 @@
 "@nimoh-digital-solutions/eslint-config": patch
 "@nimoh-digital-solutions/stylelint-config": patch
 "@nimoh-digital-solutions/tsconfig": patch
-"create-tast-app": patch
+"@nimoh-digital-solutions/create-tast-app": patch
 ---
 
 Add MIT LICENSE files and license field to all packages
