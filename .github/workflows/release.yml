@@ -62,3 +62,19 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # After Changesets bumps internal workspace dep ranges (e.g. tast-utils)
+      # the lockfile goes stale. Regenerate and push so CI doesn't fail.
+      - name: Update lockfile after version bump
+        if: steps.changesets.outputs.hasChangesets == 'true'
+        run: |
+          yarn install --no-immutable
+          if git diff --quiet yarn.lock; then
+            echo "Lockfile unchanged — nothing to commit"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add yarn.lock
+            git commit -m "chore: update lockfile after changesets version bump"
+            git push
+          fi
