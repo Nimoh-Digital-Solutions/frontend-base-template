@@ -6,6 +6,7 @@
     "name": "Matthew Venter",
     "email": "matthewcpventer@gmail.com"
   },
+  "license": "MIT",
   "type": "module",
   "private": true,
   "workspaces": [

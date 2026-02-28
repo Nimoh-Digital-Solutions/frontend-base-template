@@ -2,6 +2,7 @@
   "name": "@nimoh-digital-solutions/eslint-config",
   "version": "1.0.2",
   "description": "Shared ESLint flat config for Nimoh Digital Solutions React projects",
+  "license": "MIT",
   "type": "module",
   "main": "index.js",
   "exports": {

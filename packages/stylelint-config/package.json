@@ -2,6 +2,7 @@
   "name": "@nimoh-digital-solutions/stylelint-config",
   "version": "1.0.1",
   "description": "Shared Stylelint config for Nimoh Digital Solutions React/SCSS projects",
+  "license": "MIT",
   "main": "index.json",
   "exports": {
     ".": "./index.json"
