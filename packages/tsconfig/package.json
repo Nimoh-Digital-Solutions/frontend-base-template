@@ -1,6 +1,6 @@
 {
   "name": "@nimoh-digital-solutions/tsconfig",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Shared TypeScript config for Nimoh Digital Solutions React projects",
   "license": "MIT",
   "files": [

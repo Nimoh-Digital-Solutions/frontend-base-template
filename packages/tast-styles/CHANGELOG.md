@@ -1,5 +1,11 @@
 # @nimoh-digital-solutions/tast-styles
 
+## 1.1.5
+
+### Patch Changes
+
+- 66f32de: CI: auto-update lockfile after changesets version bump
+
 ## 1.1.4
 
 ### Patch Changes

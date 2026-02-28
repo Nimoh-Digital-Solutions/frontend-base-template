@@ -1,5 +1,11 @@
 # @nimoh-digital-solutions/tsconfig
 
+## 1.0.4
+
+### Patch Changes
+
+- 66f32de: CI: auto-update lockfile after changesets version bump
+
 ## 1.0.3
 
 ### Patch Changes
