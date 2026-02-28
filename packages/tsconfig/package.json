@@ -1,6 +1,6 @@
 {
   "name": "@nimoh-digital-solutions/tsconfig",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Shared TypeScript config for Nimoh Digital Solutions React projects",
   "files": [
     "base.json",

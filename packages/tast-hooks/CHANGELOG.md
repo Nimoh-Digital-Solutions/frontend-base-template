@@ -1,5 +1,13 @@
 # @nimoh-digital-solutions/tast-hooks
 
+## 1.2.3
+
+### Patch Changes
+
+- d7e3f4d: docs: add comprehensive README documentation for all packages
+- Updated dependencies [d7e3f4d]
+  - @nimoh-digital-solutions/tast-utils@1.1.2
+
 ## 1.2.2
 
 ### Patch Changes
