@@ -1,5 +1,5 @@
-import { useDocumentTitle as _useDocumentTitle } from '@nimoh-digital-solutions/tast-hooks';
 import { APP_CONFIG } from '@configs';
+import { useDocumentTitle as _useDocumentTitle } from '@nimoh-digital-solutions/tast-hooks';
 
 /**
  * useDocumentTitle — app-level wrapper around the tast-hooks primitive.

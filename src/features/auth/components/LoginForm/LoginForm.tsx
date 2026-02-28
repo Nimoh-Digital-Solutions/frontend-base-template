@@ -1,24 +1,14 @@
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
 import type { FieldValues, Resolver } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@components';
 import { Field } from '@components/ui/Field';
+import { z } from 'zod';
 
 import type { LoginPayload } from '../../types/auth.types';
 
 import styles from './LoginForm.module.scss';
-
-// ---------------------------------------------------------------------------
-// Schema
-// ---------------------------------------------------------------------------
-
-const loginSchema = z.object({
-  email: z.string().min(1, 'Email is required').email('Enter a valid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
 
 // ---------------------------------------------------------------------------
 // Inline Zod resolver
@@ -69,11 +59,18 @@ export interface LoginFormProps {
  * Validation runs on submit first, then on change after first submission.
  */
 export function LoginForm({ onSubmit, isLoading = false, serverError }: LoginFormProps) {
+  const { t } = useTranslation();
+
+  const loginSchema = z.object({
+    email_or_username: z.string().min(1, t('auth.credentialRequired')),
+    password: z.string().min(8, t('auth.passwordMin')),
+  });
+
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginFormValues>({
+  } = useForm<z.infer<typeof loginSchema>>({
     resolver: makeZodResolver(loginSchema),
     mode: 'onTouched',
   });
@@ -85,15 +82,15 @@ export function LoginForm({ onSubmit, isLoading = false, serverError }: LoginFor
       noValidate
     >
       <Field
-        label="Email address"
-        type="email"
-        autoComplete="email"
-        error={errors.email?.message as string | undefined}
-        {...register('email')}
+        label={t('auth.credentialLabel')}
+        type="text"
+        autoComplete="username"
+        error={errors.email_or_username?.message as string | undefined}
+        {...register('email_or_username')}
       />
 
       <Field
-        label="Password"
+        label={t('auth.passwordLabel')}
         type="password"
         autoComplete="current-password"
         error={errors.password?.message as string | undefined}
@@ -106,8 +103,8 @@ export function LoginForm({ onSubmit, isLoading = false, serverError }: LoginFor
         </p>
       )}
 
-      <Button type="submit" loading={isLoading} loadingLabel="Signing in…" fullWidth>
-        Sign in
+      <Button type="submit" loading={isLoading} loadingLabel={t('auth.loading')} fullWidth>
+        {t('auth.submit')}
       </Button>
     </form>
   );

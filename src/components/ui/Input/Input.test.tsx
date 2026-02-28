@@ -1,8 +1,10 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
 import { createRef } from 'react';
-import { Input } from './Input';
+
+import { render, screen } from '@testing-library/react';
+import { describe, expect,it } from 'vitest';
+
 import { axe } from '../../../test/a11y.setup';
+import { Input } from './Input';
 
 describe('Input', () => {
   describe('Rendering', () => {

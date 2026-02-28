@@ -9,7 +9,7 @@ Everything you need to go from zero to a running, production-ready React app.
 | Tool | Minimum | Notes |
 |---|---|---|
 | Node.js | 22 | Use nvm: `nvm use 22` |
-| Yarn | 1.22 | `npm install -g yarn` |
+| Yarn | 4 (Berry) | `corepack enable && corepack prepare yarn@4 --activate` |
 | Git | Any | — |
 
 ---
@@ -64,7 +64,7 @@ cp .env.example .env.local
 yarn dev
 ```
 
-App will be available at `http://localhost:5173`.
+App will be available at `http://localhost:3000`.
 
 ---
 
@@ -76,14 +76,19 @@ src/
 │   ├── common/      ← Shared functional components (ErrorBoundary, ProtectedRoute)
 │   ├── ui/          ← Shared visual components (Button, etc.)
 │   └── layout/      ← Header, Footer — chrome that wraps every page
+├── configs/         ← App config, env validation, Sentry, API endpoints
 ├── features/        ← Feature slices (see src/features/README.md)
 ├── pages/           ← Route-level components (one folder per page)
 ├── hooks/           ← App-specific custom hooks
-├── services/        ← API client instances (http.ts is the base)
+├── services/        ← HTTP client, error handling, WebSocket utils
 ├── contexts/        ← React context providers
+├── i18n/            ← Internationalisation resources
+├── layouts/         ← Page layout components (AppLayout)
 ├── types/           ← Shared TypeScript types
 ├── utils/           ← Utility functions (re-exports from tast-utils)
 ├── styles/          ← Global SCSS (tokens, resets, themes)
+├── test/            ← Test helpers, factories, MSW mock handlers
+├── sw/              ← Service worker (PWA)
 └── routes/
     ├── config/paths.ts          ← Add new PATHS constants here
     └── config/routesConfig.tsx  ← Add new routes here
@@ -159,23 +164,27 @@ A typed HTTP client is pre-configured with your `VITE_API_URL`:
 // src/services/http.ts — already set up, just import it
 import { http } from '@services';
 
-// Feature service example
-import type { ApiResponse } from '@types';
-
-export async function getUser(id: string): Promise<ApiResponse<User>> {
-  return http.get<User>(`/users/${id}`);
+// Feature service example — http.get/post return { data, status }
+export async function getUser(id: string): Promise<User> {
+  const { data } = await http.get<User>(`/users/${id}`);
+  return data;
 }
 ```
 
 **Handling errors:**
 ```ts
 import { HttpError } from '@services';
+import { handleHttpError, parseProblemDetail } from '@services';
 
 try {
   const user = await getUser('123');
 } catch (err) {
   if (err instanceof HttpError) {
-    console.error(err.status, err.message);
+    // RFC 7807 parsing for DRF backends
+    const problem = parseProblemDetail(err);
+    // Or use the auto-handler for structured results
+    const result = handleHttpError(err);
+    console.error(result.message, result.fieldErrors);
   }
 }
 ```
@@ -184,16 +193,20 @@ try {
 
 ## 7. Auth / Protected Routes
 
-Use `ProtectedRoute` from `@components`:
+Use `ProtectedRoute` from `@components`. It reads authentication state from the Zustand auth store internally — no need to pass `isAuthenticated`:
 
 ```tsx
-import { ProtectedRoute } from '@components';
+// In routesConfig.tsx — use the convenience ProtectedPage wrapper:
+{
+  path: PATHS.DASHBOARD,
+  element: <ProtectedPage component={DashboardPage} />,
+}
 
-// In routesConfig.tsx
+// Or manually:
 {
   path: PATHS.DASHBOARD,
   element: (
-    <ProtectedRoute isAuthenticated={isLoggedIn} redirectTo={PATHS.LOGIN}>
+    <ProtectedRoute redirectTo={PATHS.LOGIN}>
       <Suspense fallback={<PageFallback />}>
         <DashboardPage />
       </Suspense>
@@ -269,9 +282,13 @@ yarn test:coverage # coverage report
 
 | Variable | Required | Purpose |
 |---|---|---|
-| `VITE_API_URL` | Yes | Base URL for API requests |
+| `VITE_API_URL` | No | Base URL for API requests (omit for front-end-only dev) |
 | `VITE_APP_TITLE` | No | App display name (default: `React Starter Kit`) |
+| `VITE_SENTRY_DSN` | No | Sentry DSN for error tracking (disabled when omitted) |
+| `VITE_SENTRY_ENVIRONMENT` | No | Sentry environment tag (default: `development`) |
+| `VITE_WS_URL` | No | WebSocket base URL (derived from API URL when omitted) |
 | `VITE_PWA` | No | Set `true` to enable PWA service worker in dev |
+| `VITE_FF_*` | No | Feature flags — `VITE_FF_<NAME>=true` to enable |
 | `DOCKER` | No | Auto-set by `docker-compose.yml` |
 
 Always use `VITE_` prefix for variables you want available in the browser bundle. Variables without it are only available in Node (e.g. `vite.config.ts`).
@@ -286,7 +303,7 @@ docker-compose up
 
 # Production build
 docker build -t my-app .
-docker run -p 80:80 my-app
+docker run -p 8080:8080 my-app
 ```
 
 The Nginx config in `nginx.conf` handles:

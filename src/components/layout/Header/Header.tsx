@@ -1,36 +1,39 @@
 import type { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { LuHouse, LuLayers, LuMoon, LuSun, LuSunMedium } from 'react-icons/lu';
 import { NavLink } from 'react-router-dom';
-import { LuHouse, LuLayers, LuSun, LuMoon, LuSunMedium } from 'react-icons/lu';
 
 import { APP_CONFIG } from '@configs';
-import { PATHS } from '@routes/config/paths';
 import { useThemeContext } from '@contexts';
+import { PATHS } from '@routes/config/paths';
 
 import styles from './Header.module.scss';
-
-const navLinks = [
-  { name: 'Home',       path: PATHS.HOME,            icon: <LuHouse  aria-hidden="true" size={22} /> },
-  { name: 'Components', path: PATHS.COMPONENTS_DEMO, icon: <LuLayers aria-hidden="true" size={22} /> },
-];
-
-const themeConfig = {
-  light: { icon: <LuMoon  size={20} aria-hidden="true" />, label: 'Switch to dim mode'  },
-  dim:   { icon: <LuSun   size={20} aria-hidden="true" />, label: 'Switch to dark mode' },
-  dark:  { icon: <LuSunMedium size={20} aria-hidden="true" />, label: 'Switch to light mode' },
-} as const;
 
 /**
  * Header
  * Layout component — includes light → dim → dark theme cycler.
  */
 export const Header = ({ className }: { className?: string }): ReactElement => {
+  const { t } = useTranslation();
   const { theme, toggleTheme, preferredTheme, setPreferredTheme } = useThemeContext();
+
+  const navLinks = [
+    { name: t('navigation.home'),       path: PATHS.HOME,            icon: <LuHouse  aria-hidden="true" size={22} /> },
+    { name: t('navigation.components'), path: PATHS.COMPONENTS_DEMO, icon: <LuLayers aria-hidden="true" size={22} /> },
+  ];
+
+  const themeConfig = {
+    light: { icon: <LuMoon  size={20} aria-hidden="true" />, label: t('theme.switchToDim')  },
+    dim:   { icon: <LuSun   size={20} aria-hidden="true" />, label: t('theme.switchToDark') },
+    dark:  { icon: <LuSunMedium size={20} aria-hidden="true" />, label: t('theme.switchToLight') },
+  } as const;
+
   const { icon, label } = themeConfig[theme] ?? themeConfig.light;
   const isPreferred = theme === preferredTheme;
 
   return (
     <header className={className ? `${styles.root} ${className}` : styles.root}>
-      <nav className={styles.nav} aria-label="Main navigation">
+      <nav className={styles.nav} aria-label={t('navigation.mainLabel')}>
         <NavLink to="/" className={styles.navBrand!}>
           {APP_CONFIG.appName}
         </NavLink>
@@ -62,8 +65,8 @@ export const Header = ({ className }: { className?: string }): ReactElement => {
           <button
             className={`${styles.themeDefault}${isPreferred ? ` ${styles.themeDefaultActive}` : ''}`}
             onClick={() => setPreferredTheme(isPreferred ? null : theme)}
-            aria-label={isPreferred ? 'Unpin default theme' : 'Set as default theme'}
-            title={isPreferred ? 'Unpin default theme' : 'Set as default theme'}
+            aria-label={isPreferred ? t('theme.unpinDefault') : t('theme.setDefault')}
+            title={isPreferred ? t('theme.unpinDefault') : t('theme.setDefault')}
           >
             <span aria-hidden="true">{isPreferred ? '★' : '☆'}</span>
           </button>

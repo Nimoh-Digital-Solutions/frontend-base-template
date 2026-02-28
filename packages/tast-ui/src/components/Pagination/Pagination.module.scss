@@ -1,0 +1,63 @@
+@use '@styles/abstracts/functions' as func;
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: func.spacing('1');
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  padding: func.spacing('1') func.spacing('2');
+  border: 1px solid func.color('border-subtle');
+  border-radius: func.border-radius('md');
+  background: transparent;
+  color: func.color('text-primary');
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background-color: func.color('bg-hover');
+    border-color: func.color('border-default');
+  }
+
+  &:focus-visible {
+    outline: 2px solid func.color('focus-ring');
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.active {
+  background-color: func.color('accent');
+  color: func.color('text-on-accent');
+  border-color: func.color('accent');
+
+  &:hover:not(:disabled) {
+    background-color: func.color('accent');
+    border-color: func.color('accent');
+  }
+}
+
+.ellipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  color: func.color('text-muted');
+  font-size: 0.875rem;
+  user-select: none;
+}

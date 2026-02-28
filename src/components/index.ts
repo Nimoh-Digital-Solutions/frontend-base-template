@@ -2,6 +2,6 @@
 //   ui/       — primitive, stateless building blocks (Button, Input, …)
 //   layout/   — structural chrome shared app-wide (Header, Footer, …)
 //   common/   — composite cross-cutting components (ErrorBoundary, ProtectedRoute, …)
-export * from './ui';
-export * from './layout';
 export * from './common';
+export * from './layout';
+export * from './ui';

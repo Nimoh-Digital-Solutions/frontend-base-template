@@ -1,0 +1,41 @@
+@use '@styles/abstracts/functions' as func;
+@use '@styles/abstracts/mixins' as mixin;
+
+@keyframes tast-ui-skeleton-pulse {
+  0%   { opacity: 1; }
+  50%  { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+.skeleton {
+  display: block;
+  background-color: func.color('border-subtle');
+  animation: tast-ui-skeleton-pulse 1.5s ease-in-out infinite;
+
+  @include mixin.reduce-motion {
+    animation: none;
+    opacity: 0.6;
+  }
+
+  &--text {
+    border-radius: func.border-radius('sm');
+  }
+
+  &--circle {
+    border-radius: func.border-radius('round');
+  }
+
+  &--rect {
+    border-radius: func.border-radius('md');
+  }
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: func.spacing('2');
+}
+
+.srOnly {
+  @include mixin.visually-hidden;
+}

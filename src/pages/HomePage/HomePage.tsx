@@ -1,16 +1,19 @@
 import type { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { useDocumentTitle } from '@hooks';
 import { PATHS, routeMetadata } from '@routes/config/paths';
 
 import styles from './HomePage.module.scss';
 
 const HomePage = (): ReactElement => {
+  const { t } = useTranslation();
   useDocumentTitle(routeMetadata[PATHS.HOME].title);
 
   return (
     <div className={styles.root}>
       <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Surfaces</h2>
+        <h2 className={styles.sectionTitle}>{t('home.surfaces')}</h2>
         <div className={styles.surfaceSamples}>
           <div className={`${styles.surface} ${styles.surface1} ${styles.radShadow}`}>1</div>
           <div className={`${styles.surface} ${styles.surface2} ${styles.radShadow}`}>2</div>
@@ -20,7 +23,7 @@ const HomePage = (): ReactElement => {
       </section>
 
       <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Typography</h2>
+        <h2 className={styles.sectionTitle}>{t('home.typography')}</h2>
         <div className={styles.textSamples}>
           <h1 className={styles.text1}>
             <span className={`${styles.swatch} ${styles.brandSwatch} ${styles.radShadow}`} />

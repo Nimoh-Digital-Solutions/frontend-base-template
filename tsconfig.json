@@ -32,6 +32,8 @@
       "@services/*": ["services/*"],
       "@features": ["features"],
       "@features/*": ["features/*"],
+      "@test": ["test"],
+      "@test/*": ["test/*"],
       // Workspace package resolution — points tsc to source so dist/ isn't required
       "@nimoh-digital-solutions/tast-utils": ["../packages/tast-utils/src/index.ts"],
       "@nimoh-digital-solutions/tast-hooks": ["../packages/tast-hooks/src/index.ts"],

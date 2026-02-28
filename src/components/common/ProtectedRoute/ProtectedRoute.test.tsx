@@ -1,48 +1,51 @@
-import { describe, it, expect } from 'vitest';
+import { MemoryRouter, Route,Routes } from 'react-router-dom';
+
+import { useAuthStore } from '@features/auth/stores/authStore';
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
-import ProtectedRoute from './ProtectedRoute';
-import { PATHS } from '@routes/config/paths';
+import { beforeEach,describe, expect, it } from 'vitest';
+
 import { axe } from '../../../test/a11y.setup';
+import ProtectedRoute from './ProtectedRoute';
 
 // ---------------------------------------------------------------------------
 // Test helpers
 // ---------------------------------------------------------------------------
+
+/** Set auth store state before rendering. */
+function setAuthState(overrides: Partial<ReturnType<typeof useAuthStore.getState>>) {
+  useAuthStore.setState(overrides);
+}
 
 /**
  * Renders a ProtectedRoute inside a MemoryRouter with a sentinel route at
  * the redirect destination so we can assert which page was landed on.
  */
 function renderProtectedRoute({
-  isAuthenticated,
   redirectTo,
 }: {
-  isAuthenticated: boolean;
   redirectTo?: string;
-}) {
-  const targetPath = redirectTo ?? PATHS.HOME;
-
+} = {}) {
   return render(
     <MemoryRouter initialEntries={['/protected']}>
       <Routes>
         <Route
           path="/protected"
           element={
-            // Only spread redirectTo when defined; exactOptionalPropertyTypes
-            // rejects explicit `undefined` for props typed as `string`.
             redirectTo ? (
-              <ProtectedRoute isAuthenticated={isAuthenticated} redirectTo={redirectTo}>
+              <ProtectedRoute redirectTo={redirectTo}>
                 <p>Protected content</p>
               </ProtectedRoute>
             ) : (
-              <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <ProtectedRoute>
                 <p>Protected content</p>
               </ProtectedRoute>
             )
           }
         />
-        <Route path={targetPath} element={<p>Redirect destination</p>} />
+        {/* Default redirect destination is /login */}
+        <Route path="/login" element={<p>Login page</p>} />
         <Route path="/custom-login" element={<p>Custom login page</p>} />
+        <Route path="/" element={<p>Home page</p>} />
       </Routes>
     </MemoryRouter>
   );
@@ -53,53 +56,56 @@ function renderProtectedRoute({
 // ---------------------------------------------------------------------------
 
 describe('ProtectedRoute', () => {
-  it('renders children when isAuthenticated is true', () => {
-    renderProtectedRoute({ isAuthenticated: true });
+  beforeEach(() => {
+    // Reset auth store to unauthenticated, not loading
+    useAuthStore.setState({
+      accessToken: null,
+      user: null,
+      isAuthenticated: false,
+      isLoading: false,
+      error: null,
+    });
+  });
+
+  it('renders children when the user is authenticated', () => {
+    setAuthState({ isAuthenticated: true, accessToken: 'tok' });
+    renderProtectedRoute();
 
     expect(screen.getByText('Protected content')).toBeInTheDocument();
   });
 
-  it('does not render children when isAuthenticated is false', () => {
-    renderProtectedRoute({ isAuthenticated: false });
+  it('does not render children when the user is not authenticated', () => {
+    setAuthState({ isAuthenticated: false });
+    renderProtectedRoute();
 
     expect(screen.queryByText('Protected content')).not.toBeInTheDocument();
   });
 
-  it('redirects to PATHS.HOME by default when not authenticated', () => {
-    renderProtectedRoute({ isAuthenticated: false });
+  it('redirects to /login by default when not authenticated', () => {
+    setAuthState({ isAuthenticated: false });
+    renderProtectedRoute();
 
-    expect(screen.getByText('Redirect destination')).toBeInTheDocument();
+    expect(screen.getByText('Login page')).toBeInTheDocument();
   });
 
   it('redirects to a custom path when redirectTo is provided and not authenticated', () => {
-    render(
-      <MemoryRouter initialEntries={['/protected']}>
-        <Routes>
-          <Route
-            path="/protected"
-            element={
-              <ProtectedRoute isAuthenticated={false} redirectTo="/custom-login">
-                <p>Protected content</p>
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/custom-login" element={<p>Custom login page</p>} />
-        </Routes>
-      </MemoryRouter>
-    );
+    setAuthState({ isAuthenticated: false });
+    renderProtectedRoute({ redirectTo: '/custom-login' });
 
     expect(screen.getByText('Custom login page')).toBeInTheDocument();
     expect(screen.queryByText('Protected content')).not.toBeInTheDocument();
   });
 
   it('renders children for authenticated user even when redirectTo is supplied', () => {
+    setAuthState({ isAuthenticated: true, accessToken: 'tok' });
+
     render(
       <MemoryRouter initialEntries={['/protected']}>
         <Routes>
           <Route
             path="/protected"
             element={
-              <ProtectedRoute isAuthenticated={true} redirectTo="/custom-login">
+              <ProtectedRoute redirectTo="/custom-login">
                 <p>Authenticated content</p>
               </ProtectedRoute>
             }
@@ -113,14 +119,31 @@ describe('ProtectedRoute', () => {
     expect(screen.queryByText('Custom login page')).not.toBeInTheDocument();
   });
 
+  it('shows loading state while isLoading is true', () => {
+    setAuthState({ isLoading: true, isAuthenticated: false });
+    renderProtectedRoute();
+
+    expect(screen.getByText('Loading…')).toBeInTheDocument();
+    expect(screen.queryByText('Protected content')).not.toBeInTheDocument();
+    expect(screen.queryByText('Login page')).not.toBeInTheDocument();
+  });
+
   describe('Accessibility (axe)', () => {
     it('has no violations rendering protected content', async () => {
-      const { container } = renderProtectedRoute({ isAuthenticated: true });
+      setAuthState({ isAuthenticated: true, accessToken: 'tok' });
+      const { container } = renderProtectedRoute();
       expect(await axe(container)).toHaveNoViolations();
     });
 
     it('has no violations for the redirect destination', async () => {
-      const { container } = renderProtectedRoute({ isAuthenticated: false });
+      setAuthState({ isAuthenticated: false });
+      const { container } = renderProtectedRoute();
+      expect(await axe(container)).toHaveNoViolations();
+    });
+
+    it('has no violations for the loading state', async () => {
+      setAuthState({ isLoading: true });
+      const { container } = renderProtectedRoute();
       expect(await axe(container)).toHaveNoViolations();
     });
   });

@@ -62,7 +62,10 @@
     text-decoration: none;
     font-weight: func.font-weight('semibold');
     font-size: func.font-size('sm');
-    transition: background-color 0.2s ease;
+
+    @include mixin.motion-safe {
+        transition: background-color 0.2s ease;
+    }
 
     &:hover {
         background: func.shade(func.color('primary'), 10%);

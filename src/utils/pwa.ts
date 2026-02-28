@@ -1,8 +1,9 @@
 // Types now live in src/types/pwa.ts — re-export for backward compatibility
 // Using relative path: '@types/*' conflicts with TypeScript's reserved @types/ namespace
-export type { DisplayMode, ConnectionType, BeforeInstallPromptEventLike } from '../types/pwa';
-import type { DisplayMode, ConnectionType, BeforeInstallPromptEventLike } from '../types/pwa';
+export type { BeforeInstallPromptEventLike,ConnectionType, DisplayMode } from '../types/pwa';
+import type { BeforeInstallPromptEventLike,ConnectionType, DisplayMode } from '../types/pwa';
 import { pwaState } from './_pwa-state';
+import { logger } from './logger';
 
 // ---------------------------------------------------------------------------
 // Typed navigator extension — replaces (navigator as any) casts
@@ -59,7 +60,7 @@ export async function promptPWAInstall(): Promise<'accepted' | 'dismissed' | nul
 
     return choice?.outcome ?? null;
   } catch (error) {
-    console.warn('Failed to prompt PWA install:', error);
+    logger.warn('Failed to prompt PWA install', { error });
     pwaState.deferredInstallPrompt = null;
     return null;
   }
@@ -152,7 +153,7 @@ export async function getAppVersionFromSW(timeoutMs = 1500): Promise<string | nu
       sw.postMessage({ type: 'GET_VERSION' }, [channel.port2]);
     });
   } catch (error) {
-    console.warn('Failed to get app version from service worker:', error);
+    logger.warn('Failed to get app version from service worker', { error });
     return null;
   }
 }

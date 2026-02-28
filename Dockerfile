@@ -1,20 +1,22 @@
 # =====================================================
 # Stage 1: Build (Node + Vite)
 # =====================================================
-# TODO: Pin the builder image to an immutable SHA-256 digest for supply-chain
-# security.  Mutable tags (e.g. node:22-alpine) can be silently replaced.
-# How to get the current digest:
-#   docker pull node:22-alpine
-#   docker inspect node:22-alpine --format='{{index .RepoDigests 0}}'
-# Then replace the line below with:
-#   FROM node:22-alpine@sha256:<digest> AS builder
-FROM node:22-alpine AS builder
+# Pinned to SHA-256 digest for supply-chain security.
+# Corresponds to node:22-alpine (pulled 2026-02-28).
+# To update: docker pull node:22-alpine && docker inspect node:22-alpine --format='{{index .RepoDigests 0}}'
+FROM node:22-alpine@sha256:e4bf2a82ad0a4037d28035ae71529873c069b13eb0455466ae0bc13363826e34 AS builder
 
 # Set working directory
 WORKDIR /app
 
-# Copy dependency files first (improves layer caching)
-COPY package.json yarn.lock ./
+# Enable Corepack so Yarn 4 (Berry) is available
+RUN corepack enable
+
+# Copy dependency files first (improves layer caching).
+# Root manifests + lockfile + every workspace package.json are needed so Yarn
+# can resolve the workspace: protocol entries in the lockfile.
+COPY package.json yarn.lock .yarnrc.yml ./
+COPY packages/ packages/
 
 # Install dependencies
 # Uses BuildKit cache for faster rebuilds.
@@ -31,19 +33,28 @@ RUN yarn build
 # =====================================================
 # Stage 2: Production (Nginx static server)
 # =====================================================
-FROM nginxinc/nginx-unprivileged:alpine
+# Pinned to SHA-256 digest for supply-chain security.
+# Corresponds to nginxinc/nginx-unprivileged:alpine (pulled 2026-02-28).
+# To update: docker pull nginxinc/nginx-unprivileged:alpine && docker inspect nginxinc/nginx-unprivileged:alpine --format='{{index .RepoDigests 0}}'
+FROM nginxinc/nginx-unprivileged:alpine@sha256:07ac04b4a727a38e7360f3bd8bbe49a7433a8e2a3259dd403d2c982e5f4c7a1c
 
-# Remove default nginx config
-RUN rm /etc/nginx/conf.d/default.conf
+# Copy custom nginx configuration (as a template — envsubst replaces ${CSP_CONNECT_SRC})
+COPY nginx.conf /etc/nginx/templates/default.conf.template
 
-# Copy custom nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Copy shared security headers include (referenced by every location block in default.conf)
-COPY nginx/security_headers.conf /etc/nginx/conf.d/security_headers.conf
+# Copy shared security headers include (as a template for CSP domain injection)
+COPY nginx/security_headers.conf /etc/nginx/templates/security_headers.conf.template
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Default CSP connect-src domain (override at runtime via -e CSP_CONNECT_SRC=https://api.myapp.com)
+ENV CSP_CONNECT_SRC="https://api.example.com"
+
+# Tell nginx-unprivileged's entrypoint which env vars to substitute.
+# Only CSP_CONNECT_SRC is replaced; other ${...} tokens in nginx config are left untouched.
+ENV NGINX_ENVSUBST_TEMPLATE_DIR=/etc/nginx/templates
+ENV NGINX_ENVSUBST_OUTPUT_DIR=/etc/nginx/conf.d
+ENV NGINX_ENVSUBST_FILTER=CSP_CONNECT_SRC
 
 # Healthcheck endpoint
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \

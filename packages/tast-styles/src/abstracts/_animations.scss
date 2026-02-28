@@ -1,7 +1,12 @@
 /* =========================================================================
    Basic Animations
-   - Keep motion subtle; always respect reduced motion in components.
+   - Wrapped in prefers-reduced-motion: no-preference so they are only
+     active when the user has NOT requested reduced motion.
+   - The global reset (_resets.scss) also strips animation-duration and
+     transition-duration for reduce, providing a double safety net.
    ========================================================================= */
+
+@media (prefers-reduced-motion: no-preference) {
 
 /* Subtle up/down pulse — useful for loading dots, hints */
 @keyframes bounce {
@@ -48,3 +53,5 @@
         transform: translateY(20px)
     ; }
 }
+
+} /* end @media (prefers-reduced-motion: no-preference) */

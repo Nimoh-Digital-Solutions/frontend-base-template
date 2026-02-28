@@ -5,8 +5,29 @@
  * into sub-directories directly from outside this feature.
  *
  * @example
- * import { LoginPage, useAuth } from '@features/auth';
+ * import { LoginPage, useAuth, useAuthStore, useInitAuth } from '@features/auth';
  */
-export { LoginPage } from './pages/LoginPage';
 export { useAuth } from './hooks/useAuth';
-export type { LoginPayload, AuthUser, AuthState } from './types/auth.types';
+export { useInitAuth } from './hooks/useInitAuth';
+export { useSessionTimeout } from './hooks/useSessionTimeout';
+export { initAuthInterceptors } from './interceptors';
+export {
+  authErrorInterceptor,
+  authRequestInterceptor,
+  csrfRequestInterceptor,
+} from './interceptors/authInterceptors';
+export { LoginPage } from './pages/LoginPage';
+export { RegisterPage } from './pages/RegisterPage';
+export { authService } from './services/auth.service';
+export type { AuthStore } from './stores/authStore';
+export { getCsrfToken, setCsrfToken,useAuthStore } from './stores/authStore';
+export type {
+  AuthActions,
+  AuthState,
+  AuthUser,
+  CsrfResponse,
+  LoginPayload,
+  LoginResponse,
+  RefreshResponse,
+  RegisterPayload,
+} from './types/auth.types';

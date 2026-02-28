@@ -1,19 +1,20 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import {
-  registerPWAInstallPromptListener,
-  canPromptPWAInstall,
-  promptPWAInstall,
-  isPWA,
-  getDisplayMode,
-  isIOS,
-  isAndroid,
-  supportsServiceWorker,
-  getConnectionType,
-  isSlowConnection,
-  getAppVersionFromSW,
-} from './pwa';
-import type { BeforeInstallPromptEventLike } from './pwa';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { pwaState } from './_pwa-state';
+import type { BeforeInstallPromptEventLike } from './pwa';
+import {
+  canPromptPWAInstall,
+  getAppVersionFromSW,
+  getConnectionType,
+  getDisplayMode,
+  isAndroid,
+  isIOS,
+  isPWA,
+  isSlowConnection,
+  promptPWAInstall,
+  registerPWAInstallPromptListener,
+  supportsServiceWorker,
+} from './pwa';
 
 // ---------------------------------------------------------------------------
 // Test-only types for message-channel mocks

@@ -57,7 +57,10 @@
     place-content: center;
     font-size: 2.5rem;
     font-weight: 200;
-    transition: background-color 0.3s var(--ease-3, ease);
+
+    @include mixin.motion-safe {
+        transition: background-color 0.3s var(--ease-3, ease);
+    }
 }
 
 .surface1 {

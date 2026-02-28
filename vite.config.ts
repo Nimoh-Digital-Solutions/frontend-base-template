@@ -9,6 +9,7 @@ import pxtorem from 'postcss-pxtorem';
 import postcssJitProps from 'postcss-jit-props';
 import OpenProps from 'open-props';
 
+import { compression } from 'vite-plugin-compression2';
 import { pwaPlugin, htmlTransformPlugin } from './plugins';
 
 export default defineConfig(({ mode }) => {
@@ -49,6 +50,14 @@ export default defineConfig(({ mode }) => {
         },
         typescript: true,
       }),
+      // Pre-compress assets (gzip + brotli) at build time so nginx can serve
+      // them via gzip_static without CPU-intensive on-the-fly compression.
+      ...(isProd
+        ? [
+            compression({ algorithm: 'gzip', exclude: [/\.(br|gz)$/] }),
+            compression({ algorithm: 'brotliCompress', exclude: [/\.(br|gz)$/] }),
+          ]
+        : []),
       // Bundle visualiser — only active in 'analyze' mode (yarn build:analyze)
       // Generates dist/stats.html — open it to inspect chunk sizes.
       ...(mode === 'analyze'
@@ -72,6 +81,7 @@ export default defineConfig(({ mode }) => {
         '@utils': path.resolve(__dirname, 'src/utils'),
         '@services': path.resolve(__dirname, 'src/services'),
         '@features': path.resolve(__dirname, 'src/features'),
+        '@test': path.resolve(__dirname, 'src/test'),
       },
     },
 
@@ -139,6 +149,7 @@ export default defineConfig(({ mode }) => {
         exclude: [
           'node_modules/',
           'src/test/',
+          'public/',
           '**/*.d.ts',
           '**/*.config.*',
           '**/mockData',
@@ -147,16 +158,20 @@ export default defineConfig(({ mode }) => {
           'src/configs/',
           // Route config and page fallback are declarative, not logic
           'src/routes/config/',
+          // Service-worker runtime — requires browser SW APIs, integration-tested via PWA
+          'src/sw/',
+          // SCSS module proxies have no testable JS logic
+          '**/*.module.scss',
         ],
         thresholds: {
-          lines: 70,
-          functions: 70,
-          branches: 60,
-          statements: 70,
+          lines: 80,
+          functions: 80,
+          branches: 65,
+          statements: 80,
         },
       },
       include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-      exclude: ['node_modules', 'dist'],
+      exclude: ['node_modules', 'dist', 'e2e'],
     },
   };
 });

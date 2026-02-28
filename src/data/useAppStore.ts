@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -42,7 +43,7 @@ interface AppStore {
  *
  * See STATE_MANAGEMENT.md for a longer explanation and worked examples.
  */
-export const useAppStore = create<AppStore>((set, _get) => ({
+export const useAppStore = create<AppStore>()(devtools((set, _get) => ({
   // ---- Notifications -------------------------------------------------------
   notifications: [],
 
@@ -64,4 +65,4 @@ export const useAppStore = create<AppStore>((set, _get) => ({
     })),
 
   clearNotifications: () => set({ notifications: [] }),
-}));
+}), { name: 'AppStore', enabled: import.meta.env.DEV }));

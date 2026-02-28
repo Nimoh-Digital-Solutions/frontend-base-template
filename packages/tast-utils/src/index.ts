@@ -1,6 +1,8 @@
 // Types
 export type {
   ApiResponse,
+  PaginatedResponse,
+  ProblemDetail,
   Theme,
   DisplayMode,
   ConnectionType,
@@ -50,4 +52,11 @@ export {
 
 // HTTP
 export { HttpError, createHttpClient } from './http';
-export type { HttpClient } from './http';
+export type {
+  HttpClient,
+  HttpClientConfig,
+  HttpRequestContext,
+  RequestInterceptor,
+  ResponseInterceptor,
+  ErrorInterceptor,
+} from './http';

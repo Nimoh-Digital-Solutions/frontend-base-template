@@ -1,6 +1,20 @@
-import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
-import { afterEach, beforeEach, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, vi } from 'vitest';
+
+import { server } from './mocks/server';
+
+import '@testing-library/jest-dom';
+// ---------------------------------------------------------------------------
+// i18n — use inline English translations in tests (no HTTP backend needed)
+// ---------------------------------------------------------------------------
+import './i18n';
+
+// ---------------------------------------------------------------------------
+// MSW — intercept network for all tests with default handlers
+// ---------------------------------------------------------------------------
+beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
 
 // ---------------------------------------------------------------------------
 // window.matchMedia mock

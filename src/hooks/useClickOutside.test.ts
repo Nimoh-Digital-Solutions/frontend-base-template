@@ -1,7 +1,9 @@
-import { describe, it, expect, vi } from 'vitest';
-import { renderHook } from '@testing-library/react';
-import { fireEvent } from '@testing-library/dom';
 import { useRef } from 'react';
+
+import { fireEvent } from '@testing-library/dom';
+import { renderHook } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+
 import { useClickOutside } from './useClickOutside';
 
 describe('useClickOutside', () => {

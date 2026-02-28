@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
-import { HttpError, http } from './http';
+import { afterEach, beforeEach,describe, expect, it, vi } from 'vitest';
+
+import { http,HttpError } from './http';
 
 // ---------------------------------------------------------------------------
 // Mock APP_CONFIG so HTTP tests are not dependent on env vars being set
@@ -24,6 +25,11 @@ function mockFetch(status: number, body: unknown, ok?: boolean): void {
     })
   );
 }
+
+// Suppress console.debug from the logging interceptor in tests
+beforeEach(() => {
+  vi.spyOn(console, 'debug').mockImplementation(() => undefined);
+});
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -189,5 +195,100 @@ describe('http — 204 No Content', () => {
 
     expect(result.data).toBeNull();
     expect(result.status).toBe(204);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// credentials — httpOnly cookie support
+// ---------------------------------------------------------------------------
+
+describe('http — credentials', () => {
+  it('includes credentials: include on all requests for httpOnly cookie auth', async () => {
+    mockFetch(200, { ok: true });
+
+    await http.get('/profile');
+
+    expect(fetch).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ credentials: 'include' })
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// timeout — AbortSignal.timeout support
+// ---------------------------------------------------------------------------
+
+describe('http — timeout', () => {
+  it('passes an AbortSignal to fetch for request timeout', async () => {
+    mockFetch(200, { ok: true });
+
+    await http.get('/slow-endpoint');
+
+    const fetchCall = (fetch as ReturnType<typeof vi.fn>).mock.calls[0]![1]! as RequestInit;
+    expect(fetchCall.signal).toBeDefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// interceptors — runtime interceptor management
+// ---------------------------------------------------------------------------
+
+describe('http — interceptors', () => {
+  it('exposes addRequestInterceptor for runtime interceptor registration', () => {
+    expect(typeof http.addRequestInterceptor).toBe('function');
+  });
+
+  it('exposes addResponseInterceptor for runtime interceptor registration', () => {
+    expect(typeof http.addResponseInterceptor).toBe('function');
+  });
+
+  it('exposes addErrorInterceptor for runtime interceptor registration', () => {
+    expect(typeof http.addErrorInterceptor).toBe('function');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// createHttpClient — factory with config object
+// ---------------------------------------------------------------------------
+
+describe('createHttpClient — config object', () => {
+  it('accepts a config object with baseUrl and interceptors', async () => {
+    const { createHttpClient } = await import('@nimoh-digital-solutions/tast-utils');
+
+    const interceptorSpy = vi.fn((ctx: { url: string; method: string; headers: Record<string, string> }) => {
+      ctx.headers['X-Custom'] = 'test';
+      return ctx;
+    });
+
+    const client = createHttpClient({
+      baseUrl: 'https://custom-api.example.com',
+      requestInterceptors: [interceptorSpy],
+    });
+
+    mockFetch(200, { custom: true });
+    await client.get('/endpoint');
+
+    expect(interceptorSpy).toHaveBeenCalledTimes(1);
+    expect(fetch).toHaveBeenCalledWith(
+      'https://custom-api.example.com/endpoint',
+      expect.objectContaining({
+        headers: expect.objectContaining({ 'X-Custom': 'test' }),
+      })
+    );
+  });
+
+  it('still accepts a plain string for backwards compatibility', async () => {
+    const { createHttpClient } = await import('@nimoh-digital-solutions/tast-utils');
+    const client = createHttpClient('https://legacy.example.com');
+
+    mockFetch(200, { legacy: true });
+    const result = await client.get('/data');
+
+    expect(fetch).toHaveBeenCalledWith(
+      'https://legacy.example.com/data',
+      expect.any(Object)
+    );
+    expect(result.data).toEqual({ legacy: true });
   });
 });

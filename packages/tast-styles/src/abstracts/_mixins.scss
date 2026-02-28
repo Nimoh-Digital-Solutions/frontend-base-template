@@ -31,6 +31,15 @@
     }
 }
 
+/// Wrap animations / transitions with this mixin so they only run when the
+/// user has NOT requested reduced motion.  Pairs with the global reset in
+/// `_resets.scss` which strips all motion for `prefers-reduced-motion: reduce`.
+@mixin motion-safe {
+    @media (prefers-reduced-motion: no-preference) {
+        @content;
+    }
+}
+
 @mixin focus-ring($offset: 2px) {
     outline: none;
 

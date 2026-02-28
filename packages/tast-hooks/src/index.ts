@@ -9,3 +9,5 @@ export { usePrevious } from './usePrevious';
 export { useToggle } from './useToggle';
 export { useToast } from './useToast';
 export type { ToastItem, ToastVariant, UseToastReturn } from './useToast';
+export { useNetworkStatus, useIsOnline } from './useNetworkStatus';
+export type { NetworkStatus } from './useNetworkStatus';

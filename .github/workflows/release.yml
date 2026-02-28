@@ -38,6 +38,17 @@ jobs:
       - name: Build packages
         run: yarn packages:build
 
+      - name: Build app
+        run: yarn build
+
+      # - name: Upload source maps to Sentry
+      #   if: env.SENTRY_AUTH_TOKEN != ''
+      #   run: npx @sentry/cli sourcemaps upload --org "$SENTRY_ORG" --project "$SENTRY_PROJECT" dist/
+      #   env:
+      #     SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      #     SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+      #     SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
+
       - name: Create Release PR or Publish
         id: changesets
         uses: changesets/action@v1

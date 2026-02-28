@@ -1,22 +1,27 @@
-# ReactStarterKit
+# TAST — Template for Application Starter Toolkit
 
 A modern React starter kit with TypeScript, Vite, SCSS, and comprehensive tooling for building scalable applications.
 
 ## 🚀 Features
 
-- **React 19** with TypeScript
-- **Vite** for fast development and building
-- **SCSS** with clean architecture pattern
+- **React 19** with TypeScript (strict mode)
+- **Vite 7** for fast development and building
+- **SCSS Modules** with Open Props design tokens
+- **Zustand** for global state management
+- **TanStack Query** for server-state caching and synchronisation
+- **React Hook Form** + **Zod** for type-safe form validation
+- **React Router v7** for client-side routing
+- **i18next** / **react-i18next** for internationalisation
+- **Sentry** for error tracking and performance monitoring
 - **ESLint** + **Prettier** + **Stylelint** for code quality
 - **Conventional Commits** enforced via commitlint
-- **React Router** for client-side routing
 - **Path aliases** for clean imports
 - **PostCSS** with autoprefixer and px-to-rem conversion
 - **SVG support** with vite-plugin-svgr
 - **Git Hooks** (optional) with Husky for automated quality checks
 - **Docker** (optional) support for development and production
 - **PWA Support** (optional) with offline functionality and install prompts
-- **Testing Infrastructure** (optional) with Vitest and React Testing Library
+- **Testing Infrastructure** with Vitest, React Testing Library, MSW, and jest-axe
 
 <!-- OPTIONAL:SETUP:START -->
 
@@ -56,7 +61,7 @@ yarn install
 Copy the example environment file and configure as needed:
 
 ```bash
-cp .env.example .env
+cp .env.example .env.local
 ```
 
 ### Available Variables
@@ -64,8 +69,12 @@ cp .env.example .env
 | Variable         | Default                 | Description                         |
 | ---------------- | ----------------------- | ----------------------------------- |
 | `VITE_APP_TITLE` | `React Starter Kit`     | Application title used in the UI    |
-| `VITE_API_URL`   | `http://localhost:3001` | Base URL for backend API calls      |
+| `VITE_API_URL`   | *(none — optional)*      | Base URL for backend API calls      |
+| `VITE_SENTRY_DSN`| *(none — optional)*      | Sentry DSN for error tracking       |
+| `VITE_SENTRY_ENVIRONMENT` | `development`  | Sentry environment tag              |
+| `VITE_WS_URL`    | *(derived from API URL)* | WebSocket base URL                  |
 | `VITE_PWA`       | `false`                 | Enable PWA in development mode      |
+| `VITE_FF_*`      | `false`                 | Feature flags (`VITE_FF_<NAME>=true`)|
 | `DOCKER`         | (auto-set)              | Automatically set by docker-compose |
 
 <!-- OPTIONAL:PWA:START -->
@@ -108,11 +117,10 @@ When running in Docker, these variables are automatically configured:
 
 - `DOCKER=true` - Disables browser auto-open
 - `CHOKIDAR_USEPOLLING=true` - Enables file watching
-- `WATCHPACK_POLLING=true` - Webpack file watching
 
 <!-- OPTIONAL:DOCKER:END -->
 
-See [.env.example](file:///Users/mventer011/Downloads/Personal/Other/Projects/ReactStarterKit/.env.example) for detailed documentation.
+See [.env.example](.env.example) for detailed documentation.
 
 ### Commands
 
@@ -210,7 +218,7 @@ docker-compose up app
 ```bash
 docker-compose up app-prod
 # or
-docker build -t react-starter-kit . && docker run -p 8080:80 react-starter-kit
+docker build -t react-starter-kit . && docker run -p 8080:8080 react-starter-kit
 ```
 
 ### Development Features
@@ -243,7 +251,6 @@ The Docker setup automatically configures:
 
 - `DOCKER=true` - Disables browser auto-open in containers
 - `CHOKIDAR_USEPOLLING=true` - Reliable file watching
-- `WATCHPACK_POLLING=true` - Webpack file watching
 
 <!-- OPTIONAL:PWA:START -->
 
@@ -283,7 +290,7 @@ docker system prune                # Clean up unused resources
 
 **Build stage:**
 
-- Node 18 Alpine base
+- Node 22 Alpine base (Corepack enabled for Yarn 4 Berry)
 - BuildKit cache mount for faster rebuilds
 - Frozen lockfile for reproducible builds
 
@@ -293,8 +300,9 @@ docker system prune                # Clean up unused resources
 - Custom nginx.conf with:
   - SPA routing fallback
   - Security headers (CSP, X-Frame-Options, etc.)
-  - Gzip compression
+  - Gzip + Brotli compression
   - Optimized caching strategy
+  - Runtime-configurable `connect-src` CSP via `CSP_CONNECT_SRC` env var
 - Health check endpoint at `/health`
 
 <!-- OPTIONAL:DOCKER:END -->
@@ -305,14 +313,19 @@ docker system prune                # Clean up unused resources
 src/
 ├── assets/
 ├── components/
+├── configs/
 ├── contexts/
 ├── data/
+├── features/
 ├── hooks/
+├── i18n/
+├── layouts/
 ├── pages/
-├── pwa/            # optional
 ├── routes/
-├── sw/             # optional
+├── services/
 ├── styles/
+├── sw/              # service worker (PWA)
+├── test/
 ├── types/
 └── utils/
 ```

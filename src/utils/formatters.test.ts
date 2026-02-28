@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { formatDate, truncateString, capitalize } from './formatters';
+import { describe, expect,it } from 'vitest';
+
+import { capitalize,formatDate, truncateString } from './formatters';
 
 describe('formatters', () => {
   describe('formatDate', () => {

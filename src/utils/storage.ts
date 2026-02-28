@@ -2,7 +2,18 @@
 // Sensitive-key guard
 // Refuse to store values whose key name suggests sensitive data.
 // Extend this list as the project grows.
+//
+// AUTH TOKEN STORAGE STRATEGY (intentional design decision):
+// - The JWT **access token** is stored in Zustand (in-memory only) and is
+//   intentionally NOT persisted to localStorage. This guard ensures that
+//   no code accidentally writes token/auth/password data to localStorage.
+// - The JWT **refresh token** is an httpOnly cookie managed entirely by the
+//   browser — the FE never sees or stores it.
+// - On page refresh the access token is lost, but `useInitAuth` performs a
+//   silent refresh via the httpOnly cookie to restore the session.
 // ---------------------------------------------------------------------------
+import { logger } from './logger';
+
 const SENSITIVE_KEY_PATTERNS = [/token/i, /secret/i, /password/i, /auth/i];
 
 function isSensitiveKey(key: string): boolean {
@@ -18,7 +29,7 @@ function trySyncStorage(op: () => void, warnMsg: string): boolean {
     op();
     return true;
   } catch (error) {
-    console.warn(warnMsg, error);
+    logger.warn(warnMsg, { error });
     return false;
   }
 }
@@ -42,7 +53,7 @@ export function getStorageItem<T>(key: string, fallback?: T): T | null {
 
     return JSON.parse(item) as T;
   } catch (error) {
-    console.warn(`Error reading localStorage key "${key}":`, error);
+    logger.warn(`Error reading localStorage key "${key}"`, { error });
     return fallback ?? null;
   }
 }
@@ -55,7 +66,7 @@ export function getStorageItem<T>(key: string, fallback?: T): T | null {
  */
 export function setStorageItem<T>(key: string, value: T): boolean {
   if (isSensitiveKey(key)) {
-    console.error(`[storage] Refusing to store sensitive key "${key}" in localStorage.`);
+    logger.error(`[storage] Refusing to store sensitive key "${key}" in localStorage`);
     return false;
   }
 
@@ -92,7 +103,7 @@ export function hasStorageItem(key: string): boolean {
   try {
     return localStorage.getItem(key) !== null;
   } catch (error) {
-    console.warn(`Error checking localStorage key "${key}":`, error);
+    logger.warn(`Error checking localStorage key "${key}"`, { error });
     return false;
   }
 }

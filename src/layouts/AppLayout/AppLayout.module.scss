@@ -26,7 +26,7 @@
     display: flex;
 
 
-    // TODO: Remove this once oyu are building a new application
+    // TODO: Remove this once you are building a new application
     // display: flex;
     // place-content: center;
     // place-items: center;
@@ -46,7 +46,10 @@
     text-decoration: none;
     border: 2px solid var(--color-primary);
     border-radius: 0 0 4px;
-    transition: top 0.1s ease;
+
+    @include mixin.motion-safe {
+        transition: top 0.1s ease;
+    }
 
     &:focus {
         top: 0;

@@ -15,4 +15,16 @@ export const APP_CONFIG = {
 
   /** Application display name — used in page titles, metadata, and PWA manifest. */
   appName: env.VITE_APP_TITLE ?? 'React Starter Kit',
+
+  /** WebSocket base URL. Derived from apiUrl when not set explicitly. */
+  wsUrl: env.VITE_WS_URL ?? '',
+
+  /**
+   * Feature flags (default off).
+   * Add project-specific flags here, sourced from env.ts.
+   *
+   * Example:
+   *   darkMode: env.VITE_FF_DARK_MODE === 'true',
+   */
+  features: {} as Record<string, boolean>,
 };

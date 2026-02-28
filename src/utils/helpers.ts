@@ -1,3 +1,5 @@
+import { logger } from './logger';
+
 /**
  * Debounce a function call (leading false, trailing true).
  * The returned function exposes a `.cancel()` method to clear any
@@ -96,7 +98,7 @@ export function deepClone<T>(obj: T): T {
     try {
       return globalThis.structuredClone(obj);
     } catch (err) {
-      console.warn('[deepClone] structuredClone failed, falling back to manual clone:', err);
+      logger.warn('[deepClone] structuredClone failed, falling back to manual clone', { err });
     }
   }
 

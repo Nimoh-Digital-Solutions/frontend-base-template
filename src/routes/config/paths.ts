@@ -12,6 +12,8 @@ export const PATHS = {
   HOME: '/',
   COMPONENTS_DEMO: '/components',
   LOGIN: '/login',
+  REGISTER: '/register',
+  SETTINGS: '/settings',
   NOT_FOUND: '*',
 } as const;
 
@@ -38,6 +40,14 @@ export const routeMetadata = {
   [PATHS.LOGIN]: {
     title: 'Sign in',
     description: 'Sign in to your account',
+  },
+  [PATHS.REGISTER]: {
+    title: 'Create Account',
+    description: 'Create a new account',
+  },
+  [PATHS.SETTINGS]: {
+    title: 'Settings',
+    description: 'Account settings',
   },
   [PATHS.NOT_FOUND]: {
     title: 'Page Not Found',

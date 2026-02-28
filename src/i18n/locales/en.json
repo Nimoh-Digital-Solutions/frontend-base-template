@@ -21,11 +21,17 @@
   "auth": {
     "pageTitle": "Sign in",
     "welcomeBack": "Welcome back — enter your credentials below.",
-    "email": "Email",
+    "credentialLabel": "Email or Username",
+    "credentialRequired": "Email or username is required",
     "password": "Password",
     "submit": "Sign in",
     "loading": "Signing in…",
-    "unknownError": "An unexpected error occurred. Please try again."
+    "passwordMin": "Password must be at least 8 characters",
+    "unknownError": "An unexpected error occurred. Please try again.",
+    "registerTitle": "Create account",
+    "registerWelcome": "Fill in the details below to get started.",
+    "alreadyHaveAccount": "Already have an account?",
+    "signIn": "Sign in"
   },
   "home": {
     "surfaces": "Surfaces",

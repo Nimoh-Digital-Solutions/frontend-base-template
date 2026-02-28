@@ -1,7 +1,7 @@
-import { useState, type ReactElement } from 'react';
-import { LuDownload, LuHeart, LuTrash2, LuCheck, LuX } from 'react-icons/lu';
+import { type ReactElement,useState } from 'react';
+import { LuCheck, LuDownload, LuHeart, LuTrash2, LuX } from 'react-icons/lu';
 
-import { Button, Input, Textarea, Badge, Spinner, Card, Modal, Toast } from '@components';
+import { Badge, Button, Card, Input, Modal, Spinner, Textarea, ToastContainer } from '@components';
 import { useDocumentTitle, useToast } from '@hooks';
 import { PATHS, routeMetadata } from '@routes/config/paths';
 
@@ -467,10 +467,8 @@ export const ComponentsDemoPage = (): ReactElement => {
           </div>
 
           {toasts.length > 0 && (
-            <div className={styles.subsection} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1rem' }}>
-              {toasts.map((t) => (
-                <Toast key={t.id} id={t.id} message={t.message} variant={t.variant} onDismiss={dismissToast} />
-              ))}
+            <div className={styles.subsection} style={{ marginTop: '1rem' }}>
+              <ToastContainer toasts={toasts} onDismiss={dismissToast} />
             </div>
           )}
         </section>

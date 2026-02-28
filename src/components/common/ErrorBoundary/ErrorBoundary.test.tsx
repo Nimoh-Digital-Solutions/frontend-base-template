@@ -1,7 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { ErrorBoundary } from './ErrorBoundary';
+import { beforeEach,describe, expect, it, vi } from 'vitest';
+
 import { axe } from '../../../test/a11y.setup';
+import { ErrorBoundary } from './ErrorBoundary';
 
 // ---------------------------------------------------------------------------
 // Test helpers

@@ -1,9 +1,10 @@
-import { describe, it, expect } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
-import { createElement } from 'react';
 import type { ReactNode } from 'react';
+import { createElement } from 'react';
 
 import { ThemeProvider } from '@contexts/ThemeContext';
+import { act,renderHook } from '@testing-library/react';
+import { describe, expect,it } from 'vitest';
+
 import { useTheme } from './useTheme';
 
 function makeWrapper(defaultTheme?: 'light' | 'dark' | 'dim') {

@@ -1,9 +1,12 @@
 /**
  * i18n initialisation
  *
- * Initialises i18next with the `en` locale as the default and only built-in
- * translation.  Additional languages can be registered by adding a new entry
- * to `resources` and a matching JSON file under `./locales/`.
+ * Uses `i18next-http-backend` to lazy-load translations from
+ * `/locales/{{lng}}/{{ns}}.json` at runtime (they are not bundled).
+ *
+ * Uses `i18next-browser-languagedetector` to auto-detect the user's
+ * language preference in this order:
+ *   querystring → localStorage → navigator → htmlTag
  *
  * The i18n instance is exported so it can be passed directly to
  * `<I18nextProvider i18n={i18n}>` in `App.tsx`.
@@ -13,21 +16,43 @@
  *   script will delete this directory, revert `App.tsx`, and remove the
  *   `i18next` / `react-i18next` packages from `package.json`.
  */
-import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-import en from './locales/en.json';
+import i18n from 'i18next';
+import LanguageDetector from 'i18next-browser-languagedetector';
+import HttpBackend from 'i18next-http-backend';
 
-void i18n.use(initReactI18next).init({
-  resources: {
-    en: { translation: en },
-  },
-  lng: 'en',
-  fallbackLng: 'en',
-  interpolation: {
-    // React already escapes values — no need for i18next to double-escape.
-    escapeValue: false,
-  },
-});
+export const SUPPORTED_LANGUAGES = ['en', 'fr'] as const;
+export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
+
+void i18n
+  .use(HttpBackend)
+  .use(LanguageDetector)
+  .use(initReactI18next)
+  .init({
+    // --- Backend: load translations from public/locales/ at runtime --------
+    backend: {
+      loadPath: '/locales/{{lng}}/{{ns}}.json',
+    },
+
+    // --- Language detection -------------------------------------------------
+    detection: {
+      order: ['querystring', 'localStorage', 'navigator', 'htmlTag'],
+      caches: ['localStorage'],
+      lookupQuerystring: 'lng',
+      lookupLocalStorage: 'i18nextLng',
+    },
+
+    // --- Defaults -----------------------------------------------------------
+    supportedLngs: [...SUPPORTED_LANGUAGES],
+    fallbackLng: 'en',
+    ns: ['translation'],
+    defaultNS: 'translation',
+
+    interpolation: {
+      // React already escapes values — no need for i18next to double-escape.
+      escapeValue: false,
+    },
+  });
 
 export default i18n;

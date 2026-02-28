@@ -6,6 +6,30 @@ export interface ApiResponse<T = unknown> {
   message?: string;
 }
 
+// ---------------------------------------------------------------------------
+// Paginated response — matches DRF PageNumberPagination envelope
+// ---------------------------------------------------------------------------
+
+export interface PaginatedResponse<T = unknown> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+}
+
+// ---------------------------------------------------------------------------
+// RFC 7807 Problem Detail — matches nimoh_base exception handler format
+// ---------------------------------------------------------------------------
+
+export interface ProblemDetail {
+  type: string;
+  title: string;
+  status: number;
+  detail: string | Record<string, string[]>;
+  instance?: string;
+  invalid_params?: Array<{ name: string; reason: string }>;
+}
+
 export type Theme = 'light' | 'dark' | 'dim';
 
 // ---------------------------------------------------------------------------

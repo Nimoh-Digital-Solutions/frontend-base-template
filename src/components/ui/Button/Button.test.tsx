@@ -1,9 +1,11 @@
-import { describe, it, expect, vi } from 'vitest';
+import { createRef } from 'react';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createRef } from 'react';
-import { Button } from './Button';
+import { describe, expect, it, vi } from 'vitest';
+
 import { axe } from '../../../test/a11y.setup';
+import { Button } from './Button';
 
 describe('Button', () => {
   describe('Rendering', () => {

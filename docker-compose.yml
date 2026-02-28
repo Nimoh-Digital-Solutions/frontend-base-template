@@ -42,6 +42,9 @@ services:
     ports:
       - '8080:8080'
     restart: unless-stopped
+    environment:
+      # CSP connect-src domain — override with your actual API URL
+      - CSP_CONNECT_SRC=https://api.example.com
 
     # Optional hardening (safe defaults for static nginx)
     read_only: true
@@ -51,5 +54,37 @@ services:
     security_opt:
       - no-new-privileges:true
 
+  # -------------------------------------------------------------------------
+  # Backend API service (example)
+  # -------------------------------------------------------------------------
+  # Uncomment when wiring to a backend API. This example assumes a Django/DRF
+  # app with a standard Dockerfile. Adjust the image/build context to match.
+  #
+  # backend:
+  #   build:
+  #     context: ../your-backend
+  #     dockerfile: Dockerfile
+  #   container_name: react-starter-kit-api
+  #   ports:
+  #     - '8000:8000'
+  #   environment:
+  #     - DJANGO_SETTINGS_MODULE=config.settings.docker
+  #     - DATABASE_URL=postgres://user:pass@db:5432/appdb
+  #   depends_on:
+  #     - db
+  #   restart: unless-stopped
+  #
+  # db:
+  #   image: postgres:16-alpine
+  #   container_name: react-starter-kit-db
+  #   environment:
+  #     POSTGRES_USER: user
+  #     POSTGRES_PASSWORD: pass
+  #     POSTGRES_DB: appdb
+  #   volumes:
+  #     - pg_data:/var/lib/postgresql/data
+  #   restart: unless-stopped
+
 volumes:
   yarn_cache:
+  # pg_data:  # Uncomment when using the backend + db services

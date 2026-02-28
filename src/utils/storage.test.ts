@@ -1,10 +1,11 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import {
-  getStorageItem,
-  setStorageItem,
-  removeStorageItem,
   clearStorage,
+  getStorageItem,
   hasStorageItem,
+  removeStorageItem,
+  setStorageItem,
 } from './storage';
 
 describe('storage utilities', () => {
@@ -190,9 +191,9 @@ describe('storage utilities', () => {
         const success = setStorageItem(sensitiveKey, 'some-value');
 
         expect(success).toBe(false);
-        expect(errorSpy).toHaveBeenCalledWith(
-          expect.stringContaining(sensitiveKey)
-        );
+        // The structured logger passes the message as the 3rd argument (%c prefix, color, message)
+        const allArgs = errorSpy.mock.calls.flat().join(' ');
+        expect(allArgs).toContain(sensitiveKey);
         // Value must NOT have been written to storage
         expect(store[sensitiveKey]).toBeUndefined();
       }

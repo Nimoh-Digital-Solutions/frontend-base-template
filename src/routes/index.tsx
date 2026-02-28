@@ -2,4 +2,4 @@
 export { default as AppRouter } from './AppRouter';
 
 // Re-export for convenience
-export { routes, PATHS, routeMetadata } from './config';
+export { PATHS, routeMetadata,routes } from './config';

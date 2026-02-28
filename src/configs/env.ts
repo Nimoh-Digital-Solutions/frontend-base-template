@@ -34,6 +34,37 @@ const envSchema = z.object({
    * Has no effect when the PWA feature is not installed.
    */
   VITE_PWA: z.enum(['true', 'false']).optional(),
+
+  /**
+   * Sentry DSN for error tracking and performance monitoring.
+   * When omitted, Sentry is disabled (safe for local dev).
+   */
+  VITE_SENTRY_DSN: z
+    .string()
+    .url('VITE_SENTRY_DSN must be a valid Sentry DSN URL')
+    .optional(),
+
+  /**
+   * Sentry environment tag (e.g. "production", "staging", "development").
+   * Defaults to "development" when omitted.
+   */
+  VITE_SENTRY_ENVIRONMENT: z.string().optional(),
+
+  /**
+   * WebSocket base URL for real-time features.
+   * When omitted, derived automatically from VITE_API_URL (http→ws, https→wss).
+   */
+  VITE_WS_URL: z
+    .string()
+    .url('VITE_WS_URL must be a valid WebSocket URL')
+    .optional(),
+
+  // -- Feature flags --------------------------------------------------------
+  // Add project-specific feature flags here. Use the naming convention
+  // VITE_FF_<FEATURE_NAME> with 'true' / 'false' string values.
+  //
+  // Example:
+  //   VITE_FF_DARK_MODE: z.enum(['true', 'false']).optional(),
 });
 
 // Parse once at module load time. Parse errors surface immediately in the

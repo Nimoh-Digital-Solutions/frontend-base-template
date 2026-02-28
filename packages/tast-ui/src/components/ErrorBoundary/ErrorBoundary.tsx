@@ -3,6 +3,8 @@ import { Component, ErrorInfo, ReactNode } from 'react';
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
+  /** Optional callback for error reporting (e.g. Sentry.captureException). */
+  onError?: (error: Error, info: ErrorInfo) => void;
 }
 
 interface State {
@@ -16,10 +18,13 @@ interface State {
  * Catches any unhandled render errors in the React tree below it and
  * displays a fallback UI instead of letting the whole page go blank.
  *
- * Wrap your app root (and optionally individual routes) with this component.
+ * Pass an `onError` callback to report to Sentry or another service:
  *
  * @example
- * <ErrorBoundary fallback={<p>Something went wrong.</p>}>
+ * <ErrorBoundary
+ *   onError={(error, info) => Sentry.captureException(error, { extra: { componentStack: info.componentStack } })}
+ *   fallback={<p>Something went wrong.</p>}
+ * >
  *   <MyComponent />
  * </ErrorBoundary>
  */
@@ -31,7 +36,10 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    // Replace with your error-reporting service (Sentry, Datadog, etc.)
+    // Report to external service via callback
+    this.props.onError?.(error, info);
+
+    // Always log to console for development visibility
     console.error('[ErrorBoundary] Uncaught error:', error, info.componentStack);
   }
 
