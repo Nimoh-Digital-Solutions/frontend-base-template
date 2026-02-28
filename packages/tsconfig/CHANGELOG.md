@@ -1,5 +1,11 @@
 # @nimoh-digital-solutions/tsconfig
 
+## 1.0.2
+
+### Patch Changes
+
+- 39fa9d2: Add MIT LICENSE files and license field to all packages
+
 ## 1.0.1
 
 ### Patch Changes
