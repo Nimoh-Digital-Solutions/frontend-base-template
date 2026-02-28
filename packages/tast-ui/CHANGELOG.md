@@ -1,5 +1,13 @@
 # @nimoh-digital-solutions/tast-ui
 
+## 1.3.2
+
+### Patch Changes
+
+- 39fa9d2: Add MIT LICENSE files and license field to all packages
+- Updated dependencies [39fa9d2]
+  - @nimoh-digital-solutions/tast-utils@1.1.3
+
 ## 1.3.1
 
 ### Patch Changes

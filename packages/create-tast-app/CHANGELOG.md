@@ -1,5 +1,11 @@
 # @nimoh-digital-solutions/create-tast-app
 
+## 1.1.14
+
+### Patch Changes
+
+- 39fa9d2: Add MIT LICENSE files and license field to all packages
+
 ## 1.1.13
 
 ### Patch Changes

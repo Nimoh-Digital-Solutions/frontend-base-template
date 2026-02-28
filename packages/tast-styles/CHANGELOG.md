@@ -1,5 +1,11 @@
 # @nimoh-digital-solutions/tast-styles
 
+## 1.1.3
+
+### Patch Changes
+
+- 39fa9d2: Add MIT LICENSE files and license field to all packages
+
 ## 1.1.2
 
 ### Patch Changes
