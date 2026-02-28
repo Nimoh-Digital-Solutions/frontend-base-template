@@ -1,5 +1,11 @@
 # @nimoh-digital-solutions/tast-styles
 
+## 1.1.4
+
+### Patch Changes
+
+- 0f46762: Republish packages with MIT LICENSE files included
+
 ## 1.1.3
 
 ### Patch Changes

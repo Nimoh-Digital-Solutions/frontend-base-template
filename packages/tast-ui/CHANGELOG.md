@@ -1,5 +1,13 @@
 # @nimoh-digital-solutions/tast-ui
 
+## 1.3.3
+
+### Patch Changes
+
+- 0f46762: Republish packages with MIT LICENSE files included
+- Updated dependencies [0f46762]
+  - @nimoh-digital-solutions/tast-utils@1.1.4
+
 ## 1.3.2
 
 ### Patch Changes
