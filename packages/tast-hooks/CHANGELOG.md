@@ -1,5 +1,17 @@
 # @nimoh-digital-solutions/tast-hooks
 
+## 1.2.2
+
+### Patch Changes
+
+- 27506fa: feat(tast-hooks): add useNetworkStatus hook
+
+  New `useNetworkStatus` hook that wraps the Navigator online/offline API and
+  provides reactive `isOnline` state. Includes accompanying unit tests.
+
+- Updated dependencies [27506fa]
+  - @nimoh-digital-solutions/tast-utils@1.1.1
+
 ## 1.2.1
 
 ### Patch Changes
