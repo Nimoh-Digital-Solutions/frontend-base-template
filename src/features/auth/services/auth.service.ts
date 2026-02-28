@@ -1,6 +1,5 @@
-import { http } from '@services';
-
 import { API } from '@configs/apiEndpoints';
+import { http } from '@services';
 
 import type {
   AuthUser,

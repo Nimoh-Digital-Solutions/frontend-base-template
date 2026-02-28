@@ -1,7 +1,6 @@
+import { API } from '@configs/apiEndpoints';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-
-import { API } from '@configs/apiEndpoints';
 
 import type {
   AuthActions,
