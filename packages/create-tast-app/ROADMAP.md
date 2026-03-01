@@ -71,17 +71,17 @@ Implemented — `cloneTemplate()` checks `commandExists('git')` before attemptin
 
 Downloads a tarball — faster, no `.git` to clean up, works without full git history.
 
-### 11. Spinner / progress indicator
+### 11. ~~Spinner / progress indicator~~ ✅
 
-Replace plain `console.log` with `ora` or similar for long-running steps (clone, install).
+Implemented — zero-dependency inline spinner (`createSpinner`) with Braille-dot animation. Uses `execAsync` for non-blocking execution during `git clone` and `npm/yarn/pnpm install`.
 
 ### 12. Rollback on failure
 
 If scaffold crashes mid-way, clean up the partially-created directory automatically.
 
-### 13. `.env.local` generation
+### 13. ~~`.env.local` generation~~ ✅
 
-Copy `.env.example` → `.env.local` with the user's app title pre-filled.
+Implemented — `generateEnvLocal()` copies `.env.example` → `.env.local` with `VITE_APP_TITLE` set to the user's app name.
 
 ### 14. Testing framework choice prompt
 

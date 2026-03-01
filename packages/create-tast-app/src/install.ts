@@ -1,4 +1,5 @@
-import { exec, commandExists, logStep, logOk, logError } from './utils.js';
+import { createSpinner } from './spinner.js';
+import { exec, execAsync, commandExists, logOk, logError } from './utils.js';
 
 export type PackageManager = 'yarn' | 'npm' | 'pnpm';
 
@@ -10,8 +11,6 @@ export async function install(destDir: string, manager: PackageManager): Promise
   const resolvedManager = resolvePackageManager(manager);
   const installCmd = buildInstallCommand(resolvedManager);
 
-  logStep(`Installing dependencies with ${resolvedManager}`);
-
   // Ensure Corepack is enabled so the packageManager field in package.json
   // activates Yarn 4 instead of the system Yarn 1. Runs silently; ignored if
   // corepack is unavailable (e.g. very old Node).
@@ -19,15 +18,18 @@ export async function install(destDir: string, manager: PackageManager): Promise
     exec('corepack enable', destDir, 'pipe');
   }
 
-  const result = exec(installCmd, destDir, 'inherit');
+  const spinner = createSpinner(`Installing dependencies with ${resolvedManager}…`);
+
+  const result = await execAsync(installCmd, destDir);
 
   if (!result.success) {
-    logError(`Install failed: ${result.error ?? 'unknown error'}`);
+    spinner.fail('Install failed');
+    logError(result.error ?? 'unknown error');
     logError(`You can install manually: cd ${destDir} && ${installCmd}`);
     return false;
   }
 
-  logOk('Dependencies installed');
+  spinner.succeed('Dependencies installed');
   return true;
 }
 

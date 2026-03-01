@@ -1,7 +1,9 @@
 import path from 'path';
+import { createSpinner } from './spinner.js';
 import {
   commandExists,
   exec,
+  execAsync,
   exists,
   logInfo,
   logOk,
@@ -78,6 +80,9 @@ export async function scaffold(opts: ScaffoldOptions): Promise<void> {
   cleanTsconfigWorkspacePaths(destDir);
   injectBrandColors(destDir, opts);
 
+  // 3.5 Generate .env.local from .env.example with the app title pre-filled
+  generateEnvLocal(destDir, appName);
+
   // 4. Optional feature removal
   if (!enableDocker) {
     logStep('Removing Docker configuration');
@@ -113,8 +118,6 @@ export async function scaffold(opts: ScaffoldOptions): Promise<void> {
 // ─── Clone ───────────────────────────────────────────────────────────────────
 
 async function cloneTemplate(destDir: string): Promise<void> {
-  logStep(`Cloning template into ${path.basename(destDir)}`);
-
   // Pre-flight: verify git is available
   if (!commandExists('git')) {
     throw new Error(
@@ -124,17 +127,19 @@ async function cloneTemplate(destDir: string): Promise<void> {
     );
   }
 
-  const result = exec(
+  const spinner = createSpinner('Cloning template…');
+
+  const result = await execAsync(
     `git clone --depth 1 ${TEMPLATE_REPO} "${path.basename(destDir)}"`,
     path.dirname(destDir),
-    'inherit'
   );
 
   if (!result.success) {
+    spinner.fail('Clone failed');
     throw new Error(`Failed to clone template: ${result.error ?? 'unknown error'}`);
   }
 
-  logOk('Template cloned');
+  spinner.succeed('Template cloned');
 }
 
 // ─── Token replacement ───────────────────────────────────────────────────────
@@ -952,6 +957,38 @@ function injectBrandColors(
       logOk("src/styles/themes/_index.scss — added @forward './brand'");
     }
   }
+}
+
+// ─── .env.local generation ───────────────────────────────────────────────────
+
+/**
+ * Copy `.env.example` → `.env.local` with `VITE_APP_TITLE` set to the
+ * user's app name.  This gives a working local environment out of the box
+ * without the user needing to manually copy the file.
+ *
+ * If `.env.example` doesn't exist in the template (shouldn't happen, but
+ * defensive), the step is silently skipped.
+ */
+function generateEnvLocal(destDir: string, appName: string): void {
+  const examplePath = path.join(destDir, '.env.example');
+  const localPath = path.join(destDir, '.env.local');
+
+  if (!exists(examplePath)) {
+    logInfo('.env.example not found — skipping .env.local generation');
+    return;
+  }
+
+  let content = readText(examplePath);
+
+  // Replace the default title with the user's app name
+  const appTitle = toTitle(appName);
+  content = content.replace(
+    /^VITE_APP_TITLE=.*/m,
+    `VITE_APP_TITLE=${appTitle}`,
+  );
+
+  writeText(localPath, content);
+  logOk('.env.local generated from .env.example');
 }
 
 // ─── Template-only docs cleanup ──────────────────────────────────────────────

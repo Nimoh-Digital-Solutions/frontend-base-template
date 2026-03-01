@@ -1,4 +1,4 @@
-import { execSync, spawnSync } from 'child_process';
+import { execSync, spawn, spawnSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
@@ -98,6 +98,38 @@ export function exec(
     const error = err instanceof Error ? err.message : String(err);
     return { success: false, output: '', error };
   }
+}
+
+/**
+ * Run a shell command **asynchronously** so the event loop stays free
+ * (spinners can animate).  Use this for long-running operations like
+ * `git clone` and `npm install`.
+ */
+export function execAsync(cmd: string, cwd: string): Promise<ExecResult> {
+  return new Promise((resolve) => {
+    const child = spawn(cmd, { cwd, shell: true, stdio: 'pipe' });
+    let stdout = '';
+    let stderr = '';
+
+    child.stdout?.on('data', (d: Buffer) => { stdout += d.toString(); });
+    child.stderr?.on('data', (d: Buffer) => { stderr += d.toString(); });
+
+    child.on('close', (code) => {
+      if (code === 0) {
+        resolve({ success: true, output: stdout.trim() });
+      } else {
+        resolve({
+          success: false,
+          output: stdout.trim(),
+          error: stderr.trim() || `Exit code ${code}`,
+        });
+      }
+    });
+
+    child.on('error', (err) => {
+      resolve({ success: false, output: '', error: err.message });
+    });
+  });
 }
 
 /**

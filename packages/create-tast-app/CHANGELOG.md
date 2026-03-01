@@ -1,5 +1,13 @@
 # @nimoh-digital-solutions/create-tast-app
 
+## 1.3.0
+
+### Minor Changes
+
+- feat: spinner progress indicator and .env.local generation
+  - **Spinner** — animated Braille-dot spinner during `git clone` and dependency install (zero-dependency, event-loop friendly via new `execAsync` helper)
+  - **`.env.local` generation** — automatically copies `.env.example` → `.env.local` with `VITE_APP_TITLE` pre-filled with the app name
+
 ## 1.2.0
 
 ### Minor Changes
