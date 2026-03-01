@@ -1,5 +1,13 @@
 # @nimoh-digital-solutions/create-tast-app
 
+## 1.4.0
+
+### Minor Changes
+
+- feat: rollback on failure + test coverage
+  - **Rollback on failure** — if scaffold crashes mid-way, the partially-created directory is automatically cleaned up
+  - **Test coverage** — 50 tests across 3 suites: unit tests for utils & spinner, integration tests for scaffold (token replacement, feature removal, .env.local, tsconfig cleanup, Docker/Husky removal, rollback, package.json snapshot)
+
 ## 1.3.0
 
 ### Minor Changes

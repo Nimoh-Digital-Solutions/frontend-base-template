@@ -75,9 +75,9 @@ Downloads a tarball — faster, no `.git` to clean up, works without full git hi
 
 Implemented — zero-dependency inline spinner (`createSpinner`) with Braille-dot animation. Uses `execAsync` for non-blocking execution during `git clone` and `npm/yarn/pnpm install`.
 
-### 12. Rollback on failure
+### 12. ~~Rollback on failure~~ ✅
 
-If scaffold crashes mid-way, clean up the partially-created directory automatically.
+Implemented — `scaffold()` wraps the inner pipeline in a try/catch; on error it removes the partially-created directory and re-throws.
 
 ### 13. ~~`.env.local` generation~~ ✅
 
@@ -95,10 +95,10 @@ Not everyone wants Zustand — offer Zustand / Jotai / Redux Toolkit / none.
 
 Pre-define answers to prompts for team-standardised scaffolding.
 
-### 17. Test coverage
+### 17. ~~Test coverage~~ ✅
 
-The package currently has **zero tests**. Add at minimum:
+Implemented — 50 tests across 3 suites:
 
-- Unit tests for `utils.ts` helpers (pure functions)
-- Integration test that scaffolds into a temp directory and verifies the output structure
-- Snapshot tests for generated `package.json` / config files
+- **utils.test.ts** (24 tests) — `toPackageName`, `toTitle`, `removeMarkedSection`, file helpers, `getDestDir`
+- **spinner.test.ts** (6 tests) — `createSpinner` animation, `succeed`, `fail`, `stop`
+- **scaffold.test.ts** (20 tests) — full integration: token replacement, feature removal, `.env.local`, tsconfig cleanup, Docker/Husky removal, rollback, package.json snapshot

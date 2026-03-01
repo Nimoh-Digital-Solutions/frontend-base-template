@@ -55,6 +55,23 @@ export async function scaffold(opts: ScaffoldOptions): Promise<void> {
     throw new Error(`Directory "${path.basename(destDir)}" already exists.`);
   }
 
+  try {
+    await scaffoldInner(opts);
+  } catch (err) {
+    // Rollback: remove the partially-created directory so users don't end up
+    // with a broken project they need to clean up manually.
+    if (exists(destDir)) {
+      logStep('Rolling back — removing partially-created directory');
+      safeRmDir(destDir);
+      logOk('Rollback complete');
+    }
+    throw err;
+  }
+}
+
+async function scaffoldInner(opts: ScaffoldOptions): Promise<void> {
+  const { appName, description, destDir, enableTailwind, enablePwa, enableDocker, enableHusky } = opts;
+
   // 1. Clone template
   await cloneTemplate(destDir);
 
