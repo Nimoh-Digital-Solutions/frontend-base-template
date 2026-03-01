@@ -1,19 +1,20 @@
 import path from 'path';
 import {
-  exists,
+  commandExists,
   exec,
-  logStep,
-  logOk,
+  exists,
   logInfo,
-  readText,
-  writeText,
+  logOk,
+  logStep,
   readJson,
-  writeJson,
-  safeUnlink,
-  safeRmDir,
+  readText,
   removeMarkedSection,
+  safeRmDir,
+  safeUnlink,
   toPackageName,
   toTitle,
+  writeJson,
+  writeText,
 } from './utils.js';
 
 const TEMPLATE_REPO = 'https://github.com/Nimoh-Digital-Solutions/frontend-base-template.git';
@@ -104,12 +105,24 @@ export async function scaffold(opts: ScaffoldOptions): Promise<void> {
 
   // 7. Remove template-only docs that are not relevant to a scaffolded app
   cleanupTemplateDocs(destDir);
+
+  // 8. Initialise a fresh git repo + initial commit
+  initGitRepo(destDir, appName);
 }
 
 // ─── Clone ───────────────────────────────────────────────────────────────────
 
 async function cloneTemplate(destDir: string): Promise<void> {
   logStep(`Cloning template into ${path.basename(destDir)}`);
+
+  // Pre-flight: verify git is available
+  if (!commandExists('git')) {
+    throw new Error(
+      'git is not installed or not on PATH.\n' +
+      '  Install git: https://git-scm.com/downloads\n' +
+      '  Then re-run create-tast-app.'
+    );
+  }
 
   const result = exec(
     `git clone --depth 1 ${TEMPLATE_REPO} "${path.basename(destDir)}"`,
@@ -307,6 +320,18 @@ function removeDocker(destDir: string): void {
 
   for (const f of files) {
     if (safeUnlink(path.join(destDir, f))) deleted++;
+  }
+
+  // Remove nginx/ directory (contains security_headers.conf etc.)
+  if (safeRmDir(path.join(destDir, 'nginx'))) {
+    deleted++;
+    logInfo('nginx/ — removed');
+  }
+
+  // Remove Makefile (Docker-specific make targets)
+  if (safeUnlink(path.join(destDir, 'Makefile'))) {
+    deleted++;
+    logInfo('Makefile — removed');
   }
 
   // README — remove Docker sections
@@ -951,6 +976,46 @@ function cleanupTemplateDocs(destDir: string): void {
     }
   }
   if (removed === 0) logInfo('No template docs found to remove');
+}
+
+// ─── Git init ────────────────────────────────────────────────────────────────
+
+/**
+ * Initialise a fresh git repo and make an initial commit so the user starts
+ * with a clean working tree.  Fails silently if git is unavailable (the
+ * scaffold is still perfectly usable without VCS).
+ */
+function initGitRepo(destDir: string, appName: string): void {
+  logStep('Initialising git repository');
+
+  if (!commandExists('git')) {
+    logInfo('git not found — skipping repository initialisation');
+    return;
+  }
+
+  const gitInit = exec('git init', destDir);
+  if (!gitInit.success) {
+    logInfo('git init failed — skipping repository initialisation');
+    return;
+  }
+  logOk('git init');
+
+  const gitAdd = exec('git add -A', destDir);
+  if (!gitAdd.success) {
+    logInfo('git add failed — skipping initial commit');
+    return;
+  }
+
+  const msg = `Initial commit from create-tast-app (${appName})`;
+  const gitCommit = exec(
+    `git commit -m "${msg}" --no-verify`,
+    destDir,
+  );
+  if (gitCommit.success) {
+    logOk('Initial commit created');
+  } else {
+    logInfo('Initial commit skipped (git commit failed)');
+  }
 }
 
 // ─── Shared helpers ──────────────────────────────────────────────────────────

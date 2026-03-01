@@ -43,25 +43,25 @@ The "Next steps" banner unconditionally prints Docker / NPM_TOKEN guidance even 
 
 ## High-Value Features
 
-### 5. `git init` + initial commit after scaffold
+### 5. ~~`git init` + initial commit after scaffold~~ ✅
 
-Currently the scaffolded directory has **no `.git`** — the cloned history is stripped but no fresh repo is initialised.
+Implemented — `initGitRepo()` runs `git init` + `git add -A` + `git commit` after scaffolding. Fails gracefully if git is unavailable.
 
-### 6. `--yes` / `-y` flag for non-interactive mode
+### 6. ~~`--yes` / `-y` flag for non-interactive mode~~ ✅
 
-Accept all defaults without prompting. Essential for CI pipelines and scripting.
+Implemented — accepts `--yes` or `-y` to skip all prompts and use sensible defaults (no Tailwind, PWA/Docker/Husky enabled, auto-detected PM).
 
-### 7. Remove `nginx/` directory when Docker is disabled
+### 7. ~~Remove `nginx/` directory when Docker is disabled~~ ✅
 
-`removeDocker()` deletes `nginx.conf` at root but misses the `nginx/` directory (e.g. `nginx/security_headers.conf`).
+Implemented — `removeDocker()` now also removes the `nginx/` directory and `Makefile`.
 
-### 8. Add `"engines"` field to package.json
+### 8. ~~Add `"engines"` field to package.json~~ ✅
 
-Declare `"engines": { "node": ">=18" }` — the package targets Node 18+ but doesn't enforce it.
+Implemented — `"engines": { "node": ">=18" }` added to package.json.
 
-### 9. Check `git` availability before clone
+### 9. ~~Check `git` availability before clone~~ ✅
 
-If `git` is not installed, the clone error is opaque. Add a friendly check with a clear message.
+Implemented — `cloneTemplate()` checks `commandExists('git')` before attempting clone and throws a friendly error with install link.
 
 ---
 

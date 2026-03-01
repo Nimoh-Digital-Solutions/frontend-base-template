@@ -29,9 +29,40 @@ async function main(): Promise<void> {
   printBanner();
   abortIfInsideWorkspace();
 
-  // Allow app name to be passed as the first argument:
-  //   npx create-tast-app my-app
-  const argName = process.argv[2]?.trim();
+  // Parse CLI flags
+  const args = process.argv.slice(2);
+  const yesFlag = args.includes('--yes') || args.includes('-y');
+  // First positional arg (not a flag) is the app name
+  const argName = args.find(a => !a.startsWith('-'))?.trim();
+
+  // Non-interactive mode: use sensible defaults and skip all prompts
+  if (yesFlag) {
+    const appName = toPackageName(argName ?? 'my-tast-app');
+    const destDir = getDestDir(appName);
+    const pm = detectDefaultPm();
+
+    console.log('');
+    logStep(`Creating "${appName}" (non-interactive) in ${path.relative(process.cwd(), path.dirname(destDir))}`);
+
+    try {
+      await scaffold({
+        appName,
+        description: '',
+        destDir,
+        enableTailwind: false,
+        enablePwa: true,
+        enableDocker: true,
+        enableHusky: true,
+      });
+    } catch (err) {
+      logError(err instanceof Error ? err.message : String(err));
+      process.exit(1);
+    }
+
+    const ok = await install(destDir, pm);
+    printNextSteps(appName, pm, ok, /* enableDocker */ true);
+    return;
+  }
 
   const answers = await prompts<keyof Answers>(
     [
@@ -252,6 +283,16 @@ function buildPmChoices(): Array<{ title: string; value: PackageManager }> {
     ...detected.map(p => ({ ...p, title: `${p.title} ✓` })),
     ...undetected,
   ];
+}
+
+/**
+ * Auto-detect the best available package manager for `--yes` mode.
+ * Preference order: yarn → pnpm → npm (npm is always available with Node).
+ */
+function detectDefaultPm(): PackageManager {
+  if (commandExists('yarn')) return 'yarn';
+  if (commandExists('pnpm')) return 'pnpm';
+  return 'npm';
 }
 
 function printNextSteps(appName: string, pm: PackageManager, installed: boolean, enableDocker: boolean): void {
