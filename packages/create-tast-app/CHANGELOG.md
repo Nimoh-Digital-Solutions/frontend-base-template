@@ -1,5 +1,16 @@
 # @nimoh-digital-solutions/create-tast-app
 
+## 1.2.0
+
+### Minor Changes
+
+- feat: implement high-value features 5-9
+  - **git init + initial commit** — scaffolded projects now start with a clean git repo and initial commit
+  - **`--yes` / `-y` flag** — non-interactive mode that accepts all defaults, useful for CI/scripting
+  - **Remove `nginx/` directory** — `removeDocker()` now also cleans up the `nginx/` dir and `Makefile`
+  - **`engines` field** — declares `"node": ">=18"` in package.json
+  - **Git availability check** — friendly error with install link if `git` is not on PATH
+
 ## 1.1.16
 
 ### Patch Changes
