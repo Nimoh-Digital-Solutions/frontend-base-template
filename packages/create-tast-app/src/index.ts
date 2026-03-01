@@ -177,12 +177,12 @@ async function main(): Promise<void> {
     if (!ok) {
       // Scaffold succeeded — only the install step was skipped/failed.
       // Exit 0 so the calling shell doesn't treat a ready project as an error.
-      printNextSteps(appName, pm, /* installed */ false);
+      printNextSteps(appName, pm, /* installed */ false, answers.enableDocker ?? true);
       process.exit(0);
     }
   }
 
-  printNextSteps(appName, pm, answers.installDeps ?? true);
+  printNextSteps(appName, pm, answers.installDeps ?? true, answers.enableDocker ?? true);
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -254,7 +254,7 @@ function buildPmChoices(): Array<{ title: string; value: PackageManager }> {
   ];
 }
 
-function printNextSteps(appName: string, pm: PackageManager, installed: boolean): void {
+function printNextSteps(appName: string, pm: PackageManager, installed: boolean, enableDocker: boolean): void {
   console.log('');
   console.log('  ✅  Your project is ready!\n');
   console.log('  Next steps:\n');
@@ -263,9 +263,11 @@ function printNextSteps(appName: string, pm: PackageManager, installed: boolean)
     console.log(`    ${pm} install`);
   }
   console.log(`    ${devCommand(pm)}`);
-  console.log('');
-  console.log('  For Docker (make docker-dev / make docker-prod):');
-  console.log(`    Add NPM_TOKEN=<your-token> to your .env file`);
+  if (enableDocker) {
+    console.log('');
+    console.log('  For Docker (make docker-dev / make docker-prod):');
+    console.log(`    Add NPM_TOKEN=<your-token> to your .env file`);
+  }
   console.log('');
   console.log('  Docs: https://github.com/Nimoh-Digital-Solutions/frontend-base-template');
   console.log('');

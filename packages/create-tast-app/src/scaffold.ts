@@ -71,9 +71,10 @@ export async function scaffold(opts: ScaffoldOptions): Promise<void> {
   safeRmDir(path.join(destDir, 'packages'));
   safeRmDir(path.join(destDir, '.changeset'));
 
-  // 3. Token replace
+  // 3. Token replace + cleanup monorepo references
   logStep('Customising template');
   replaceTokens(destDir, appName, description);
+  cleanTsconfigWorkspacePaths(destDir);
   injectBrandColors(destDir, opts);
 
   // 4. Optional feature removal
@@ -258,6 +259,46 @@ function replaceTokens(destDir: string, appName: string, description: string): v
   }
 }
 
+// ─── tsconfig.json — strip workspace-specific paths ──────────────────────────
+
+/**
+ * Remove `@nimoh-digital-solutions/*` path entries from `tsconfig.json`.
+ *
+ * The monorepo template maps `@nimoh-digital-solutions/tast-utils` etc. to
+ * `../packages/<pkg>/src/index.ts` so TypeScript resolves to source in the
+ * workspace. In a standalone scaffolded app, `packages/` doesn't exist — the
+ * packages come from the npm registry and resolve via `node_modules/`.
+ * Leaving the stale paths causes TypeScript errors.
+ */
+function cleanTsconfigWorkspacePaths(destDir: string): void {
+  const tsconfigPath = path.join(destDir, 'tsconfig.json');
+  if (!exists(tsconfigPath)) return;
+
+  let content = readText(tsconfigPath);
+
+  // Remove lines that map @nimoh-digital-solutions/* to ../packages/*
+  // Matches both the key and key/* wildcard forms, with or without trailing comma.
+  content = content.replace(
+    /^\s*"@nimoh-digital-solutions\/[^"]*":\s*\[[^\]]*\],?\s*\n/gm,
+    ''
+  );
+
+  // Remove the "Workspace package resolution" comment if present
+  content = content.replace(
+    /^\s*\/\/\s*Workspace package resolution[^\n]*\n/gm,
+    ''
+  );
+
+  // Clean up trailing commas before closing brace of "paths" block
+  content = content.replace(/,(\s*\n\s*\})/g, '$1');
+
+  // Clean up double blank lines
+  content = content.replace(/\n{3,}/g, '\n\n');
+
+  writeText(tsconfigPath, content);
+  logOk('tsconfig.json — removed workspace package path mappings');
+}
+
 // ─── Docker removal ──────────────────────────────────────────────────────────
 
 function removeDocker(destDir: string): void {
@@ -348,6 +389,12 @@ function removePwa(destDir: string): void {
     writeText(readmePath, readme);
     logInfo('README.md — removed PWA sections');
   }
+
+  // main.tsx — remove initPWA import and call
+  removePwaFromMainTsx(destDir);
+
+  // App.tsx — remove PwaUpdateBanner import and render
+  removePwaFromAppTsx(destDir);
 
   logOk(`Deleted ${deleted} PWA file(s)`);
 }
@@ -458,6 +505,61 @@ function removePwaFromIndexHtml(destDir: string): void {
 
   writeText(indexPath, html);
   logInfo('index.html — removed PWA meta tags and manifest link');
+}
+
+/**
+ * Remove `initPWA` import and call from `src/main.tsx`.
+ *
+ * When PWA is disabled, `src/sw/pwa.ts` is deleted. If `main.tsx` still
+ * imports `initPWA` from that module the build breaks with a missing-module
+ * error.
+ */
+function removePwaFromMainTsx(destDir: string): void {
+  const mainPath = path.join(destDir, 'src', 'main.tsx');
+  if (!exists(mainPath)) return;
+
+  let content = readText(mainPath);
+
+  // Remove the import line:  import { initPWA } from './sw/pwa';
+  content = content.replace(/^import\s*\{[^}]*initPWA[^}]*\}\s*from\s*['"][^'"]*pwa['"];\s*\n/gm, '');
+
+  // Remove the initPWA() call (with optional surrounding blank lines)
+  content = content.replace(/^\s*initPWA\(\);\s*\n/gm, '');
+
+  // Clean up double blank lines
+  content = content.replace(/\n{3,}/g, '\n\n');
+
+  writeText(mainPath, content);
+  logInfo('src/main.tsx — removed initPWA import and call');
+}
+
+/**
+ * Remove `PwaUpdateBanner` import and JSX render from `src/App.tsx`.
+ *
+ * When PWA is disabled, the component still works (it's in @components) but
+ * renders nothing useful — cleaner to strip it so new developers aren't
+ * confused by a dormant PWA banner.
+ */
+function removePwaFromAppTsx(destDir: string): void {
+  const appPath = path.join(destDir, 'src', 'App.tsx');
+  if (!exists(appPath)) return;
+
+  let content = readText(appPath);
+
+  // Remove PwaUpdateBanner from a destructured import like:
+  //   import { ErrorBoundary, PwaUpdateBanner } from '@components';
+  // Handle it being first, middle, or last in the list.
+  content = content.replace(/,\s*PwaUpdateBanner\b/g, '');
+  content = content.replace(/\bPwaUpdateBanner\s*,\s*/g, '');
+
+  // Remove <PwaUpdateBanner /> JSX line
+  content = content.replace(/^\s*<PwaUpdateBanner\s*\/?>.*\n/gm, '');
+
+  // Clean up double blank lines
+  content = content.replace(/\n{3,}/g, '\n\n');
+
+  writeText(appPath, content);
+  logInfo('src/App.tsx — removed PwaUpdateBanner');
 }
 
 // ─── Husky removal ────────────────────────────────────────────────────────────
@@ -732,43 +834,9 @@ function rgbToHsl(r: number, g: number, b: number): { h: number; s: number; l: n
   return { h: h * 360, s: s * 100, l: l * 100 };
 }
 
-function hslToHex(h: number, s: number, l: number): string {
-  h /= 360; s /= 100; l /= 100;
-  const hue2rgb = (p: number, q: number, t: number): number => {
-    if (t < 0) t += 1; if (t > 1) t -= 1;
-    if (t < 1 / 6) return p + (q - p) * 6 * t;
-    if (t < 1 / 2) return q;
-    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-    return p;
-  };
-  let r, g, b;
-  if (s === 0) { r = g = b = l; } else {
-    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-    const p = 2 * l - q;
-    r = hue2rgb(p, q, h + 1 / 3);
-    g = hue2rgb(p, q, h);
-    b = hue2rgb(p, q, h - 1 / 3);
-  }
-  return '#' + [r, g, b].map(x => Math.round(x * 255).toString(16).padStart(2, '0')).join('');
-}
-
 function normHex(hex: string): string {
   const h = hex.replace('#', '');
   return '#' + (h.length === 3 ? h.split('').map(c => c + c).join('') : h).toLowerCase();
-}
-
-/** Derive a 4-stop palette from a single base hex:
- *  100 = very light tint, 400 = slightly lighter, 500 = base, 900 = deep shade */
-function derivePalette(hex: string): Record<'100' | '400' | '500' | '900', string> {
-  const base = normHex(hex);
-  const { r, g, b } = hexToRgb(base);
-  const { h, s, l } = rgbToHsl(r, g, b);
-  return {
-    '100': hslToHex(h, Math.max(s - 15, 8), Math.min(l + 42, 93)),
-    '400': hslToHex(h, s, Math.min(l + 12, 82)),
-    '500': base,
-    '900': hslToHex(h, Math.min(s + 12, 100), Math.max(l - 32, 10)),
-  };
 }
 
 // ── Brand colour injection ────────────────────────────────────────────────────
