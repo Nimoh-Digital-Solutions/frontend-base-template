@@ -9,6 +9,23 @@ import { env } from './env';
  *
  * Add new env vars to env.ts first, then surface them here.
  */
+
+/**
+ * Converts an http(s) API URL to a ws(s) WebSocket URL.
+ * Returns '' if the input is not a valid URL.
+ *
+ * Example: deriveWsUrl('https://api.example.com') → 'wss://api.example.com'
+ */
+function deriveWsUrl(apiUrl: string): string {
+  try {
+    const url = new URL(apiUrl);
+    url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+    return url.toString().replace(/\/$/, '');
+  } catch {
+    return '';
+  }
+}
+
 export const APP_CONFIG = {
   /** Base URL for API requests (validated as a URL in env.ts when present). */
   apiUrl: env.VITE_API_URL ?? '',
@@ -16,8 +33,12 @@ export const APP_CONFIG = {
   /** Application display name — used in page titles, metadata, and PWA manifest. */
   appName: env.VITE_APP_TITLE ?? 'React Starter Kit',
 
-  /** WebSocket base URL. Derived from apiUrl when not set explicitly. */
-  wsUrl: env.VITE_WS_URL ?? '',
+  /**
+   * WebSocket base URL.
+   * Explicit VITE_WS_URL takes precedence; otherwise derived from VITE_API_URL
+   * by swapping http→ws / https→wss. Falls back to '' when neither is set.
+   */
+  wsUrl: env.VITE_WS_URL ?? (env.VITE_API_URL ? deriveWsUrl(env.VITE_API_URL) : ''),
 
   /**
    * Feature flags (default off).

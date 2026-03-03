@@ -53,10 +53,14 @@ const envSchema = z.object({
   /**
    * WebSocket base URL for real-time features.
    * When omitted, derived automatically from VITE_API_URL (http→ws, https→wss).
+   * Note: Zod's .url() rejects ws:// and wss:// schemes — use .refine() instead.
    */
   VITE_WS_URL: z
     .string()
-    .url('VITE_WS_URL must be a valid WebSocket URL')
+    .refine(
+      val => /^wss?:\/\/.+/.test(val),
+      { message: 'VITE_WS_URL must be a valid WebSocket URL (ws:// or wss://)' },
+    )
     .optional(),
 
   // -- Feature flags --------------------------------------------------------
