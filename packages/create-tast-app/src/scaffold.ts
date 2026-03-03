@@ -104,6 +104,12 @@ async function scaffoldInner(opts: ScaffoldOptions): Promise<void> {
   if (!enableDocker) {
     logStep('Removing Docker configuration');
     removeDocker(destDir);
+  } else {
+    // Patch the Dockerfile for a standalone (non-monorepo) project.
+    // The template Dockerfile has a `COPY packages/ packages/` line needed for
+    // the monorepo workspace install. Scaffolded projects don't have a packages/
+    // directory and would fail the Docker build without this patch.
+    patchDockerfileForScaffold(destDir);
   }
 
   if (!enablePwa) {
@@ -332,6 +338,37 @@ function cleanTsconfigWorkspacePaths(destDir: string): void {
 
   writeText(tsconfigPath, content);
   logOk('tsconfig.json — removed workspace package path mappings');
+}
+
+// ─── Docker patch for standalone (non-monorepo) projects ────────────────────
+
+/**
+ * Removes the `COPY packages/ packages/` line from the Dockerfile.
+ *
+ * The template is a workspace monorepo and Yarn needs every package.json from
+ * `packages/` to resolve `workspace:` protocol entries in the lockfile.
+ * Scaffolded projects are NOT monorepos — they install everything from npm, so
+ * `packages/` doesn’t exist and the COPY would fail the production Docker build.
+ */
+function patchDockerfileForScaffold(destDir: string): void {
+  const dockerfilePath = path.join(destDir, 'Dockerfile');
+  if (!exists(dockerfilePath)) return;
+
+  let content = readText(dockerfilePath);
+
+  // Remove the `COPY packages/ packages/` line.
+  content = content.replace(/^COPY packages\/ packages\/\n?/m, '');
+
+  // Trim the now-inaccurate part of the layer-caching comment that mentions
+  // workspace package.json files (no longer relevant in a standalone project).
+  content = content.replace(
+    /# Root manifests \+ lockfile \+ every workspace package\.json are needed so Yarn\n# can resolve the workspace: protocol entries in the lockfile\.\n/,
+    '# Root manifests and lockfile are copied first so `yarn install` is only\n# re-run when dependencies change, not on every source file change.\n',
+  );
+
+  content = content.replace(/\n{3,}/g, '\n\n');
+  writeText(dockerfilePath, content);
+  logOk('Dockerfile \u2014 removed monorepo workspace COPY (standalone project)');
 }
 
 // ─── Docker removal ──────────────────────────────────────────────────────────

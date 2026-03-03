@@ -56,6 +56,12 @@ services:
     tmpfs:
       - /var/cache/nginx
       - /var/run
+      # nginx-unprivileged's entrypoint runs envsubst and writes processed
+      # config files to /etc/nginx/conf.d/ at start-up. Without this tmpfs
+      # mount the write fails on a read-only filesystem.
+      - /etc/nginx/conf.d
+      # Some nginx modules (e.g. gzip temp files) write to /tmp.
+      - /tmp
     security_opt:
       - no-new-privileges:true
 

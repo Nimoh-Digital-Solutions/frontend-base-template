@@ -1,5 +1,14 @@
 # @nimoh-digital-solutions/create-tast-app
 
+## 1.5.1
+
+### Patch Changes
+
+- Fix three production Docker build blockers identified during BE↔FE integration
+  - **Fix Docker build fail in scaffolded projects** — the Dockerfile contained `COPY packages/ packages/` which only applies to this monorepo. Scaffolded standalone projects don't have a `packages/` directory, causing the production image build to fail immediately. `scaffold.ts` now strips that line (and updates the surrounding comment) when Docker is kept in a scaffolded project.
+  - **Fix `read_only: true` + envsubst conflict** — `app-prod` in `docker-compose.yml` had `read_only: true` but nginx-unprivileged's entrypoint writes envsubst-processed config files to `/etc/nginx/conf.d/` at startup, which fails on a read-only filesystem. Added `/etc/nginx/conf.d` and `/tmp` to the `tmpfs` list so envsubst can write while the rest of the filesystem stays immutable.
+  - **Fix HSTS localhost cache poisoning** — `security_headers.conf` sent `Strict-Transport-Security` on all responses including `localhost:8080`. This poisons the browser's HSTS cache and forces all subsequent localhost traffic to HTTPS, breaking local development. Added a `map $host $hsts_header` directive in `nginx.conf` that returns an empty string for `localhost` (suppressing the header) and the full HSTS value for production hosts.
+
 ## 1.5.0
 
 ### Minor Changes
