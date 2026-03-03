@@ -162,6 +162,39 @@ export default defineConfig(({ mode }) => {
           'src/sw/',
           // SCSS module proxies have no testable JS logic
           '**/*.module.scss',
+          // Barrel / re-export stubs: V8 cannot instrument `export { x } from 'pkg'`
+          // statements — they pass all tests but always show 0 % in coverage.
+          'src/hooks/index.ts',
+          'src/hooks/useTheme.ts',
+          'src/hooks/useToast.ts',
+          'src/hooks/useToggle.ts',
+          'src/hooks/useWindowSize.ts',
+          'src/hooks/useClickOutside.ts',
+          'src/hooks/useDebounce.ts',
+          'src/hooks/useLocalStorage.ts',
+          'src/hooks/useMediaQuery.ts',
+          'src/hooks/usePrevious.ts',
+          'src/services/index.ts',
+          'src/contexts/ThemeContext.tsx',
+          'src/contexts/index.ts',
+          // UI component re-export stubs + barrel index files
+          'src/components/**/**/index.ts',
+          'src/components/ui/Spinner/Spinner.tsx',
+          'src/components/ui/Textarea/Textarea.tsx',
+          'src/components/ui/Toast/Toast.tsx',
+          'src/components/ui/Badge/Badge.tsx',
+          'src/components/ui/Button/Button.tsx',
+          'src/components/ui/Button/Button.interface.ts',
+          'src/components/ui/Card/Card.tsx',
+          'src/components/ui/EmptyState/EmptyState.tsx',
+          'src/components/ui/Input/Input.tsx',
+          'src/components/ui/Modal/Modal.tsx',
+          'src/components/ui/Pagination/Pagination.tsx',
+          'src/components/ui/Skeleton/Skeleton.tsx',
+          'src/components/common/ErrorBoundary/ErrorBoundary.tsx',
+          // Monorepo packages — each package has its own vitest config and
+          // coverage thresholds; they must not pollute the app-level report.
+          'packages/**',
         ],
         thresholds: {
           lines: 80,

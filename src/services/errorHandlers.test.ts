@@ -1,10 +1,12 @@
 import { useAppStore } from '@data/useAppStore';
+import type { HttpRequestContext } from '@nimoh-digital-solutions/tast-utils';
 import { HttpError } from '@nimoh-digital-solutions/tast-utils';
 import { beforeEach,describe, expect, it, vi } from 'vitest';
 
 import {
   handleHttpError,
   notificationErrorInterceptor,
+  stripClientOnlyHeaders,
   SUPPRESS_TOAST_HEADER,
 } from './errorHandlers';
 
@@ -122,6 +124,19 @@ describe('handleHttpError', () => {
     expect(result.message).toContain('418');
     expect(result.variant).toBe('error');
   });
+
+  it('returns DRF field errors for 400 with standard DRF validation format', () => {
+    // Body is NOT a ProblemDetail, but IS a DRF { field: ["msg"] } structure
+    const error = httpError(400, {
+      email: ['This field is required.'],
+      username: ['A user with that username already exists.'],
+    });
+    const result = handleHttpError(error);
+    expect(result.fieldErrors.length).toBeGreaterThan(0);
+    expect(result.suppressToast).toBe(true);
+    expect(result.variant).toBe('error');
+    expect(result.message).toBe('Please correct the errors below');
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -187,5 +202,36 @@ describe('notificationErrorInterceptor', () => {
     const context = { url: '/api/test', method: 'DELETE', headers: {} };
 
     expect(() => notificationErrorInterceptor(error, context)).toThrow(HttpError);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// stripClientOnlyHeaders
+// ---------------------------------------------------------------------------
+
+describe('stripClientOnlyHeaders', () => {
+  const baseContext: HttpRequestContext = { url: '/api/test', method: 'GET', headers: {} };
+
+  it('removes X-Suppress-Toast from headers when present', () => {
+    const context = {
+      ...baseContext,
+      headers: { [SUPPRESS_TOAST_HEADER]: 'true', 'Content-Type': 'application/json' },
+    };
+
+    const result = stripClientOnlyHeaders(context) as HttpRequestContext;
+
+    expect(result.headers).not.toHaveProperty(SUPPRESS_TOAST_HEADER);
+    expect(result.headers).toHaveProperty('Content-Type', 'application/json');
+  });
+
+  it('returns the context unchanged when X-Suppress-Toast is absent', () => {
+    const context = {
+      ...baseContext,
+      headers: { 'Content-Type': 'application/json' },
+    };
+
+    const result = stripClientOnlyHeaders(context) as HttpRequestContext;
+
+    expect(result).toStrictEqual(context);
   });
 });
