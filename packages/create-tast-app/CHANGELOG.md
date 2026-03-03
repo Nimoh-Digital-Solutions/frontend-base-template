@@ -1,5 +1,23 @@
 # @nimoh-digital-solutions/create-tast-app
 
+## 1.5.0
+
+### Minor Changes
+
+- Pre-wire backend integration in scaffolded projects
+
+  **Bug fixes**
+  - Fix `VITE_WS_URL` Zod validator — `z.string().url()` rejected `ws://` and `wss://` schemes, causing a startup crash whenever a WebSocket URL was configured. Replaced with a `.refine()` regex check.
+  - Fix `APP_CONFIG.wsUrl` — the documented auto-derivation from `VITE_API_URL` (http→ws, https→wss) was not implemented. Added `deriveWsUrl()` so only one env var is required.
+
+  **New features**
+  - Add Vite dev-server proxy for `/api` and `/ws` — eliminates CORS entirely during `yarn dev` when `VITE_API_URL` is set. No backend CORS config needed in development.
+  - Activate nginx reverse-proxy blocks for `/api/` and `/ws/` (previously commented out) and parameterise the backend URL via `${BACKEND_URL}` envsubst so it is runtime-configurable without rebuilding the image.
+  - Add `BACKEND_URL` to Dockerfile and `NGINX_ENVSUBST_FILTER` so the default (`http://backend:8000`) can be overridden at container start-up.
+  - Update `docker-compose.yml` with a `BACKEND_URL` env var on `app-prod` and a `nimoh_base`-aligned backend service template (Redis, Celery-ready, correct env vars).
+  - Pre-fill `.env.example` with `VITE_API_URL=http://localhost:8000` so scaffolded projects work out of the box against a local backend.
+  - Add `make be-health` (smoke-test the backend health endpoint) and `make docker-stack` (start the full prod stack in one command) to the Makefile.
+
 ## 1.4.0
 
 ### Minor Changes
