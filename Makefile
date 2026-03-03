@@ -79,6 +79,7 @@ build-analyze: ## Build with bundle analyser → dist/stats.html
 # ─── Docker ───────────────────────────────────────────────────────────────────
 
 docker-dev: ## Start dev server in Docker with hot-reload (localhost:3000)
+	@docker rm -f react-starter-kit-dev 2>/dev/null || true
 	$(DC) up app
 
 docker-prod: ## Build & serve production image via nginx (localhost:8080)
