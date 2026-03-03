@@ -99,7 +99,14 @@ docker-shell: ## Open a shell inside the running dev container
 
 docker-build-image: ## Build the production Docker image without starting it
 	$(DC) build app-prod
+docker-stack: ## Build & start the full production stack: FE + backend + Redis (requires backend service uncommented in docker-compose.yml)
+	@docker rm -f react-starter-kit-prod 2>/dev/null || true
+	$(DC) up --build app-prod backend redis
 
+be-health: ## Ping the backend health endpoint and print the result
+	@curl -sf http://localhost:8000/api/v1/health/ \
+	  && echo "✓ Backend healthy" \
+	  || echo "✗ Backend not reachable — is it running on port 8000?"
 # ─── Code quality ─────────────────────────────────────────────────────────────
 
 type-check: ## Run TypeScript type-check (no emit)

@@ -114,6 +114,28 @@ export default defineConfig(({ mode }) => {
 
       // Don't try to open a browser when running in Docker
       open: !isDocker,
+
+      // Proxy API and WebSocket requests to the backend so the browser never
+      // makes a cross-origin call during local development. CORS headers on the
+      // backend are therefore not required in the dev environment.
+      // Only active when VITE_API_URL is set — safe to omit for frontends with
+      // no backend.
+      ...(env.VITE_API_URL
+        ? {
+            proxy: {
+              '/api': {
+                target: env.VITE_API_URL,
+                changeOrigin: true,
+                secure: false,
+              },
+              '/ws': {
+                target: env.VITE_API_URL,
+                ws: true,
+                changeOrigin: true,
+              },
+            },
+          }
+        : {}),
     },
 
     build: {

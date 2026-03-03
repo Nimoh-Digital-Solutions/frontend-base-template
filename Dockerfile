@@ -47,14 +47,15 @@ COPY nginx/security_headers.conf /etc/nginx/templates/security_headers.conf.temp
 # Copy built application from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Default CSP connect-src domain (override at runtime via -e CSP_CONNECT_SRC=https://api.myapp.com)
-ENV CSP_CONNECT_SRC="https://api.example.com"
+# Default runtime env vars (override at container start-up via -e or docker-compose environment:)
+ENV CSP_CONNECT_SRC="'self'"
+ENV BACKEND_URL="http://backend:8000"
 
 # Tell nginx-unprivileged's entrypoint which env vars to substitute.
-# Only CSP_CONNECT_SRC is replaced; other ${...} tokens in nginx config are left untouched.
+# Both CSP_CONNECT_SRC and BACKEND_URL are replaced; other ${...} tokens are left untouched.
 ENV NGINX_ENVSUBST_TEMPLATE_DIR=/etc/nginx/templates
 ENV NGINX_ENVSUBST_OUTPUT_DIR=/etc/nginx/conf.d
-ENV NGINX_ENVSUBST_FILTER=CSP_CONNECT_SRC
+ENV NGINX_ENVSUBST_FILTER="CSP_CONNECT_SRC BACKEND_URL"
 
 # Healthcheck endpoint
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
