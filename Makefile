@@ -80,10 +80,12 @@ build-analyze: ## Build with bundle analyser → dist/stats.html
 
 docker-dev: ## Start dev server in Docker with hot-reload (localhost:3000)
 	@docker rm -f react-starter-kit-dev 2>/dev/null || true
-	$(DC) up app
+	$(DC) up -d app
+	@echo "Dev server running at http://localhost:3000 — use 'make docker-logs' to tail logs"
 
 docker-prod: ## Build & serve production image via nginx (localhost:8080)
-	$(DC) up --build app-prod
+	$(DC) up --build -d app-prod
+	@echo "Production build running at http://localhost:8080 — use 'make docker-logs' to tail logs"
 
 docker-stop: ## Stop all running containers for this project
 	$(DC) down

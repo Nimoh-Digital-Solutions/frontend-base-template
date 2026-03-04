@@ -1,5 +1,13 @@
 # @nimoh-digital-solutions/create-tast-app
 
+## 1.5.2
+
+### Patch Changes
+
+- Change Tailwind CSS default from No to Yes
+
+  The interactive prompt, the `--yes` non-interactive path, and the `??` fallback all now default `enableTailwind` to `true`. Press Enter to accept Tailwind; explicitly choose No to skip it.
+
 ## 1.5.1
 
 ### Patch Changes
