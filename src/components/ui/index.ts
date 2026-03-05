@@ -6,6 +6,7 @@ export * from './EmptyState';
 export * from './Field';
 export * from './Input';
 export * from './Modal';
+export * from './PageLoader';
 export * from './Pagination';
 export * from './Skeleton';
 export * from './Spinner';

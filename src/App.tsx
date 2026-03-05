@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { I18nextProvider } from 'react-i18next';
 
-import { ErrorBoundary, PwaUpdateBanner } from '@components';
+import { ErrorBoundary, PageLoader, PwaUpdateBanner } from '@components';
 import { captureException } from '@configs/sentry';
 import { ThemeProvider } from '@contexts';
 import { useInitAuth } from '@features/auth';
@@ -30,11 +30,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   const { isLoading } = useInitAuth();
 
   if (isLoading) {
-    return (
-      <div className="app" aria-busy="true" aria-live="polite">
-        Loading…
-      </div>
-    );
+    return <PageLoader />;
   }
 
   return <>{children}</>;
@@ -44,7 +40,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <I18nextProvider i18n={i18n}>
-        <Suspense fallback={<div className="app" aria-busy="true">Loading…</div>}>
+        <Suspense fallback={<PageLoader />}>
           <ErrorBoundary onError={handleBoundaryError}>
             <ThemeProvider>
               <AuthGate>
