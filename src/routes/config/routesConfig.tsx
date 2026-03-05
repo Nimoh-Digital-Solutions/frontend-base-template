@@ -2,11 +2,10 @@ import { lazy, type ReactElement,Suspense } from 'react';
 import { RouteObject } from 'react-router-dom';
 
 import ProtectedRoute from '@components/common/ProtectedRoute/ProtectedRoute';
+import { PageLoader } from '@components/ui/PageLoader';
 import { AppLayout } from '@layouts';
 
 import { PATHS, routeMetadata } from './paths';
-
-import styles from './pageFallback.module.scss';
 
 // Re-export PATHS and routeMetadata so existing imports from '@routes' / './config' still work
 export { PATHS, routeMetadata };
@@ -35,15 +34,9 @@ const AuthRoutesWrapper = lazy(() =>
 
 const SettingsPage = lazy(() => import('@pages/SettingsPage/SettingsPage'));
 
-/**
- * Minimal loading state shown while a lazy page chunk is being fetched.
- * Replace with a proper <PageLoader /> component as the project grows.
- */
-const PageFallback = (): ReactElement => <div className={styles.fallback}>Loading…</div>;
-
 /** Convenience wrapper: lazy page inside Suspense. */
 const LazyPage = ({ component: Component }: { component: React.LazyExoticComponent<() => ReactElement> }): ReactElement => (
-  <Suspense fallback={<PageFallback />}>
+  <Suspense fallback={<PageLoader />}>
     <Component />
   </Suspense>
 );
@@ -51,7 +44,7 @@ const LazyPage = ({ component: Component }: { component: React.LazyExoticCompone
 /** Convenience wrapper: protected lazy page. */
 const ProtectedPage = ({ component: Component }: { component: React.LazyExoticComponent<() => ReactElement> }): ReactElement => (
   <ProtectedRoute>
-    <Suspense fallback={<PageFallback />}>
+    <Suspense fallback={<PageLoader />}>
       <Component />
     </Suspense>
   </ProtectedRoute>
@@ -65,7 +58,7 @@ export const routes: RouteObject[] = [
   // ---------------------------------------------------------------------------
   {
     element: (
-      <Suspense fallback={<PageFallback />}>
+      <Suspense fallback={<PageLoader />}>
         <AuthRoutesWrapper />
       </Suspense>
     ),
@@ -74,14 +67,14 @@ export const routes: RouteObject[] = [
         // AuthPage is a layout route that stays mounted for both /login and
         // /register, enabling the AuthSplitPanel layout-swap animation.
         element: (
-          <Suspense fallback={<PageFallback />}>
+          <Suspense fallback={<PageLoader />}>
             <AuthPage />
           </Suspense>
         ),
         children: [
-          { path: PATHS.LOGIN },
-          { path: PATHS.REGISTER },
-          { path: PATHS.FORGOT_PASSWORD },
+          { path: PATHS.LOGIN, element: null },
+          { path: PATHS.REGISTER, element: null },
+          { path: PATHS.FORGOT_PASSWORD, element: null },
         ],
       },
     ],
