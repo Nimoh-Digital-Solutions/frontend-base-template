@@ -83,9 +83,9 @@ export function LoginForm({ onSubmit, onToggle, isLoading = false, serverError }
   return (
     <div className={styles.root}>
       <div className={styles.header}>
-        <h1 className={styles.title}>{t('auth.welcomeBack', 'Welcome Back')}</h1>
+        <h1 className={styles.title}>{t('auth.pageTitle', 'Sign in')}</h1>
         <p className={styles.subtitle}>
-          {t('auth.pageSubtitle', 'Sign in to your account to continue.')}
+          {t('auth.welcomeBack', 'Welcome back — enter your credentials below.')}
         </p>
       </div>
 
