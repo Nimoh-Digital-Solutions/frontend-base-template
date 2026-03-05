@@ -1,3 +1,5 @@
+import { MemoryRouter } from 'react-router-dom';
+
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach,describe, expect, it, vi } from 'vitest';
@@ -5,15 +7,24 @@ import { beforeEach,describe, expect, it, vi } from 'vitest';
 import { axe } from '../../../../test/a11y.setup';
 import { LoginForm } from './LoginForm';
 
+const renderForm = (props: Parameters<typeof LoginForm>[0]) =>
+  render(
+    <MemoryRouter>
+      <LoginForm {...props} />
+    </MemoryRouter>,
+  );
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 
 describe('LoginForm', () => {
   const onSubmit = vi.fn();
+  const onToggle = vi.fn();
 
   beforeEach(() => {
     onSubmit.mockClear();
+    onToggle.mockClear();
   });
 
   // -----------------------------------------------------------------------
@@ -21,7 +32,7 @@ describe('LoginForm', () => {
   // -----------------------------------------------------------------------
 
   it('renders email/username and password fields with labels', () => {
-    render(<LoginForm onSubmit={onSubmit} />);
+    renderForm({ onSubmit, onToggle });
 
     expect(screen.getByLabelText(/email or username/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
@@ -29,9 +40,9 @@ describe('LoginForm', () => {
   });
 
   it('renders loading state on submit button', () => {
-    render(<LoginForm onSubmit={onSubmit} isLoading />);
+    renderForm({ onSubmit, onToggle, isLoading: true });
 
-    const button = screen.getByRole('button');
+    const button = screen.getByRole('button', { name: /signing in/i });
     // Button should indicate loading — either via text or aria attribute
     expect(
       button.textContent?.toLowerCase().includes('signing in') ||
@@ -41,13 +52,13 @@ describe('LoginForm', () => {
   });
 
   it('renders server error when provided', () => {
-    render(<LoginForm onSubmit={onSubmit} serverError="Invalid credentials" />);
+    renderForm({ onSubmit, onToggle, serverError: 'Invalid credentials' });
 
     expect(screen.getByRole('alert')).toHaveTextContent('Invalid credentials');
   });
 
   it('does not render server error when null', () => {
-    render(<LoginForm onSubmit={onSubmit} serverError={null} />);
+    renderForm({ onSubmit, onToggle, serverError: null });
 
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
@@ -58,7 +69,7 @@ describe('LoginForm', () => {
 
   it('shows required error when submitting empty form', async () => {
     const user = userEvent.setup();
-    render(<LoginForm onSubmit={onSubmit} />);
+    renderForm({ onSubmit, onToggle });
 
     await user.click(screen.getByRole('button', { name: /sign in/i }));
 
@@ -71,7 +82,7 @@ describe('LoginForm', () => {
 
   it('shows min-length error for short password', async () => {
     const user = userEvent.setup();
-    render(<LoginForm onSubmit={onSubmit} />);
+    renderForm({ onSubmit, onToggle });
 
     await user.type(screen.getByLabelText(/email or username/i), 'user@example.com');
     await user.type(screen.getByLabelText(/password/i), 'short');
@@ -90,7 +101,7 @@ describe('LoginForm', () => {
 
   it('calls onSubmit with valid data', async () => {
     const user = userEvent.setup();
-    render(<LoginForm onSubmit={onSubmit} />);
+    renderForm({ onSubmit, onToggle });
 
     await user.type(screen.getByLabelText(/email or username/i), 'user@example.com');
     await user.type(screen.getByLabelText(/password/i), 'password123');
@@ -108,16 +119,13 @@ describe('LoginForm', () => {
 
   it('does not call onSubmit when isLoading', async () => {
     const user = userEvent.setup();
-    render(<LoginForm onSubmit={onSubmit} isLoading />);
+    renderForm({ onSubmit, onToggle, isLoading: true });
 
     await user.type(screen.getByLabelText(/email or username/i), 'user@example.com');
     await user.type(screen.getByLabelText(/password/i), 'password123');
-    // Button should be disabled during loading
-    const button = screen.getByRole('button');
-    if (!button.hasAttribute('disabled')) {
-      // If not disabled, try clicking — but expect no submission while loading
-      await user.click(button);
-    }
+    // Submit button should be disabled during loading
+    const button = screen.getByRole('button', { name: /signing in/i });
+    expect(button).toBeDisabled();
 
     // Should not call onSubmit because loading blocks interaction
     expect(onSubmit).not.toHaveBeenCalled();
@@ -128,14 +136,12 @@ describe('LoginForm', () => {
   // -----------------------------------------------------------------------
 
   it('has no axe violations', async () => {
-    const { container } = render(<LoginForm onSubmit={onSubmit} />);
+    const { container } = renderForm({ onSubmit, onToggle });
     expect(await axe(container)).toHaveNoViolations();
   });
 
   it('has no axe violations with server error displayed', async () => {
-    const { container } = render(
-      <LoginForm onSubmit={onSubmit} serverError="Bad request" />,
-    );
+    const { container } = renderForm({ onSubmit, onToggle, serverError: 'Bad request' });
     expect(await axe(container)).toHaveNoViolations();
   });
 });

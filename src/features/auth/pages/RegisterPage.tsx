@@ -1,35 +1,38 @@
-import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
-import { PATHS } from '@routes/config/paths';
+import { useDocumentTitle } from '@hooks';
+import { PATHS, routeMetadata } from '@routes/config/paths';
 
-import styles from './LoginPage.module.scss';
+import { AuthBranding } from '../components/AuthBranding/AuthBranding';
+import { AuthSplitPanel } from '../components/AuthSplitPanel/AuthSplitPanel';
+import { RegisterForm } from '../components/RegisterForm/RegisterForm';
+import { authService } from '../services/auth.service';
+import type { RegisterPayload } from '../types/auth.types';
 
-/**
- * RegisterPage
- *
- * Route: /register
- *
- * Placeholder registration page. Replace with a full RegisterForm once
- * the registration flow is implemented for your project.
- */
 export function RegisterPage() {
-  const { t } = useTranslation();
+  useDocumentTitle(routeMetadata[PATHS.REGISTER].title);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (payload: RegisterPayload) => {
+    await authService.register(payload);
+    void navigate(PATHS.LOGIN, {
+      replace: true,
+      state: { registered: true },
+    });
+  };
+
+  const handleToggle = () => void navigate(PATHS.LOGIN, { replace: true });
 
   return (
-    <main className={styles.page}>
-      <div className={styles.card}>
-        <h1 className={styles.heading}>
-          {t('auth.register.pageTitle', 'Create Account')}
-        </h1>
-        <p className={styles.subheading}>
-          {t('auth.register.subtitle', 'Registration form coming soon.')}
-        </p>
-        <p>
-          {t('auth.register.alreadyHaveAccount', 'Already have an account?')}{' '}
-          <Link to={PATHS.LOGIN}>{t('auth.signIn', 'Sign in')}</Link>
-        </p>
-      </div>
-    </main>
+    <AuthSplitPanel
+      isLogin={false}
+      brandingContent={<AuthBranding isLogin={false} />}
+      formContent={
+        <RegisterForm
+          onSubmit={handleSubmit}
+          onToggle={handleToggle}
+        />
+      }
+    />
   );
 }

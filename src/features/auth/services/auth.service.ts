@@ -91,4 +91,27 @@ export const authService = {
     const { data } = await http.get<AuthUser>(API.auth.me);
     return data;
   },
+
+  /**
+   * Request a password-reset email for the given address.
+   */
+  async requestPasswordReset(email: string): Promise<void> {
+    await http.post(API.auth.passwordReset, { email });
+  },
+
+  /**
+   * Confirm a password reset using the uid/token from the email link.
+   */
+  async confirmPasswordReset(
+    uid: string,
+    token: string,
+    newPassword: string,
+  ): Promise<void> {
+    await http.post(API.auth.passwordResetConfirm, {
+      uid,
+      token,
+      new_password: newPassword,
+      new_password_confirm: newPassword,
+    });
+  },
 };

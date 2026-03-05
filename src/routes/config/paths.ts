@@ -13,6 +13,8 @@ export const PATHS = {
   COMPONENTS_DEMO: '/components',
   LOGIN: '/login',
   REGISTER: '/register',
+  FORGOT_PASSWORD: '/forgot-password',
+  PASSWORD_RESET_CONFIRM: '/password-reset/confirm',
   SETTINGS: '/settings',
   NOT_FOUND: '*',
 } as const;
@@ -44,6 +46,14 @@ export const routeMetadata = {
   [PATHS.REGISTER]: {
     title: 'Create Account',
     description: 'Create a new account',
+  },
+  [PATHS.FORGOT_PASSWORD]: {
+    title: 'Forgot Password',
+    description: 'Reset your account password',
+  },
+  [PATHS.PASSWORD_RESET_CONFIRM]: {
+    title: 'Set New Password',
+    description: 'Choose a new password for your account',
   },
   [PATHS.SETTINGS]: {
     title: 'Settings',

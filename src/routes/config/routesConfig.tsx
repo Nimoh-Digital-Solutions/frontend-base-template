@@ -25,12 +25,16 @@ const ComponentsDemoPage = lazy(() =>
 
 const NotFoundPage = lazy(() => import('@pages/NotFoundPage/NotFoundPage'));
 
-const LoginPage = lazy(() =>
-  import('@features/auth').then(m => ({ default: m.LoginPage }))
+const AuthPage = lazy(() =>
+  import('@features/auth').then(m => ({ default: m.AuthPage }))
 );
 
-const RegisterPage = lazy(() =>
-  import('@features/auth').then(m => ({ default: m.RegisterPage }))
+const ForgotPasswordPage = lazy(() =>
+  import('@features/auth').then(m => ({ default: m.ForgotPasswordPage }))
+);
+
+const AuthRoutesWrapper = lazy(() =>
+  import('@features/auth').then(m => ({ default: m.AuthRoutesWrapper }))
 );
 
 const SettingsPage = lazy(() => import('@pages/SettingsPage/SettingsPage'));
@@ -58,6 +62,41 @@ const ProtectedPage = ({ component: Component }: { component: React.LazyExoticCo
 );
 
 export const routes: RouteObject[] = [
+  // ---------------------------------------------------------------------------
+  // Auth route group
+  // Full-screen split-panel pages — no AppLayout shell (no Header / Footer).
+  // AuthRoutesWrapper redirects to HOME if the user is already authenticated.
+  // ---------------------------------------------------------------------------
+  {
+    element: (
+      <Suspense fallback={<PageFallback />}>
+        <AuthRoutesWrapper />
+      </Suspense>
+    ),
+    children: [
+      {
+        // AuthPage is a layout route that stays mounted for both /login and
+        // /register, enabling the AuthSplitPanel layout-swap animation.
+        element: (
+          <Suspense fallback={<PageFallback />}>
+            <AuthPage />
+          </Suspense>
+        ),
+        children: [
+          { path: PATHS.LOGIN },
+          { path: PATHS.REGISTER },
+        ],
+      },
+      {
+        path: PATHS.FORGOT_PASSWORD,
+        element: <LazyPage component={ForgotPasswordPage} />,
+      },
+    ],
+  },
+  // ---------------------------------------------------------------------------
+  // App route group
+  // Standard pages wrapped in AppLayout (Header + Footer + skip link).
+  // ---------------------------------------------------------------------------
   {
     path: PATHS.HOME,
     element: <AppLayout />,
@@ -70,15 +109,7 @@ export const routes: RouteObject[] = [
         path: PATHS.COMPONENTS_DEMO,
         element: <LazyPage component={ComponentsDemoPage} />,
       },
-      {
-        path: PATHS.LOGIN,
-        element: <LazyPage component={LoginPage} />,
-      },
-      {
-        path: PATHS.REGISTER,
-        element: <LazyPage component={RegisterPage} />,
-      },
-      // -- Protected routes -----------------------------------------------
+      // -- Protected routes -------------------------------------------------
       // Add your authenticated routes here using the ProtectedPage wrapper:
       //
       //   {

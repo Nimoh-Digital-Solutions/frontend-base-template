@@ -1,56 +1,45 @@
-import { useTranslation } from 'react-i18next';
-import { useLocation,useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useDocumentTitle } from '@hooks';
 import { PATHS, routeMetadata } from '@routes/config/paths';
 
+import { AuthBranding } from '../components/AuthBranding/AuthBranding';
+import { AuthSplitPanel } from '../components/AuthSplitPanel/AuthSplitPanel';
 import { LoginForm } from '../components/LoginForm/LoginForm';
 import { useAuth } from '../hooks/useAuth';
 import type { LoginPayload } from '../types/auth.types';
 
-import styles from './LoginPage.module.scss';
-
-/**
- * LoginPage
- *
- * Route: /login
- *
- * Composes the LoginForm with the useAuth hook.
- * On successful login the user is redirected to either the original
- * page they tried to access (captured via `returnUrl` state from
- * ProtectedRoute) or the home page.
- */
 export function LoginPage() {
   useDocumentTitle(routeMetadata[PATHS.LOGIN].title);
-  const { t } = useTranslation();
   const { login, isLoading, error } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // ProtectedRoute passes the original URL via router state
   const returnUrl = (location.state as { returnUrl?: string } | null)?.returnUrl;
 
   const handleSubmit = async (payload: LoginPayload) => {
     try {
       await login(payload);
-      void navigate(returnUrl ?? '/', { replace: true });
+      void navigate(returnUrl ?? PATHS.HOME, { replace: true });
     } catch {
-      // Error is already captured in the store's `error` state
-      // and displayed via `serverError` prop on LoginForm.
+      // error is already captured in the store's `error` state
     }
   };
 
+  const handleToggle = () => void navigate(PATHS.REGISTER, { replace: true });
+
   return (
-    <main className={styles.page}>
-      <div className={styles.card}>
-        <h1 className={styles.heading}>{t('auth.pageTitle')}</h1>
-        <p className={styles.subheading}>{t('auth.welcomeBack')}</p>
+    <AuthSplitPanel
+      isLogin={true}
+      brandingContent={<AuthBranding isLogin={true} />}
+      formContent={
         <LoginForm
           onSubmit={handleSubmit}
+          onToggle={handleToggle}
           isLoading={isLoading}
           serverError={error}
         />
-      </div>
-    </main>
+      }
+    />
   );
 }
