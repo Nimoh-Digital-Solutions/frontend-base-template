@@ -64,6 +64,7 @@ export const useAuthStore = create<AuthStore>()(devtools((set, get) => ({
   // -- Actions --------------------------------------------------------------
 
   setAuth: (token: string, user: AuthUser) => {
+    localStorage.setItem('tast:sessionActive', '1');
     set({
       accessToken: token,
       user,
@@ -78,6 +79,7 @@ export const useAuthStore = create<AuthStore>()(devtools((set, get) => ({
   },
 
   clearAuth: () => {
+    localStorage.removeItem('tast:sessionActive');
     set({
       accessToken: null,
       user: null,

@@ -41,19 +41,29 @@ export function useInitAuth(): { isLoading: boolean } {
       // Signal that auth init is in progress
       useAuthStore.setState({ isLoading: true });
 
-      try {
-        // Attempt to restore session via httpOnly refresh cookie
-        const refreshData = await authService.refreshToken();
+      // Only attempt refresh if we have a prior session indicator.
+      // The httpOnly refresh cookie is unreadable by JS, so a localStorage
+      // flag set on login / cleared on logout is the only durable signal.
+      const hasSession = localStorage.getItem('tast:sessionActive') === '1';
 
-        // Refresh succeeded — temporarily store the token so subsequent
-        // requests (like getProfile) are authenticated.
-        useAuthStore.setState({ accessToken: refreshData.access });
+      if (hasSession) {
+        try {
+          // Attempt to restore session via httpOnly refresh cookie
+          const refreshData = await authService.refreshToken();
 
-        // Fetch the full user profile from the BE
-        const user = await authService.getProfile();
-        setAuth(refreshData.access, user);
-      } catch {
-        // No valid session — stay unauthenticated (this is normal for first visit)
+          // Refresh succeeded — temporarily store the token so subsequent
+          // requests (like getProfile) are authenticated.
+          useAuthStore.setState({ accessToken: refreshData.access });
+
+          // Fetch the full user profile from the BE
+          const user = await authService.getProfile();
+          setAuth(refreshData.access, user);
+        } catch {
+          // Refresh cookie expired / revoked — clear the stale session flag
+          clearAuth();
+        }
+      } else {
+        // No prior session — skip the refresh call entirely
         clearAuth();
       }
 
