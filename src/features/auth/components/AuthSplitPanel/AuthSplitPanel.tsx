@@ -6,13 +6,15 @@ import { BackgroundPaths } from '../BackgroundPaths/BackgroundPaths';
 
 import styles from './AuthSplitPanel.module.scss';
 
+export type AuthView = 'login' | 'register' | 'forgot';
+
 export interface AuthSplitPanelProps {
   /**
-   * Controls which side the branding panel appears on.
-   * true  → branding left, form right  (login)
-   * false → branding right, form left  (register / forgot-password)
+   * Which auth view is active.
+   * login / forgot → branding panel left, form panel right.
+   * register       → branding panel right, form panel left.
    */
-  isLogin: boolean;
+  view: AuthView;
   /** Content rendered inside the dark branding panel (logo, headlines, avatars). */
   brandingContent: ReactNode;
   /** Content rendered inside the light form panel. */
@@ -26,7 +28,8 @@ export interface AuthSplitPanelProps {
  *
  * On desktop (≥ 1024px):
  *   - Left / right panels swap order via Framer Motion `layout` spring
- *     when `isLogin` toggles, creating a smooth panel-slide effect.
+ *     when `view` changes between login/forgot and register, creating a
+ *     smooth panel-slide effect.
  *   - Dark panel: deep purple + animated BackgroundPaths SVG overlay.
  *   - Light panel: warm off-white form area.
  *
@@ -37,19 +40,22 @@ export interface AuthSplitPanelProps {
  * Respects `prefers-reduced-motion` — disables the panel swap animation
  * when the user has requested reduced motion.
  */
-export function AuthSplitPanel({ isLogin, brandingContent, formContent }: AuthSplitPanelProps) {
+export function AuthSplitPanel({ view, brandingContent, formContent }: AuthSplitPanelProps) {
   const prefersReducedMotion = useReducedMotion();
 
   const panelTransition = prefersReducedMotion
     ? { duration: 0 }
     : { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const };
 
+  // login and forgot both keep the branding panel on the left
+  const brandingFirst = view !== 'register';
+
   return (
     <main className={styles.root}>
       {/* ── Dark / Branding panel ────────────────────────────────── */}
       <motion.div
         layout
-        className={`${styles.brandPanel} ${isLogin ? styles.orderFirst : styles.orderLast}`}
+        className={`${styles.brandPanel} ${brandingFirst ? styles.orderFirst : styles.orderLast}`}
         transition={panelTransition}
       >
         {/* Animated background SVG */}
@@ -67,7 +73,7 @@ export function AuthSplitPanel({ isLogin, brandingContent, formContent }: AuthSp
       {/* ── Light / Form panel ────────────────────────────────────────────── */}
       <motion.div
         layout
-        className={`${styles.formPanel} ${isLogin ? styles.orderLast : styles.orderFirst}`}
+        className={`${styles.formPanel} ${brandingFirst ? styles.orderLast : styles.orderFirst}`}
         transition={panelTransition}
       >
         <div className={styles.formContent}>

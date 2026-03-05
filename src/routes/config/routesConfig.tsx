@@ -29,10 +29,6 @@ const AuthPage = lazy(() =>
   import('@features/auth').then(m => ({ default: m.AuthPage }))
 );
 
-const ForgotPasswordPage = lazy(() =>
-  import('@features/auth').then(m => ({ default: m.ForgotPasswordPage }))
-);
-
 const AuthRoutesWrapper = lazy(() =>
   import('@features/auth').then(m => ({ default: m.AuthRoutesWrapper }))
 );
@@ -85,11 +81,8 @@ export const routes: RouteObject[] = [
         children: [
           { path: PATHS.LOGIN },
           { path: PATHS.REGISTER },
+          { path: PATHS.FORGOT_PASSWORD },
         ],
-      },
-      {
-        path: PATHS.FORGOT_PASSWORD,
-        element: <LazyPage component={ForgotPasswordPage} />,
       },
     ],
   },

@@ -1,11 +1,13 @@
-import { Leaf } from 'lucide-react';
+import { Leaf, LockKeyhole } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+
+import type { AuthView } from '../AuthSplitPanel/AuthSplitPanel';
 
 import styles from './AuthBranding.module.scss';
 
 export interface AuthBrandingProps {
-  /** Controls which copy variant is shown: login or register. */
-  isLogin: boolean;
+  /** Controls which copy variant is shown. */
+  view: AuthView;
   /** App / brand name shown in the logo lockup and headings. */
   appName?: string;
 }
@@ -30,10 +32,11 @@ function AvatarStack() {
 /**
  * AuthBranding
  *
- * Renders the left-panel (dark side) branding content for the auth split-panel layout.
- * Crossfades between login and register copy variants via AnimatePresence.
+ * Renders the branding panel content for the auth split-panel layout.
+ * Crossfades between login, register, and forgot-password copy variants
+ * via AnimatePresence.
  */
-export function AuthBranding({ isLogin, appName = 'App' }: AuthBrandingProps) {
+export function AuthBranding({ view, appName = 'App' }: AuthBrandingProps) {
   const prefersReducedMotion = useReducedMotion();
 
   const fadeProps = prefersReducedMotion
@@ -48,7 +51,7 @@ export function AuthBranding({ isLogin, appName = 'App' }: AuthBrandingProps) {
   return (
     <div className={styles.root}>
       <AnimatePresence mode="wait">
-        {isLogin ? (
+        {view === 'login' && (
           <motion.div key="login-branding" className={styles.content} {...fadeProps}>
             {/* Logo lockup */}
             <div className={styles.logoRow}>
@@ -72,7 +75,9 @@ export function AuthBranding({ isLogin, appName = 'App' }: AuthBrandingProps) {
               <p className={styles.socialProofText}>+500 users joined this month</p>
             </div>
           </motion.div>
-        ) : (
+        )}
+
+        {view === 'register' && (
           <motion.div key="register-branding" className={styles.content} {...fadeProps}>
             {/* Logo lockup */}
             <div className={styles.logoRow}>
@@ -97,6 +102,33 @@ export function AuthBranding({ isLogin, appName = 'App' }: AuthBrandingProps) {
                 <p className={styles.glassCardAccent}>+500 users</p>
                 <p className={styles.glassCardSub}>Joined our community this month</p>
               </div>
+            </div>
+          </motion.div>
+        )}
+
+        {view === 'forgot' && (
+          <motion.div key="forgot-branding" className={styles.content} {...fadeProps}>
+            {/* Logo lockup */}
+            <div className={styles.logoRow}>
+              <div className={styles.logoIcon}>
+                <LockKeyhole aria-hidden="true" />
+              </div>
+              <span className={styles.logoName}>{appName}</span>
+            </div>
+
+            <h2 className={styles.headline}>
+              Regain access in seconds.
+            </h2>
+            <p className={styles.tagline}>
+              Enter your email address and we'll send you a secure link to reset
+              your password and get back to work.
+            </p>
+
+            {/* Reassurance note */}
+            <div className={styles.socialProof}>
+              <p className={styles.socialProofText}>
+                Reset links expire after 15 minutes for your security.
+              </p>
             </div>
           </motion.div>
         )}

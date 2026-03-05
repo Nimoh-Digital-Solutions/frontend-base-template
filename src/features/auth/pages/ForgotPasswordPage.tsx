@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { useDocumentTitle } from '@hooks';
 import { PATHS, routeMetadata } from '@routes/config/paths';
@@ -23,6 +23,7 @@ import styles from './ForgotPasswordPage.module.scss';
 export function ForgotPasswordPage() {
   useDocumentTitle(routeMetadata[PATHS.FORGOT_PASSWORD].title);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -64,6 +65,7 @@ export function ForgotPasswordPage() {
 
           <ForgotPasswordForm
             onSubmit={handleSubmit}
+            onBack={() => void navigate(PATHS.LOGIN)}
             isLoading={isLoading}
             serverError={serverError}
             isSuccess={isSuccess}

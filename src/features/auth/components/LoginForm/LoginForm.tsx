@@ -1,9 +1,7 @@
 import type { FieldValues, Resolver } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 
-import { PATHS } from '@routes/config/paths';
 import { ArrowRight, Lock, Mail, Wand2 } from 'lucide-react';
 import { z } from 'zod';
 
@@ -45,6 +43,8 @@ export interface LoginFormProps {
   onSubmit: (payload: LoginPayload) => void | Promise<void>;
   /** Triggers the parent to navigate to the register view. */
   onToggle: () => void;
+  /** Triggers the parent to navigate to the forgot-password view. */
+  onForgotPassword: () => void;
   /** When true the submit button shows a loading state. */
   isLoading?: boolean;
   /** Server-side error message to display below the form. */
@@ -63,7 +63,7 @@ export interface LoginFormProps {
  * - Business logic wired to RHF + Zod; matches LoginPayload type contract.
  * - Google OAuth and Magic Link buttons are scaffolded (not wired to backend).
  */
-export function LoginForm({ onSubmit, onToggle, isLoading = false, serverError }: LoginFormProps) {
+export function LoginForm({ onSubmit, onToggle, onForgotPassword, isLoading = false, serverError }: LoginFormProps) {
   const { t } = useTranslation();
 
   const loginSchema = z.object({
@@ -119,9 +119,9 @@ export function LoginForm({ onSubmit, onToggle, isLoading = false, serverError }
             <label className={styles.label} htmlFor="login-password">
               {t('auth.passwordLabel', 'Password')}
             </label>
-            <Link to={PATHS.FORGOT_PASSWORD} className={styles.forgotLink}>
+            <button type="button" onClick={onForgotPassword} className={styles.forgotLink}>
               {t('auth.forgotPassword', 'Forgot password?')}
-            </Link>
+            </button>
           </div>
           <div className={styles.inputWrapper}>
             <Lock className={styles.inputIcon} aria-hidden="true" />

@@ -27,15 +27,17 @@ export function LoginPage() {
   };
 
   const handleToggle = () => void navigate(PATHS.REGISTER, { replace: true });
+  const handleForgotPassword = () => void navigate(PATHS.FORGOT_PASSWORD, { replace: true });
 
   return (
     <AuthSplitPanel
-      isLogin={true}
-      brandingContent={<AuthBranding isLogin={true} />}
+      view="login"
+      brandingContent={<AuthBranding view="login" />}
       formContent={
         <LoginForm
           onSubmit={handleSubmit}
           onToggle={handleToggle}
+          onForgotPassword={handleForgotPassword}
           isLoading={isLoading}
           serverError={error}
         />

@@ -21,18 +21,22 @@ const renderForm = (props: Parameters<typeof LoginForm>[0]) =>
 describe('LoginForm', () => {
   const onSubmit = vi.fn();
   const onToggle = vi.fn();
+  const onForgotPassword = vi.fn();
 
   beforeEach(() => {
     onSubmit.mockClear();
     onToggle.mockClear();
+    onForgotPassword.mockClear();
   });
+
+  const defaultProps = () => ({ onSubmit, onToggle, onForgotPassword });
 
   // -----------------------------------------------------------------------
   // Rendering
   // -----------------------------------------------------------------------
 
   it('renders email/username and password fields with labels', () => {
-    renderForm({ onSubmit, onToggle });
+    renderForm(defaultProps());
 
     expect(screen.getByLabelText(/email or username/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
@@ -40,7 +44,7 @@ describe('LoginForm', () => {
   });
 
   it('renders loading state on submit button', () => {
-    renderForm({ onSubmit, onToggle, isLoading: true });
+    renderForm({ ...defaultProps(), isLoading: true });
 
     const button = screen.getByRole('button', { name: /signing in/i });
     // Button should indicate loading — either via text or aria attribute
@@ -52,13 +56,13 @@ describe('LoginForm', () => {
   });
 
   it('renders server error when provided', () => {
-    renderForm({ onSubmit, onToggle, serverError: 'Invalid credentials' });
+    renderForm({ ...defaultProps(), serverError: 'Invalid credentials' });
 
     expect(screen.getByRole('alert')).toHaveTextContent('Invalid credentials');
   });
 
   it('does not render server error when null', () => {
-    renderForm({ onSubmit, onToggle, serverError: null });
+    renderForm({ ...defaultProps(), serverError: null });
 
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
@@ -69,7 +73,7 @@ describe('LoginForm', () => {
 
   it('shows required error when submitting empty form', async () => {
     const user = userEvent.setup();
-    renderForm({ onSubmit, onToggle });
+    renderForm(defaultProps());
 
     await user.click(screen.getByRole('button', { name: /sign in/i }));
 
@@ -82,7 +86,7 @@ describe('LoginForm', () => {
 
   it('shows min-length error for short password', async () => {
     const user = userEvent.setup();
-    renderForm({ onSubmit, onToggle });
+    renderForm(defaultProps());
 
     await user.type(screen.getByLabelText(/email or username/i), 'user@example.com');
     await user.type(screen.getByLabelText(/password/i), 'short');
@@ -101,7 +105,7 @@ describe('LoginForm', () => {
 
   it('calls onSubmit with valid data', async () => {
     const user = userEvent.setup();
-    renderForm({ onSubmit, onToggle });
+    renderForm(defaultProps());
 
     await user.type(screen.getByLabelText(/email or username/i), 'user@example.com');
     await user.type(screen.getByLabelText(/password/i), 'password123');
@@ -119,7 +123,7 @@ describe('LoginForm', () => {
 
   it('does not call onSubmit when isLoading', async () => {
     const user = userEvent.setup();
-    renderForm({ onSubmit, onToggle, isLoading: true });
+    renderForm({ ...defaultProps(), isLoading: true });
 
     await user.type(screen.getByLabelText(/email or username/i), 'user@example.com');
     await user.type(screen.getByLabelText(/password/i), 'password123');
@@ -136,12 +140,12 @@ describe('LoginForm', () => {
   // -----------------------------------------------------------------------
 
   it('has no axe violations', async () => {
-    const { container } = renderForm({ onSubmit, onToggle });
+    const { container } = renderForm(defaultProps());
     expect(await axe(container)).toHaveNoViolations();
   });
 
   it('has no axe violations with server error displayed', async () => {
-    const { container } = renderForm({ onSubmit, onToggle, serverError: 'Bad request' });
+    const { container } = renderForm({ ...defaultProps(), serverError: 'Bad request' });
     expect(await axe(container)).toHaveNoViolations();
   });
 });

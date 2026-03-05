@@ -2,7 +2,7 @@ import type { FieldValues, Resolver } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
-import { Mail } from 'lucide-react';
+import { ArrowLeft, Mail } from 'lucide-react';
 import { z } from 'zod';
 
 import styles from './ForgotPasswordForm.module.scss';
@@ -30,6 +30,8 @@ function makeZodResolver<T extends FieldValues>(schema: z.ZodType<T>): Resolver<
 export interface ForgotPasswordFormProps {
   /** Called with the validated email on submission. */
   onSubmit: (email: string) => void | Promise<void>;
+  /** Navigates back to the login view. */
+  onBack: () => void;
   /** When true the submit button shows a loading state. */
   isLoading?: boolean;
   /** Server-side error message. */
@@ -60,6 +62,7 @@ type FormValues = z.infer<typeof schema>;
  */
 export function ForgotPasswordForm({
   onSubmit,
+  onBack,
   isLoading = false,
   serverError,
   isSuccess = false,
@@ -95,6 +98,11 @@ export function ForgotPasswordForm({
       onSubmit={handleSubmit(({ email }) => onSubmit(email))}
       noValidate
     >
+      <button type="button" onClick={onBack} className={styles.backBtn}>
+        <ArrowLeft aria-hidden="true" />
+        {t('auth.forgotPassword.backToLogin', 'Back to Login')}
+      </button>
+
       <div className={styles.heading}>
         <h1 className={styles.title}>
           {t('auth.forgotPassword.title', 'Forgot Password?')}

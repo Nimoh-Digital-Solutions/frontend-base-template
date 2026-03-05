@@ -25,8 +25,8 @@ export function RegisterPage() {
 
   return (
     <AuthSplitPanel
-      isLogin={false}
-      brandingContent={<AuthBranding isLogin={false} />}
+      view="register"
+      brandingContent={<AuthBranding view="register" />}
       formContent={
         <RegisterForm
           onSubmit={handleSubmit}
