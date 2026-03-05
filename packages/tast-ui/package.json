@@ -1,6 +1,6 @@
 {
   "name": "@nimoh-digital-solutions/tast-ui",
-  "version": "1.3.4",
+  "version": "1.4.0",
   "description": "UI components and theme system for tast projects",
   "keywords": [
     "react",
