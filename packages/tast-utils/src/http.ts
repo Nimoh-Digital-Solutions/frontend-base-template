@@ -102,12 +102,15 @@ async function request<T>(
 ): Promise<ApiResponse<T>> {
   const normalizedBase = config.baseUrl.replace(/\/$/, '');
 
-  // Build initial request context
+  // Build initial request context.
+  // When the body is FormData, omit Content-Type entirely so the browser can
+  // set the correct multipart/form-data; boundary=... header automatically.
+  const isFormData = body instanceof FormData;
   let context: HttpRequestContext = {
     url: `${normalizedBase}${endpoint}`,
     method,
     headers: {
-      'Content-Type': 'application/json',
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       Accept: 'application/json',
       ...(init?.headers as Record<string, string> | undefined),
     },
@@ -142,7 +145,9 @@ async function request<T>(
       // Conditional spread avoids setting `body: undefined` which violates
       // exactOptionalPropertyTypes (RequestInit.body is `BodyInit | null`, not
       // `BodyInit | null | undefined`).
-      ...(context.body != null ? { body: JSON.stringify(context.body) } : {}),
+      ...(context.body != null
+        ? { body: context.body instanceof FormData ? context.body : JSON.stringify(context.body) }
+        : {}),
       ...(signal ? { signal } : {}),
       ...(context.credentials ? { credentials: context.credentials } : {}),
     });
