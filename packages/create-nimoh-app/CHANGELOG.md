@@ -1,5 +1,11 @@
 # @nimoh-digital-solutions/create-nimoh-app
 
+## 1.1.1
+
+### Patch Changes
+
+- 8bfcdac: fix: hoist backend project files to backend/ instead of nesting under backend/<slug>/
+
 ## 1.1.0
 
 ### Minor Changes
