@@ -129,16 +129,22 @@ function writeTempConfig(projectName: string, portOffset: number): string {
 
 /**
  * Move all entries from `srcDir` into `destDir`, then remove `srcDir`.
- * Skips entries that already exist in `destDir` (e.g. `.venv`).
+ * Handles the case where srcDir lives inside destDir (e.g. backend/bookswap/)
+ * and contains a child with the same name (e.g. bookswap/ — the Django app).
  */
 function hoistDirectory(srcDir: string, destDir: string): void {
-  for (const entry of fs.readdirSync(srcDir)) {
-    const src = path.join(srcDir, entry);
+  // Rename to a temp name first so that children whose name matches the
+  // srcDir basename don't collide with the srcDir path itself.
+  const tempDir = srcDir + `_nimoh_hoist_${Date.now()}`;
+  fs.renameSync(srcDir, tempDir);
+
+  for (const entry of fs.readdirSync(tempDir)) {
+    const src = path.join(tempDir, entry);
     const dest = path.join(destDir, entry);
     if (exists(dest)) continue; // don't clobber .venv or other pre-existing items
     fs.renameSync(src, dest);
   }
-  fs.rmSync(srcDir, { recursive: true, force: true });
+  fs.rmSync(tempDir, { recursive: true, force: true });
 }
 
 function safeUnlink(absPath: string): void {
