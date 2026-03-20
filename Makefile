@@ -13,6 +13,7 @@
 PM        ?= yarn          # override: make dev PM=npm
 DC        ?= docker compose # override: make docker-dev DC="docker-compose"
 APP_NAME  := $(shell node -e "process.stdout.write(require('./package.json').name)" 2>/dev/null || echo "app")
+export APP_NAME
 
 .DEFAULT_GOAL := help
 
@@ -79,7 +80,7 @@ build-analyze: ## Build with bundle analyser → dist/stats.html
 # ─── Docker ───────────────────────────────────────────────────────────────────
 
 docker-dev: ## Start dev server in Docker with hot-reload (localhost:3000)
-	@docker rm -f react-starter-kit-dev 2>/dev/null || true
+	@docker rm -f $(APP_NAME)-fe-dev 2>/dev/null || true
 	$(DC) up -d app
 	@echo "Dev server running at http://localhost:3000 — use 'make docker-logs' to tail logs"
 
@@ -102,7 +103,7 @@ docker-shell: ## Open a shell inside the running dev container
 docker-build-image: ## Build the production Docker image without starting it
 	$(DC) build app-prod
 docker-stack: ## Build & start the full production stack: FE + backend + Redis (requires backend service uncommented in docker-compose.yml)
-	@docker rm -f react-starter-kit-prod 2>/dev/null || true
+	@docker rm -f $(APP_NAME)-fe-prod 2>/dev/null || true
 	$(DC) up --build app-prod backend redis
 
 be-health: ## Ping the backend health endpoint and print the result

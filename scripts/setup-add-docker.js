@@ -64,7 +64,7 @@ const DOCKER_COMPOSE = `services:
   # Development environment with hot-reload
   app:
     image: node:22-alpine
-    container_name: app-dev
+    container_name: \${APP_NAME:-app}-fe-dev
     working_dir: /app
     volumes:
       - .:/app
@@ -90,7 +90,7 @@ const DOCKER_COMPOSE = `services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: app-prod
+    container_name: \${APP_NAME:-app}-fe-prod
     ports:
       - '8080:8080'
     restart: unless-stopped

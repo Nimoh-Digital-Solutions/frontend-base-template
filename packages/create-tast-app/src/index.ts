@@ -19,6 +19,7 @@ interface Answers {
   enablePwa: boolean;
   enableDocker: boolean;
   enableHusky: boolean;
+  portOffset: number;
   packageManager: PackageManager;
   installDeps: boolean;
 }
@@ -53,6 +54,7 @@ async function main(): Promise<void> {
         enablePwa: true,
         enableDocker: true,
         enableHusky: true,
+        portOffset: 0,
       });
     } catch (err) {
       logError(err instanceof Error ? err.message : String(err));
@@ -149,6 +151,15 @@ async function main(): Promise<void> {
         inactive: 'No',
       },
 
+      // Port offset — avoids port conflicts when running multiple projects
+      {
+        type: 'number',
+        name: 'portOffset',
+        message: 'Port offset (0 = default ports; e.g. 100 → dev 3100, prod 8180):',
+        initial: 0,
+        validate: (v: number) => v >= 0 || 'Must be a non-negative integer',
+      },
+
       // Package manager
       {
         type: 'select',
@@ -192,6 +203,7 @@ async function main(): Promise<void> {
       enablePwa: answers.enablePwa ?? true,
       enableDocker: answers.enableDocker ?? true,
       enableHusky: answers.enableHusky ?? true,
+      portOffset: answers.portOffset ?? 0,
       brandPrimary: answers.brandPrimary?.trim() || undefined,
       brandSecondary: answers.brandSecondary?.trim() || undefined,
       brandTertiary: answers.brandTertiary?.trim() || undefined,

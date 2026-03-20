@@ -35,6 +35,12 @@ export interface ScaffoldOptions {
   enableDocker: boolean;
   enableHusky: boolean;
   /**
+   * Port offset — shifts all host-facing ports so multiple projects can run
+   * side-by-side without port conflicts.  0 = default ports (3000 dev, 8080 prod).
+   * Example: 100 → dev 3100, prod 8180, BE 8100.
+   */
+  portOffset: number;
+  /**
    * Optional brand hex colours, e.g. '#3b82f6'.
    * When provided, a `_brand.scss` override file is generated in
    * `src/styles/themes/` that sets `--color-primary*` etc. to the
@@ -70,7 +76,7 @@ export async function scaffold(opts: ScaffoldOptions): Promise<void> {
 }
 
 async function scaffoldInner(opts: ScaffoldOptions): Promise<void> {
-  const { appName, description, destDir, enableTailwind, enablePwa, enableDocker, enableHusky } = opts;
+  const { appName, description, destDir, enableTailwind, enablePwa, enableDocker, enableHusky, portOffset } = opts;
 
   // 1. Clone template
   await cloneTemplate(destDir);
@@ -110,7 +116,17 @@ async function scaffoldInner(opts: ScaffoldOptions): Promise<void> {
     // the monorepo workspace install. Scaffolded projects don't have a packages/
     // directory and would fail the Docker build without this patch.
     patchDockerfileForScaffold(destDir);
+
+    // Apply port offset and project-specific container names
+    patchDockerComposeForProject(destDir, appName, portOffset);
   }
+
+  // 4.1 Apply port offset to Vite config and Makefile regardless of Docker
+  if (portOffset !== 0) {
+    patchViteConfigPort(destDir, portOffset);
+    patchEnvExamplePorts(destDir, portOffset);
+  }
+  patchMakefileForProject(destDir, appName);
 
   if (!enablePwa) {
     logStep('Removing PWA support');
@@ -369,6 +385,126 @@ function patchDockerfileForScaffold(destDir: string): void {
   content = content.replace(/\n{3,}/g, '\n\n');
   writeText(dockerfilePath, content);
   logOk('Dockerfile \u2014 removed monorepo workspace COPY (standalone project)');
+}
+
+// ─── Port offset + container naming patches ─────────────────────────────────
+
+/**
+ * Patch docker-compose.yml with project-specific container names and
+ * offset-adjusted host ports.  The template uses
+ * `${APP_NAME:-react-starter-kit}-fe-dev` for names — we replace the
+ * fallback default with the actual app name so the file works standalone
+ * even without the Makefile exporting APP_NAME.
+ *
+ * Ports: internal container ports stay the same; only the host side shifts.
+ */
+function patchDockerComposeForProject(destDir: string, appName: string, portOffset: number): void {
+  const composePath = path.join(destDir, 'docker-compose.yml');
+  if (!exists(composePath)) return;
+
+  logStep('Patching docker-compose.yml — container names + ports');
+
+  let content = readText(composePath);
+
+  // Replace the fallback default in container_name: ${APP_NAME:-react-starter-kit}-fe-*
+  content = content.replace(
+    /\$\{APP_NAME:-react-starter-kit\}/g,
+    `\${APP_NAME:-${appName}}`
+  );
+
+  // Patch host ports if offset is non-zero
+  if (portOffset !== 0) {
+    const devPort = 3000 + portOffset;
+    const prodPort = 8080 + portOffset;
+    const bePort = 8000 + portOffset;
+
+    // Dev service: '3000:3000' → '<devPort>:3000'
+    content = content.replace(/['"]3000:3000['"]/g, `'${devPort}:3000'`);
+
+    // Prod service: '8080:8080' → '<prodPort>:8080'
+    content = content.replace(/['"]8080:8080['"]/g, `'${prodPort}:8080'`);
+
+    // Backend service (if uncommented): '8000:8000' → '<bePort>:8000'
+    content = content.replace(/['"]8000:8000['"]/g, `'${bePort}:8000'`);
+
+    // Update BACKEND_URL port reference
+    content = content.replace(
+      /BACKEND_URL=http:\/\/backend:8000/g,
+      `BACKEND_URL=http://backend:8000`
+    );
+  }
+
+  writeText(composePath, content);
+  logOk(`docker-compose.yml — container names: ${appName}-fe-dev / ${appName}-fe-prod`);
+  if (portOffset !== 0) {
+    logOk(`docker-compose.yml — host ports shifted by +${portOffset}`);
+  }
+}
+
+/**
+ * Patch Makefile to use project-specific container names and port-adjusted URLs.
+ */
+function patchMakefileForProject(destDir: string, appName: string): void {
+  const makefilePath = path.join(destDir, 'Makefile');
+  if (!exists(makefilePath)) return;
+
+  let content = readText(makefilePath);
+
+  // The template Makefile already reads APP_NAME from package.json and exports
+  // it, and docker-compose.yml references ${APP_NAME}. The `docker rm -f`
+  // commands already use $(APP_NAME)-fe-dev from the template. Nothing to patch
+  // if the Makefile already has the dynamic pattern.
+  //
+  // However, if the template still has a hardcoded `react-starter-kit-*`
+  // reference (older clone), replace it with the dynamic pattern.
+  content = content.replace(/react-starter-kit-dev/g, `$(APP_NAME)-fe-dev`);
+  content = content.replace(/react-starter-kit-prod/g, `$(APP_NAME)-fe-prod`);
+
+  writeText(makefilePath, content);
+  logOk('Makefile — ensured dynamic container names');
+}
+
+/**
+ * Patch vite.config.ts server port when offset is non-zero.
+ */
+function patchViteConfigPort(destDir: string, portOffset: number): void {
+  const configPath = path.join(destDir, 'vite.config.ts');
+  if (!exists(configPath)) return;
+
+  const devPort = 3000 + portOffset;
+  let content = readText(configPath);
+
+  // Replace `port: 3000` with the offset port
+  content = content.replace(
+    /port:\s*3000/,
+    `port: ${devPort}`
+  );
+
+  writeText(configPath, content);
+  logOk(`vite.config.ts — dev server port set to ${devPort}`);
+}
+
+/**
+ * Patch .env.example and .env.local with offset-adjusted API URL.
+ */
+function patchEnvExamplePorts(destDir: string, portOffset: number): void {
+  const bePort = 8000 + portOffset;
+
+  for (const envFile of ['.env.example', '.env.local']) {
+    const envPath = path.join(destDir, envFile);
+    if (!exists(envPath)) continue;
+
+    let content = readText(envPath);
+
+    // Update VITE_API_URL port
+    content = content.replace(
+      /VITE_API_URL=http:\/\/localhost:8000/,
+      `VITE_API_URL=http://localhost:${bePort}`
+    );
+
+    writeText(envPath, content);
+    logOk(`${envFile} — VITE_API_URL port set to ${bePort}`);
+  }
 }
 
 // ─── Docker removal ──────────────────────────────────────────────────────────

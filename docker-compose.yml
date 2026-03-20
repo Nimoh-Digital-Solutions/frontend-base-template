@@ -2,7 +2,7 @@ services:
   # Development environment with hot-reload
   app:
     image: node:22-alpine
-    container_name: react-starter-kit-dev
+    container_name: ${APP_NAME:-react-starter-kit}-fe-dev
     # Dev containers run as root so yarn can write to the node_modules volume.
     # The production image (app-prod) enforces non-root via nginx-unprivileged.
     working_dir: /app
@@ -38,7 +38,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: react-starter-kit-prod
+    container_name: ${APP_NAME:-react-starter-kit}-fe-prod
     ports:
       - '8080:8080'
     restart: unless-stopped
@@ -77,7 +77,7 @@ services:
   #   build:
   #     context: ../your-be-project   # path to your nimoh_base repo
   #     dockerfile: Dockerfile
-  #   container_name: react-starter-kit-api
+  #   container_name: ${APP_NAME:-react-starter-kit}-fe-api
   #   ports:
   #     - '8000:8000'
   #   environment:

@@ -204,6 +204,7 @@ function defaultOpts(overrides: Partial<ScaffoldOptions> = {}): ScaffoldOptions 
     enablePwa: true,
     enableDocker: true,
     enableHusky: true,
+    portOffset: 0,
     ...overrides,
   };
 }
