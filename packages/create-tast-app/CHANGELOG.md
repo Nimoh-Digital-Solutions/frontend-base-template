@@ -1,5 +1,13 @@
 # @nimoh-digital-solutions/create-tast-app
 
+## 1.7.2
+
+### Patch Changes
+
+- 2688e2a: Fix APP_NAME whitespace in container names
+
+  Wrap `APP_NAME` Makefile variable in `$(strip ...)` to prevent trailing whitespace from producing invalid Docker container names (e.g. `my_app   -fe-dev`). The scaffold now patches existing Makefiles with the same fix.
+
 ## 1.7.1
 
 ### Patch Changes
