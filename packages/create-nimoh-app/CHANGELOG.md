@@ -1,5 +1,11 @@
 # @nimoh-digital-solutions/create-nimoh-app
 
+## 1.1.2
+
+### Patch Changes
+
+- cdadb86: fix: preserve Django app directory when hoisting backend files (name collision with project slug)
+
 ## 1.1.1
 
 ### Patch Changes
