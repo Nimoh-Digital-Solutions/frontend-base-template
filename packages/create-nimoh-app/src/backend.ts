@@ -70,6 +70,7 @@ export async function scaffoldBackend(opts: BackendOptions): Promise<void> {
   console.log('');
 
   const nimohBase = venvBin(venvDir, 'nimoh-base');
+  const slug = toPythonSlug(projectName);
   try {
     const { code } = await spawnInteractive(
       nimohBase,
@@ -83,6 +84,12 @@ export async function scaffoldBackend(opts: BackendOptions): Promise<void> {
   } finally {
     // Clean up temp config regardless of success/failure
     safeUnlink(configPath);
+  }
+
+  // nimoh-base init creates backend/<slug>/ — hoist contents up to backend/
+  const nestedDir = path.join(backendDir, slug);
+  if (exists(nestedDir)) {
+    hoistDirectory(nestedDir, backendDir);
   }
 
   logOk('Backend scaffolded');
@@ -118,6 +125,20 @@ function writeTempConfig(projectName: string, portOffset: number): string {
   const configPath = path.join(tmpDir, `nimoh-config-${Date.now()}.yml`);
   writeText(configPath, yaml);
   return configPath;
+}
+
+/**
+ * Move all entries from `srcDir` into `destDir`, then remove `srcDir`.
+ * Skips entries that already exist in `destDir` (e.g. `.venv`).
+ */
+function hoistDirectory(srcDir: string, destDir: string): void {
+  for (const entry of fs.readdirSync(srcDir)) {
+    const src = path.join(srcDir, entry);
+    const dest = path.join(destDir, entry);
+    if (exists(dest)) continue; // don't clobber .venv or other pre-existing items
+    fs.renameSync(src, dest);
+  }
+  fs.rmSync(srcDir, { recursive: true, force: true });
 }
 
 function safeUnlink(absPath: string): void {
