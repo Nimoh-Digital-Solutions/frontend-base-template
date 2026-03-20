@@ -12,7 +12,7 @@
 
 PM        ?= yarn          # override: make dev PM=npm
 DC        ?= docker compose # override: make docker-dev DC="docker-compose"
-APP_NAME  := $(shell node -e "process.stdout.write(require('./package.json').name)" 2>/dev/null || echo "app")
+APP_NAME  := $(strip $(shell node -e "process.stdout.write(require('./package.json').name)" 2>/dev/null || echo "app"))
 export APP_NAME
 
 .DEFAULT_GOAL := help

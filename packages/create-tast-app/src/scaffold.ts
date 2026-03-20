@@ -450,6 +450,13 @@ function patchMakefileForProject(destDir: string, appName: string): void {
 
   let content = readText(makefilePath);
 
+  // Wrap APP_NAME in $(strip ...) to prevent trailing whitespace from
+  // producing invalid Docker container names (e.g. "my_app   -fe-dev").
+  content = content.replace(
+    /APP_NAME\s*:=\s*\$\(shell ([^)]+)\)/,
+    'APP_NAME  := $(strip $(shell $1))',
+  );
+
   // The template Makefile already reads APP_NAME from package.json and exports
   // it, and docker-compose.yml references ${APP_NAME}. The `docker rm -f`
   // commands already use $(APP_NAME)-fe-dev from the template. Nothing to patch
