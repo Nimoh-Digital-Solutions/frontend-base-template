@@ -1,3 +1,5 @@
+name: ${APP_NAME:-react-starter-kit}
+
 services:
   # Development environment with hot-reload
   app:
