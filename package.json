@@ -18,7 +18,7 @@
     "build": "tsc && vite build",
     "storybook": "yarn workspace @nimoh-digital-solutions/tast-ui storybook",
     "storybook:build": "yarn workspace @nimoh-digital-solutions/tast-ui storybook:build",
-    "packages:build": "yarn workspace @nimoh-digital-solutions/tast-utils build && yarn workspace @nimoh-digital-solutions/tast-hooks build && yarn workspace @nimoh-digital-solutions/tast-ui build && yarn workspace @nimoh-digital-solutions/create-tast-app build",
+    "packages:build": "yarn workspace @nimoh-digital-solutions/tast-utils build && yarn workspace @nimoh-digital-solutions/tast-hooks build && yarn workspace @nimoh-digital-solutions/tast-ui build && yarn workspace @nimoh-digital-solutions/create-tast-app build && yarn workspace @nimoh-digital-solutions/create-nimoh-app build",
     "packages:typecheck": "yarn workspace @nimoh-digital-solutions/tast-utils typecheck && yarn workspace @nimoh-digital-solutions/tast-hooks typecheck && yarn workspace @nimoh-digital-solutions/tast-ui typecheck",
     "build:analyze": "tsc && vite build --mode analyze",
     "preview": "vite preview",

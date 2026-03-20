@@ -33,8 +33,10 @@ async function main(): Promise<void> {
   // Parse CLI flags
   const args = process.argv.slice(2);
   const yesFlag = args.includes('--yes') || args.includes('-y');
+  // --port-offset <n> — allows callers (e.g. create-nimoh-app) to pre-set the offset
+  const argPortOffset = parseNumericFlag(args, '--port-offset');
   // First positional arg (not a flag) is the app name
-  const argName = args.find(a => !a.startsWith('-'))?.trim();
+  const argName = args.find(a => !a.startsWith('-') && !isValueOfFlag(args, a))?.trim();
 
   // Non-interactive mode: use sensible defaults and skip all prompts
   if (yesFlag) {
@@ -54,7 +56,7 @@ async function main(): Promise<void> {
         enablePwa: true,
         enableDocker: true,
         enableHusky: true,
-        portOffset: 0,
+        portOffset: argPortOffset ?? 0,
       });
     } catch (err) {
       logError(err instanceof Error ? err.message : String(err));
@@ -153,7 +155,7 @@ async function main(): Promise<void> {
 
       // Port offset — avoids port conflicts when running multiple projects
       {
-        type: 'number',
+        type: argPortOffset != null ? null : 'number',
         name: 'portOffset',
         message: 'Port offset (0 = default ports; e.g. 100 → dev 3100, prod 8180):',
         initial: 0,
@@ -203,7 +205,7 @@ async function main(): Promise<void> {
       enablePwa: answers.enablePwa ?? true,
       enableDocker: answers.enableDocker ?? true,
       enableHusky: answers.enableHusky ?? true,
-      portOffset: answers.portOffset ?? 0,
+      portOffset: argPortOffset ?? answers.portOffset ?? 0,
       brandPrimary: answers.brandPrimary?.trim() || undefined,
       brandSecondary: answers.brandSecondary?.trim() || undefined,
       brandTertiary: answers.brandTertiary?.trim() || undefined,
@@ -324,6 +326,30 @@ function printNextSteps(appName: string, pm: PackageManager, installed: boolean,
   console.log('');
   console.log('  Docs: https://github.com/Nimoh-Digital-Solutions/frontend-base-template');
   console.log('');
+}
+
+// ─── CLI flag helpers ─────────────────────────────────────────────────────────
+
+/**
+ * Parse a numeric flag like `--port-offset 100` from argv.
+ * Returns the number or undefined if not present.
+ */
+function parseNumericFlag(args: string[], flag: string): number | undefined {
+  const idx = args.indexOf(flag);
+  if (idx === -1 || idx + 1 >= args.length) return undefined;
+  const val = Number(args[idx + 1]);
+  return Number.isFinite(val) ? val : undefined;
+}
+
+/**
+ * Check if a value string is the value argument of a flag (e.g. "100" after "--port-offset").
+ * Used to avoid treating flag values as positional args.
+ */
+function isValueOfFlag(args: string[], value: string): boolean {
+  const idx = args.indexOf(value);
+  if (idx <= 0) return false;
+  const prev = args[idx - 1];
+  return prev !== undefined && prev.startsWith('--');
 }
 
 // ─── Run ──────────────────────────────────────────────────────────────────────
