@@ -1,5 +1,13 @@
 # @nimoh-digital-solutions/create-tast-app
 
+## 1.7.1
+
+### Patch Changes
+
+- cd8dcdf: Add `--port-offset <n>` CLI flag
+
+  Allows callers (e.g. `create-nimoh-app`) to pre-set the port offset without interactive prompting. When provided, the port offset prompt is skipped and the value is used directly.
+
 ## 1.7.0
 
 ### Minor Changes
