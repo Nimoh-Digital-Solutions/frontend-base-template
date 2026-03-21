@@ -6,6 +6,7 @@ declare const __PACKAGE_VERSION__: string;
 import { checkPrerequisites } from './prereqs.js';
 import { scaffoldBackend } from './backend.js';
 import { scaffoldFrontend } from './frontend.js';
+import { createRootFiles } from './root-files.js';
 import { exec, exists, logError, logOk, logStep, mkdirp, toKebab } from './utils.js';
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
@@ -70,11 +71,14 @@ async function main(): Promise<void> {
     // 7. Scaffold frontend
     await scaffoldFrontend({ projectName, portOffset, projectRoot });
 
-    // 8. Git init at project root
+    // 8. Root-level files (.gitignore, Makefile, .github/, .claude/)
+    createRootFiles({ projectName, projectRoot });
+
+    // 9. Git init at project root
     logStep('Initialising git repository');
     initRootGit(projectRoot);
 
-    // 9. Summary
+    // 10. Summary
     printSummary(projectName, portOffset);
   } catch (err) {
     logError(err instanceof Error ? err.message : String(err));
@@ -129,6 +133,10 @@ function printSummary(projectName: string, portOffset: number): void {
   console.log('      backend/          Django API');
   console.log('        .venv/          Python virtual environment');
   console.log('      frontend/         React app');
+  console.log('      .gitignore        Root ignore rules');
+  console.log('      Makefile          Root dev commands');
+  console.log('      .github/          GitHub config');
+  console.log('      .claude/          Claude config');
   console.log('');
   console.log('  Quick start:');
   console.log('');
