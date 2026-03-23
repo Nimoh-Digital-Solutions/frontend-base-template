@@ -8,6 +8,7 @@ import {
   logInfo,
   logOk,
   logStep,
+  patchReplace,
   readJson,
   readText,
   removeMarkedSection,
@@ -96,6 +97,10 @@ async function scaffoldInner(opts: ScaffoldOptions): Promise<void> {
   safeUnlink(path.join(destDir, 'yarn.lock'));
   safeRmDir(path.join(destDir, 'packages'));
   safeRmDir(path.join(destDir, '.changeset'));
+  safeUnlink(path.join(destDir, 'commitlint.config.js'));
+
+  // 2.6 Clean monorepo-specific gitignore entries
+  cleanupGitignore(destDir);
 
   // 3. Token replace + cleanup monorepo references
   logStep('Customising template');
@@ -149,6 +154,9 @@ async function scaffoldInner(opts: ScaffoldOptions): Promise<void> {
 
   // 7. Remove template-only docs that are not relevant to a scaffolded app
   cleanupTemplateDocs(destDir);
+
+  // 7b. Patch CI/CD workflows for standalone usage
+  patchWorkflowFiles(destDir);
 
   // 8. Initialise a fresh git repo + initial commit
   initGitRepo(destDir, appName);
@@ -407,9 +415,11 @@ function patchDockerComposeForProject(destDir: string, appName: string, portOffs
   let content = readText(composePath);
 
   // Replace the fallback default in container_name: ${APP_NAME:-react-starter-kit}-fe-*
-  content = content.replace(
+  content = patchReplace(
+    content,
     /\$\{APP_NAME:-react-starter-kit\}/g,
-    `\${APP_NAME:-${appName}}`
+    `\${APP_NAME:-${appName}}`,
+    'docker-compose.yml — APP_NAME fallback replacement',
   );
 
   // Patch host ports if offset is non-zero
@@ -419,13 +429,13 @@ function patchDockerComposeForProject(destDir: string, appName: string, portOffs
     const bePort = 8000 + portOffset;
 
     // Dev service: '3000:3000' → '<devPort>:3000'
-    content = content.replace(/['"]3000:3000['"]/g, `'${devPort}:3000'`);
+    content = patchReplace(content, /['"]3000:3000['"]/g, `'${devPort}:3000'`, 'docker-compose.yml — dev port 3000');
 
     // Prod service: '8080:8080' → '<prodPort>:8080'
-    content = content.replace(/['"]8080:8080['"]/g, `'${prodPort}:8080'`);
+    content = patchReplace(content, /['"]8080:8080['"]/g, `'${prodPort}:8080'`, 'docker-compose.yml — prod port 8080');
 
     // Backend service (if uncommented): '8000:8000' → '<bePort>:8000'
-    content = content.replace(/['"]8000:8000['"]/g, `'${bePort}:8000'`);
+    content = patchReplace(content, /['"]8000:8000['"]/g, `'${bePort}:8000'`, 'docker-compose.yml — backend port 8000');
 
     // Update BACKEND_URL port reference
     content = content.replace(
@@ -482,10 +492,7 @@ function patchViteConfigPort(destDir: string, portOffset: number): void {
   let content = readText(configPath);
 
   // Replace `port: 3000` with the offset port
-  content = content.replace(
-    /port:\s*3000/,
-    `port: ${devPort}`
-  );
+  content = patchReplace(content, /port:\s*3000/, `port: ${devPort}`, 'vite.config.ts — dev server port');
 
   writeText(configPath, content);
   logOk(`vite.config.ts — dev server port set to ${devPort}`);
@@ -504,9 +511,11 @@ function patchEnvExamplePorts(destDir: string, portOffset: number): void {
     let content = readText(envPath);
 
     // Update VITE_API_URL port
-    content = content.replace(
+    content = patchReplace(
+      content,
       /VITE_API_URL=http:\/\/localhost:8000/,
-      `VITE_API_URL=http://localhost:${bePort}`
+      `VITE_API_URL=http://localhost:${bePort}`,
+      `${envFile} — VITE_API_URL port`,
     );
 
     writeText(envPath, content);
@@ -1188,6 +1197,40 @@ function generateEnvLocal(destDir: string, appName: string): void {
   logOk('.env.local generated from .env.example');
 }
 
+// ─── Gitignore cleanup ───────────────────────────────────────────────────────
+
+/**
+ * Removes monorepo-specific entries from `.gitignore` so the standalone
+ * project has a clean ignore file.
+ */
+function cleanupGitignore(destDir: string): void {
+  const gitignorePath = path.join(destDir, '.gitignore');
+  if (!exists(gitignorePath)) return;
+
+  let content = readText(gitignorePath);
+
+  // Patterns that are only relevant inside the monorepo template
+  const monorepoPatterns = [
+    /^\*\.local\.md$/m,       // template-internal analysis docs
+    /^packages\/\*\/dist\/$/m, // monorepo package build output
+  ];
+
+  let patched = false;
+  for (const re of monorepoPatterns) {
+    if (re.test(content)) {
+      content = content.replace(re, '');
+      patched = true;
+    }
+  }
+
+  if (patched) {
+    // Collapse runs of 3+ blank lines into 2
+    content = content.replace(/\n{3,}/g, '\n\n');
+    writeText(gitignorePath, content);
+    logOk('.gitignore — removed monorepo-specific entries');
+  }
+}
+
 // ─── Template-only docs cleanup ──────────────────────────────────────────────
 
 /**
@@ -1210,6 +1253,85 @@ function cleanupTemplateDocs(destDir: string): void {
     }
   }
   if (removed === 0) logInfo('No template docs found to remove');
+}
+
+// ─── Workflow patching ───────────────────────────────────────────────────────
+
+/**
+ * Rewrites `.github/workflows/` CI and release files so they work for a
+ * standalone app instead of the monorepo template they were cloned from.
+ */
+function patchWorkflowFiles(destDir: string): void {
+  logStep('Patching GitHub workflow files for standalone project');
+
+  const workflowDir = path.join(destDir, '.github', 'workflows');
+
+  // ── ci.yml: remove the monorepo-only "Build packages" step ──
+  const ciPath = path.join(workflowDir, 'ci.yml');
+  if (exists(ciPath)) {
+    let ci = readText(ciPath);
+    // Remove the entire "Build packages" step block
+    ci = ci.replace(
+      /\n {6}- name: Build packages\n {8}run: yarn packages:build\n/,
+      '\n',
+    );
+    // Remove changeset-related scripts references if any
+    ci = ci.replace(/yarn changeset:publish/g, 'echo "no-op"');
+    writeText(ciPath, ci);
+    logOk('ci.yml — removed monorepo-specific steps');
+  }
+
+  // ── release.yml: rewrite for standalone build + deploy artifact ──
+  const releasePath = path.join(workflowDir, 'release.yml');
+  if (exists(releasePath)) {
+    const standaloneRelease = `name: Build & Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Enable Corepack (Yarn 4)
+        run: corepack enable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build app
+        run: yarn build
+
+      # Uncomment and configure for your deployment target:
+      # - name: Deploy to GitHub Pages
+      #   uses: peaceiris/actions-gh-pages@v4
+      #   with:
+      #     github_token: \${{ secrets.GITHUB_TOKEN }}
+      #     publish_dir: ./dist
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 30
+`;
+    writeText(releasePath, standaloneRelease);
+    logOk('release.yml — rewritten for standalone deployment');
+  }
 }
 
 // ─── Git init ────────────────────────────────────────────────────────────────

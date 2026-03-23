@@ -186,3 +186,20 @@ export function removeMarkedSection(content: string, marker: string): string {
 export function getDestDir(appName: string): string {
   return path.resolve(process.cwd(), appName);
 }
+
+/**
+ * Replace a pattern in content and warn if no replacement occurred.
+ * Use for critical template patches where a silent no-op would cause bugs.
+ */
+export function patchReplace(
+  content: string,
+  pattern: string | RegExp,
+  replacement: string,
+  description: string,
+): string {
+  const result = content.replace(pattern, replacement);
+  if (result === content) {
+    logWarn(`Patch had no effect: ${description}`);
+  }
+  return result;
+}

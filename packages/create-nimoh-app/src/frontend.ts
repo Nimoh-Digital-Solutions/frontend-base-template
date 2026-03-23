@@ -5,6 +5,7 @@ export interface FrontendOptions {
   projectName: string;
   portOffset: number;
   projectRoot: string; // absolute path to the top-level project dir
+  nonInteractive?: boolean;
 }
 
 /**
@@ -13,7 +14,7 @@ export interface FrontendOptions {
  * only answers FE-specific prompts interactively.
  */
 export async function scaffoldFrontend(opts: FrontendOptions): Promise<void> {
-  const { projectName, portOffset, projectRoot } = opts;
+  const { projectName, portOffset, projectRoot, nonInteractive } = opts;
 
   logStep('Running create-tast-app (answer the remaining prompts)');
   console.log('');
@@ -27,6 +28,10 @@ export async function scaffoldFrontend(opts: FrontendOptions): Promise<void> {
     '--port-offset',
     String(portOffset),
   ];
+
+  if (nonInteractive) {
+    args.push('--yes');
+  }
 
   const { code } = await spawnInteractive('npx', args, projectRoot);
 

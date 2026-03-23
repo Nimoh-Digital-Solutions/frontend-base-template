@@ -6,6 +6,7 @@ import { logOk, logStep, mkdirp, writeText } from './utils.js';
 
 interface RootFilesOpts {
   projectName: string;
+  portOffset: number;
   projectRoot: string;
 }
 
@@ -13,7 +14,7 @@ interface RootFilesOpts {
  * Create root-level configuration files (`.gitignore`, `Makefile`) and
  * placeholder directories (`.github/`, `.claude/`) at the monorepo root.
  */
-export function createRootFiles({ projectName, projectRoot }: RootFilesOpts): void {
+export function createRootFiles({ projectName, portOffset, projectRoot }: RootFilesOpts): void {
   logStep('Creating root-level project files');
 
   // .gitignore
@@ -24,6 +25,14 @@ export function createRootFiles({ projectName, projectRoot }: RootFilesOpts): vo
   writeText(path.join(projectRoot, 'Makefile'), rootMakefile());
   logOk('Makefile');
 
+  // README.md
+  writeText(path.join(projectRoot, 'README.md'), rootReadme(projectName, portOffset));
+  logOk('README.md');
+
+  // .env.example — shared env vars used by docker-compose and Makefile
+  writeText(path.join(projectRoot, '.env.example'), rootEnvExample(projectName));
+  logOk('.env.example');
+
   // Placeholder directories
   mkdirp(path.join(projectRoot, '.github'));
   logOk('.github/');
@@ -33,6 +42,91 @@ export function createRootFiles({ projectName, projectRoot }: RootFilesOpts): vo
 }
 
 // ─── File contents ───────────────────────────────────────────────────────────
+
+function rootReadme(projectName: string, portOffset: number): string {
+  const bePort = 8000 + portOffset;
+  const feDevPort = 3000 + portOffset;
+  const feProdPort = 8080 + portOffset;
+  const titleName = projectName
+    .split(/[-_\s]+/)
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+
+  return `# ${titleName}
+
+Full-stack application: Django backend + React/Vite frontend.
+
+## Structure
+
+\`\`\`
+${projectName}/
+  backend/          Django API (DRF + nimoh-be-django-base)
+    .venv/          Python virtual environment
+  frontend/         React app (Vite + TypeScript)
+  .gitignore        Root ignore rules
+  Makefile          Root dev commands
+  .github/          GitHub config (local)
+  .claude/          Claude AI config (local)
+\`\`\`
+
+## Prerequisites
+
+- Python >= 3.12
+- Node.js >= 18
+- Docker & Docker Compose
+- Git
+
+## Quick Start
+
+### Both (parallel)
+
+\`\`\`bash
+make start
+\`\`\`
+
+### Backend only
+
+\`\`\`bash
+cd backend
+source .venv/bin/activate
+make dev
+# → http://localhost:${bePort}
+\`\`\`
+
+### Frontend only
+
+\`\`\`bash
+cd frontend
+yarn dev        # or: make docker-dev
+# → http://localhost:${feDevPort} (dev)
+# → http://localhost:${feProdPort} (prod/nginx)
+\`\`\`
+
+## Ports
+
+| Service         | Port  |
+| --------------- | ----- |
+| Backend (Django) | ${bePort} |
+| Frontend (Vite dev) | ${feDevPort} |
+| Frontend (nginx prod) | ${feProdPort} |
+`;
+}
+
+function rootEnvExample(projectName: string): string {
+  return `# =============================================================================
+# ${projectName} — shared environment variables
+# =============================================================================
+# Copy to .env and edit as needed:   cp .env.example .env
+#
+# These variables are read by docker-compose and the root Makefile.
+# For service-specific configuration see:
+#   backend/.env.example   — Django settings
+#   frontend/.env.example  — Vite / React settings
+
+# Used by docker-compose \`name:\` field and container naming
+APP_NAME=${projectName}
+`;
+}
 
 function rootGitignore(projectName: string): string {
   return `# =============================================================================
@@ -209,15 +303,24 @@ AGENTS.md
 }
 
 function rootMakefile(): string {
-  return `.DEFAULT: start
+  return `.DEFAULT_GOAL := start
 
+start: ## Start both the BE and FE servers in parallel
+\t@echo "Starting backend and frontend…"
+\t@cd backend && make dev &
+\t@cd frontend && make docker-dev &
+\t@wait
 
-
-start: # start both the BE server and the FE server
-\t@echo "Starting the BE server and the FE server..."
+start-be: ## Start backend only
 \t@cd backend && make dev
-\t@echo "BE server started."
+
+start-fe: ## Start frontend only
 \t@cd frontend && make docker-dev
-\t@echo "FE server started."
+
+stop: ## Stop all running services
+\t@echo "Stopping services…"
+\t-@cd frontend && docker compose down 2>/dev/null
+\t-@pkill -f "manage.py runserver" 2>/dev/null
+\t@echo "Done."
 `;
 }
