@@ -1,6 +1,6 @@
 {
   "name": "@nimoh-digital-solutions/create-nimoh-ai-helpers",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Scaffold AI helper assets (agents, skills, instructions, prompts, workflows) into any project",
   "type": "module",
   "bin": "./dist/index.cjs",
