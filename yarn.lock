@@ -2385,6 +2385,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@nimoh-digital-solutions/create-nimoh-ai-helpers@workspace:packages/create-nimoh-ai-helpers":
+  version: 0.0.0-use.local
+  resolution: "@nimoh-digital-solutions/create-nimoh-ai-helpers@workspace:packages/create-nimoh-ai-helpers"
+  dependencies:
+    "@nimoh-digital-solutions/tsconfig": "workspace:^"
+    "@types/node": "npm:^24.0.14"
+    tsup: "npm:^8.4.0"
+    typescript: "npm:^5.8.3"
+    vitest: "npm:^4.0.18"
+  bin:
+    create-nimoh-ai-helpers: ./dist/index.cjs
+  languageName: unknown
+  linkType: soft
+
 "@nimoh-digital-solutions/create-nimoh-app@workspace:packages/create-nimoh-app":
   version: 0.0.0-use.local
   resolution: "@nimoh-digital-solutions/create-nimoh-app@workspace:packages/create-nimoh-app"

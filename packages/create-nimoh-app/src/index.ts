@@ -7,7 +7,8 @@ import { checkPrerequisites } from './prereqs.js';
 import { scaffoldBackend } from './backend.js';
 import { scaffoldFrontend } from './frontend.js';
 import { createRootFiles } from './root-files.js';
-import { commandExists, exec, exists, logError, logInfo, logOk, logStep, mkdirp, toKebab } from './utils.js';
+import { commandExists, exec, execAsync, exists, logError, logInfo, logOk, logStep, mkdirp, toKebab } from './utils.js';
+import { createSpinner } from './spinner.js';
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
@@ -21,10 +22,11 @@ async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const argName = args.find(a => !a.startsWith('-'))?.trim();
   const yesMode = args.includes('--yes') || args.includes('-y');
+  const aiHelpersFlag = args.includes('--ai-helpers');
 
   // 3. Shared prompts
   const answers = yesMode
-    ? { projectName: argName ?? 'my-nimoh-app', portOffset: 0 }
+    ? { projectName: argName ?? 'my-nimoh-app', portOffset: 0, aiHelpers: aiHelpersFlag }
     : await prompts(
       [
         {
@@ -42,6 +44,12 @@ async function main(): Promise<void> {
           initial: 0,
           validate: (v: number) => v >= 0 || 'Must be a non-negative integer',
         },
+        {
+          type: aiHelpersFlag ? null : 'confirm',
+          name: 'aiHelpers',
+          message: 'Sync AI helper assets (agents, skills, instructions)?',
+          initial: false,
+        },
       ],
       {
         onCancel: () => {
@@ -53,6 +61,7 @@ async function main(): Promise<void> {
 
   const projectName = toKebab(argName ?? answers.projectName ?? 'my-nimoh-app');
   const portOffset: number = answers.portOffset ?? 0;
+  const includeAiHelpers: boolean = aiHelpersFlag || (answers.aiHelpers ?? false);
   const projectRoot = path.resolve(process.cwd(), projectName);
 
   // 4. Validate project directory doesn't exist
@@ -77,16 +86,44 @@ async function main(): Promise<void> {
     // 8. Root-level files (.gitignore, Makefile, README.md, .github/, .claude/)
     createRootFiles({ projectName, portOffset, projectRoot });
 
-    // 9. Git init at project root
+    // 9. AI helper assets (opt-in)
+    if (includeAiHelpers) {
+      await syncAiHelpers(projectRoot);
+    }
+
+    // 10. Git init at project root
     logStep('Initialising git repository');
     initRootGit(projectRoot);
 
-    // 10. Summary
-    printSummary(projectName, portOffset);
+    // 11. Summary
+    printSummary(projectName, portOffset, includeAiHelpers);
   } catch (err) {
     logError(err instanceof Error ? err.message : String(err));
     logError('Scaffold failed. The partially created directory has been left for inspection.');
     process.exit(1);
+  }
+}
+
+// ─── AI helpers sync ─────────────────────────────────────────────────────────
+
+const AI_HELPERS_PKG = '@nimoh-digital-solutions/nimoh-ai-helpers';
+
+async function syncAiHelpers(projectRoot: string): Promise<void> {
+  logStep('Syncing AI helper assets');
+
+  const spinner = createSpinner('Downloading and syncing helpers');
+
+  const result = await execAsync(
+    `npx --yes --package ${AI_HELPERS_PKG} nimoh-ai-helpers-sync ${projectRoot} --with-claude`,
+    projectRoot,
+  );
+
+  if (result.success) {
+    spinner.succeed('AI helpers synced');
+  } else {
+    spinner.fail('AI helper sync failed');
+    logInfo('You can sync manually later:');
+    logInfo(`  npx --yes --package ${AI_HELPERS_PKG} nimoh-ai-helpers-sync . --with-claude`);
   }
 }
 
@@ -140,7 +177,7 @@ function printBanner(): void {
   console.log('  Django (nimoh-be-django-base) + React (create-tast-app)');
 }
 
-function printSummary(projectName: string, portOffset: number): void {
+function printSummary(projectName: string, portOffset: number, aiHelpers = false): void {
   const bePort = 8000 + portOffset;
   const feDevPort = 3000 + portOffset;
   const feProdPort = 8080 + portOffset;
@@ -163,6 +200,14 @@ function printSummary(projectName: string, portOffset: number): void {
   console.log('      Makefile          Root dev commands');
   console.log('      .github/          GitHub config');
   console.log('      .claude/          Claude config');
+
+  if (aiHelpers) {
+    console.log('      .github/agents/   AI agent definitions');
+    console.log('      .github/skills/   AI skill definitions');
+    console.log('      .claude/agents/   AI agents (Claude)');
+    console.log('      .claude/skills/   AI skills (Claude)');
+  }
+
   console.log('');
   console.log('  Ports:');
   console.log(`    Django API        http://localhost:${bePort}`);
