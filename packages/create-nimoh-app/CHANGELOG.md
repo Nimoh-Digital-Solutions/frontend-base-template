@@ -1,5 +1,14 @@
 # @nimoh-digital-solutions/create-nimoh-app
 
+## 1.3.0
+
+### Minor Changes
+
+- 00d64da: Add `--ai-helpers` flag to scaffold AI helper assets alongside the full-stack project
+  - Opt-in via `--ai-helpers` flag or interactive prompt
+  - Syncs agents, skills, instructions, prompts, and workflows into `.github` and `.claude`
+  - Non-fatal: prints manual sync command if the download fails
+
 ## 1.2.0
 
 ### Minor Changes
