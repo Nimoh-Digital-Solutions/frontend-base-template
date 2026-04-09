@@ -1,5 +1,24 @@
 # @nimoh-digital-solutions/create-nimoh-app
 
+## 1.2.0
+
+### Minor Changes
+
+- 8e48d1d: feat: scaffolder improvements — non-interactive mode, workflow patching, expanded summary
+  - Add --yes/-y flag for non-interactive scaffolding (CI-friendly)
+  - Patch FE GitHub workflow files for standalone projects (ci.yml + release.yml)
+  - Clean monorepo-specific .gitignore entries and remove commitlint.config.js
+  - Generate root .env.example with shared APP_NAME variable
+  - Expand summary with all ports (PostgreSQL, Redis, prod) and root Makefile commands
+  - Generate root README.md with ports table and quick-start instructions
+  - Add patchReplace() utility with mismatch warnings for safer template patching
+  - Add graceful error handling to root git init
+  - Log warnings when hoistDirectory skips existing files
+
+### Patch Changes
+
+- e5a4651: fix: pass offset-aware frontend_url to backend CLI config so CORS_ALLOWED_ORIGINS and FRONTEND_URL match the actual FE dev port when a port offset is used
+
 ## 1.1.2
 
 ### Patch Changes
