@@ -1,5 +1,11 @@
 # @nimoh-digital-solutions/create-tast-app
 
+## 1.8.3
+
+### Patch Changes
+
+- d6dbda5: Use same docker-compose project name as BE so all containers are grouped together in Docker Desktop — container names (with -be-/-fe- prefixes) are the differentiators
+
 ## 1.8.2
 
 ### Patch Changes
