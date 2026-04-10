@@ -1,5 +1,11 @@
 # @nimoh-digital-solutions/create-tast-app
 
+## 1.8.2
+
+### Patch Changes
+
+- 6499992: Fix blank page when FE runs in Docker with port offset: skip Vite port patch when Docker is enabled (container always listens on 3000, Docker maps the host port). Also give FE docker-compose a distinct project name (-fe suffix) to prevent BE docker-down from killing FE containers.
+
 ## 1.8.1
 
 ### Patch Changes
