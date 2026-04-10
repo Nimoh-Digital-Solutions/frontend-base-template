@@ -161,7 +161,6 @@ function writeTempConfig(
       '# Mobile extras',
       'use_mobile: true',
       'use_push: true',
-      `mobile_app_scheme: "${slug.replace(/_/g, '')}"`,
     );
   }
 
