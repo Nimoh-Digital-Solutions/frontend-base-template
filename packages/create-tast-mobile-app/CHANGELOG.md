@@ -1,5 +1,11 @@
 # @nimoh-digital-solutions/create-tast-mobile-app
 
+## 0.2.2
+
+### Patch Changes
+
+- 360cc30: Create .env from .env.example during scaffold so the mobile app runs out of the box with correct EXPO_PUBLIC_API_URL
+
 ## 0.2.0
 
 ### Minor Changes
