@@ -1,5 +1,11 @@
 # @nimoh-digital-solutions/create-nimoh-app
 
+## 1.4.3
+
+### Patch Changes
+
+- 250034e: Preserve underscores in project names — `my_app` now stays `my_app` instead of being converted to `my-app`
+
 ## 1.4.2
 
 ### Patch Changes
