@@ -418,8 +418,8 @@ start-fe: ## Start frontend only
 \t@cd frontend && make docker-dev
 ${mobileTargets}stop: ## Stop all running services
 \t@echo "Stopping services…"
-\t-@cd frontend && docker compose down 2>/dev/null
-\t-@pkill -f "manage.py runserver" 2>/dev/null${mobile ? '\n\t-@pkill -f "expo start" 2>/dev/null' : ''}
+\t-@cd backend && make dev-down 2>/dev/null
+\t-@cd frontend && docker compose down 2>/dev/null${mobile ? '\n\t-@pkill -f "expo start" 2>/dev/null' : ''}
 \t@echo "Done."
 `;
 }

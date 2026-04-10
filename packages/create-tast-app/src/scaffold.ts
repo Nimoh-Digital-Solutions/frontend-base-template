@@ -128,9 +128,13 @@ async function scaffoldInner(opts: ScaffoldOptions): Promise<void> {
     patchDockerComposeForProject(destDir, appName, portOffset);
   }
 
-  // 4.1 Apply port offset to Vite config and Makefile regardless of Docker
+  // 4.1 Apply port offset to env files and (when not using Docker) to Vite config.
+  // When Docker is enabled the container always listens on port 3000 internally;
+  // the host-side port offset is handled by docker-compose.yml alone.
   if (portOffset !== 0) {
-    patchViteConfigPort(destDir, portOffset);
+    if (!enableDocker) {
+      patchViteConfigPort(destDir, portOffset);
+    }
     patchEnvExamplePorts(destDir, portOffset);
   }
   patchMakefileForProject(destDir, appName);
@@ -424,6 +428,13 @@ function patchDockerComposeForProject(destDir: string, appName: string, portOffs
     /\$\{APP_NAME:-react-starter-kit\}/g,
     `\${APP_NAME:-${appName}}`,
     'docker-compose.yml — APP_NAME fallback replacement',
+  );
+
+  // Give the FE compose project a distinct name so it doesn't collide with
+  // the BE compose project (both would otherwise share the same app name).
+  content = content.replace(
+    /^name:\s*\$\{APP_NAME:-[^}]+\}\s*$/m,
+    `name: \${APP_NAME:-${appName}}-fe`,
   );
 
   // Patch host ports if offset is non-zero
