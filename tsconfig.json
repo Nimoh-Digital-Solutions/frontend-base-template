@@ -34,12 +34,15 @@
       "@features/*": ["features/*"],
       "@test": ["test"],
       "@test/*": ["test/*"],
+      // Shared package alias — active when project has packages/shared/
+      // (e.g. via create-nimoh-app --mobile). Safe to leave when packages/shared/ doesn't exist.
+      "@shared/*": ["../../packages/shared/src/*"],
       // Workspace package resolution — points tsc to source so dist/ isn't required
       "@nimoh-digital-solutions/tast-utils": ["../packages/tast-utils/src/index.ts"],
       "@nimoh-digital-solutions/tast-hooks": ["../packages/tast-hooks/src/index.ts"],
       "@nimoh-digital-solutions/tast-ui": ["../packages/tast-ui/src/index.ts"]
     }
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src", "../packages/shared/src"],
+  "exclude": ["node_modules", "dist", "../packages/shared/src/**/__tests__"]
 }

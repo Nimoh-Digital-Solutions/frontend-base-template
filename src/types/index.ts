@@ -20,3 +20,7 @@ export type {
 
 // Add app-specific type extensions below, e.g.:
 // export type { MyCustomType } from './myCustomTypes';
+//
+// Cross-platform types live in packages/shared/ and are available as:
+//   import type { User } from '@shared/types';
+//   import { userSchema } from '@shared/schemas';
