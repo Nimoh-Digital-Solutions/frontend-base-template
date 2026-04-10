@@ -430,11 +430,11 @@ function patchDockerComposeForProject(destDir: string, appName: string, portOffs
     'docker-compose.yml — APP_NAME fallback replacement',
   );
 
-  // Give the FE compose project a distinct name so it doesn't collide with
-  // the BE compose project (both would otherwise share the same app name).
+  // Ensure the compose project name matches the app name (same as BE) so all
+  // containers are grouped under one project in Docker Desktop.
   content = content.replace(
     /^name:\s*\$\{APP_NAME:-[^}]+\}\s*$/m,
-    `name: \${APP_NAME:-${appName}}-fe`,
+    `name: \${APP_NAME:-${appName}}`,
   );
 
   // Patch host ports if offset is non-zero
