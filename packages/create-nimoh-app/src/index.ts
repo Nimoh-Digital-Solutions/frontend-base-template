@@ -10,6 +10,7 @@ import { scaffoldMobile } from './mobile.js';
 import { createRootFiles } from './root-files.js';
 import { scaffoldSharedPackage } from './shared-package.js';
 import { patchSharedReferences } from './shared-patch.js';
+import fs from 'fs';
 import { commandExists, exec, execAsync, exists, logError, logInfo, logOk, logStep, mkdirp, toKebab } from './utils.js';
 import { createSpinner } from './spinner.js';
 
@@ -143,7 +144,18 @@ async function main(): Promise<void> {
     printSummary(projectName, portOffset, includeAiHelpers, includeMobile);
   } catch (err) {
     logError(err instanceof Error ? err.message : String(err));
-    logError('Scaffold failed. The partially created directory has been left for inspection.');
+
+    // Clean up the partially created project directory
+    if (exists(projectRoot)) {
+      try {
+        fs.rmSync(projectRoot, { recursive: true, force: true });
+        logInfo(`Cleaned up ${projectName}/`);
+      } catch {
+        logError(`Could not clean up ${projectName}/ — remove it manually before retrying.`);
+      }
+    }
+
+    logError('Scaffold failed.');
     process.exit(1);
   }
 }
