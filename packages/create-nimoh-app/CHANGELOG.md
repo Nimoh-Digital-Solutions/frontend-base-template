@@ -1,5 +1,11 @@
 # @nimoh-digital-solutions/create-nimoh-app
 
+## 1.4.1
+
+### Patch Changes
+
+- 0df751b: Fix: remove mobile_app_scheme from backend scaffold config (it's a runtime env var, not a CLI scaffold key)
+
 ## 1.4.0
 
 ### Minor Changes
