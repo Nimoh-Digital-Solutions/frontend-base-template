@@ -30,16 +30,34 @@ export function exists(absPath: string): boolean {
   return fs.existsSync(absPath);
 }
 
-export function mkdirp(absPath: string): void {
-  fs.mkdirSync(absPath, { recursive: true });
-}
-
 export function readText(absPath: string): string {
   return fs.readFileSync(absPath, 'utf-8');
 }
 
 export function writeText(absPath: string, content: string): void {
   fs.writeFileSync(absPath, content);
+}
+
+export function readJson(absPath: string): Record<string, unknown> {
+  return JSON.parse(fs.readFileSync(absPath, 'utf-8')) as Record<string, unknown>;
+}
+
+export function writeJson(absPath: string, data: unknown): void {
+  fs.writeFileSync(absPath, JSON.stringify(data, null, 2) + '\n');
+}
+
+export function mkdirp(absPath: string): void {
+  fs.mkdirSync(absPath, { recursive: true });
+}
+
+export function safeRmDir(absDir: string): boolean {
+  if (!exists(absDir)) return false;
+  try {
+    fs.rmSync(absDir, { recursive: true, force: true });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 // ─── Exec helpers ─────────────────────────────────────────────────────────────
@@ -50,9 +68,6 @@ export interface ExecResult {
   error?: string;
 }
 
-/**
- * Run a shell command synchronously.
- */
 export function exec(
   cmd: string,
   cwd: string,
@@ -71,9 +86,6 @@ export function exec(
   }
 }
 
-/**
- * Run a shell command asynchronously (spinners can animate).
- */
 export function execAsync(cmd: string, cwd: string): Promise<ExecResult> {
   return new Promise((resolve) => {
     const child = spawn(cmd, { cwd, shell: true, stdio: 'pipe' });
@@ -101,37 +113,6 @@ export function execAsync(cmd: string, cwd: string): Promise<ExecResult> {
   });
 }
 
-/**
- * Spawn a command with full stdio inheritance (user interacts directly).
- * Returns a promise that resolves when the process exits.
- */
-export function spawnInteractive(
-  cmd: string,
-  args: string[],
-  cwd: string,
-  env?: Record<string, string>,
-): Promise<{ code: number }> {
-  return new Promise((resolve, reject) => {
-    const child = spawn(cmd, args, {
-      cwd,
-      stdio: 'inherit',
-      shell: false,
-      env: env ? { ...process.env, ...env } : process.env,
-    });
-
-    child.on('close', (code) => {
-      resolve({ code: code ?? 1 });
-    });
-
-    child.on('error', (err) => {
-      reject(err);
-    });
-  });
-}
-
-/**
- * Check if a command is available on PATH.
- */
 export function commandExists(cmd: string): boolean {
   const result = spawnSync(cmd, ['--version'], {
     shell: false,
@@ -144,7 +125,7 @@ export function commandExists(cmd: string): boolean {
 // ─── String helpers ───────────────────────────────────────────────────────────
 
 /**
- * Convert a string to a kebab-case slug.
+ * Convert a string to a valid kebab-case package name.
  * e.g. "My Cool App" → "my-cool-app"
  */
 export function toKebab(name: string): string {
@@ -156,9 +137,27 @@ export function toKebab(name: string): string {
 }
 
 /**
- * Convert a kebab-case string to a Python identifier slug.
- * e.g. "my-cool-app" → "my_cool_app"
+ * Convert a kebab-case string to a URL scheme slug (no hyphens).
+ * e.g. "my-cool-app" → "mycoolapp"
  */
-export function toPythonSlug(name: string): string {
-  return toKebab(name).replace(/-/g, '_');
+export function toSlug(name: string): string {
+  return toKebab(name).replace(/-/g, '');
+}
+
+/**
+ * Convert a kebab-case string to a title.
+ * e.g. "my-cool-app" → "My Cool App"
+ */
+export function toTitle(name: string): string {
+  return name
+    .split(/[-_\s]+/)
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
+/**
+ * Path to the project root (where this CLI was invoked from).
+ */
+export function getDestDir(appName: string): string {
+  return path.resolve(process.cwd(), appName);
 }

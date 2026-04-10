@@ -1,0 +1,49 @@
+{
+  "name": "@nimoh-digital-solutions/create-tast-mobile-app",
+  "version": "0.1.0",
+  "description": "Scaffold a React Native (Expo) mobile app from the nimoh base template",
+  "type": "module",
+  "bin": "./dist/index.cjs",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "yarn build"
+  },
+  "dependencies": {
+    "prompts": "^2.4.2"
+  },
+  "devDependencies": {
+    "@nimoh-digital-solutions/tsconfig": "workspace:^",
+    "@types/node": "^24.0.14",
+    "@types/prompts": "^2.4.9",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.3",
+    "vitest": "^4.0.18"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public",
+    "tag": "latest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nimoh-Digital-Solutions/frontend-base-template.git"
+  },
+  "keywords": [
+    "create-app",
+    "cli",
+    "react-native",
+    "expo",
+    "mobile",
+    "tast"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  }
+}

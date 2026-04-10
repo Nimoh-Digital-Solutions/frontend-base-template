@@ -6,27 +6,47 @@ declare const __PACKAGE_VERSION__: string;
 import { checkPrerequisites } from './prereqs.js';
 import { scaffoldBackend } from './backend.js';
 import { scaffoldFrontend } from './frontend.js';
+import { scaffoldMobile } from './mobile.js';
 import { createRootFiles } from './root-files.js';
+import { scaffoldSharedPackage } from './shared-package.js';
+import { patchSharedReferences } from './shared-patch.js';
 import { commandExists, exec, execAsync, exists, logError, logInfo, logOk, logStep, mkdirp, toKebab } from './utils.js';
 import { createSpinner } from './spinner.js';
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
+  const args = process.argv.slice(2);
+
+  if (args.includes('--help') || args.includes('-h')) {
+    printHelp();
+    return;
+  }
+
+  if (args.includes('--version') || args.includes('-V')) {
+    console.log(__PACKAGE_VERSION__);
+    return;
+  }
+
   printBanner();
 
   // 1. Prerequisite checks
   checkPrerequisites();
 
   // 2. Parse CLI args
-  const args = process.argv.slice(2);
   const argName = args.find(a => !a.startsWith('-'))?.trim();
   const yesMode = args.includes('--yes') || args.includes('-y');
+  const mobileFlag = args.includes('--mobile');
   const aiHelpersFlag = args.includes('--ai-helpers');
 
   // 3. Shared prompts
   const answers = yesMode
-    ? { projectName: argName ?? 'my-nimoh-app', portOffset: 0, aiHelpers: aiHelpersFlag }
+    ? {
+        projectName: argName ?? 'my-nimoh-app',
+        portOffset: 0,
+        includeMobile: mobileFlag,
+        aiHelpers: aiHelpersFlag,
+      }
     : await prompts(
       [
         {
@@ -45,6 +65,12 @@ async function main(): Promise<void> {
           validate: (v: number) => v >= 0 || 'Must be a non-negative integer',
         },
         {
+          type: mobileFlag ? null : 'confirm',
+          name: 'includeMobile',
+          message: 'Include mobile app (Expo / React Native)?',
+          initial: false,
+        },
+        {
           type: aiHelpersFlag ? null : 'confirm',
           name: 'aiHelpers',
           message: 'Sync AI helper assets (agents, skills, instructions)?',
@@ -61,6 +87,7 @@ async function main(): Promise<void> {
 
   const projectName = toKebab(argName ?? answers.projectName ?? 'my-nimoh-app');
   const portOffset: number = answers.portOffset ?? 0;
+  const includeMobile: boolean = mobileFlag || (answers.includeMobile ?? false);
   const includeAiHelpers: boolean = aiHelpersFlag || (answers.aiHelpers ?? false);
   const projectRoot = path.resolve(process.cwd(), projectName);
 
@@ -71,32 +98,49 @@ async function main(): Promise<void> {
   }
 
   console.log('');
-  logStep(`Creating full-stack project "${projectName}"`);
+  logStep(`Creating full-stack project "${projectName}"${includeMobile ? ' (with mobile)' : ''}`);
 
   // 5. Create project root
   mkdirp(projectRoot);
 
   try {
-    // 6. Scaffold backend
-    await scaffoldBackend({ projectName, portOffset, projectRoot, nonInteractive: yesMode });
+    // 6. Scaffold backend (passes mobile flags to nimoh-base init config)
+    await scaffoldBackend({
+      projectName,
+      portOffset,
+      projectRoot,
+      nonInteractive: yesMode,
+      includeMobile,
+    });
 
     // 7. Scaffold frontend
     await scaffoldFrontend({ projectName, portOffset, projectRoot, nonInteractive: yesMode });
 
-    // 8. Root-level files (.gitignore, Makefile, README.md, .github/, .claude/)
-    createRootFiles({ projectName, portOffset, projectRoot });
+    // 8. Mobile-specific extras: shared package, mobile app, cross-platform patches
+    if (includeMobile) {
+      scaffoldSharedPackage(projectRoot, projectName);
 
-    // 9. AI helper assets (opt-in)
+      const mobileOk = await scaffoldMobile({ projectName, portOffset, projectRoot });
+
+      if (mobileOk) {
+        patchSharedReferences(projectRoot);
+      }
+    }
+
+    // 9. Root-level files (.gitignore, Makefile, README.md, .env.example, .github/, .claude/)
+    createRootFiles({ projectName, portOffset, projectRoot, includeMobile });
+
+    // 10. AI helper assets (opt-in)
     if (includeAiHelpers) {
       await syncAiHelpers(projectRoot);
     }
 
-    // 10. Git init at project root
+    // 11. Git init at project root
     logStep('Initialising git repository');
-    initRootGit(projectRoot);
+    initRootGit(projectRoot, includeMobile);
 
-    // 11. Summary
-    printSummary(projectName, portOffset, includeAiHelpers);
+    // 12. Summary
+    printSummary(projectName, portOffset, includeAiHelpers, includeMobile);
   } catch (err) {
     logError(err instanceof Error ? err.message : String(err));
     logError('Scaffold failed. The partially created directory has been left for inspection.');
@@ -129,7 +173,7 @@ async function syncAiHelpers(projectRoot: string): Promise<void> {
 
 // ─── Git init ────────────────────────────────────────────────────────────────
 
-function initRootGit(projectRoot: string): void {
+function initRootGit(projectRoot: string, includeMobile = false): void {
   if (!commandExists('git')) {
     logInfo('git not found — skipping repository initialisation');
     return;
@@ -137,7 +181,8 @@ function initRootGit(projectRoot: string): void {
 
   // Remove any .git dirs that sub-scaffolds may have created
   const fs = require('fs') as typeof import('fs');
-  for (const sub of ['backend', 'frontend']) {
+  const subDirs = includeMobile ? ['backend', 'frontend', 'mobile'] : ['backend', 'frontend'];
+  for (const sub of subDirs) {
     const gitDir = path.join(projectRoot, sub, '.git');
     if (exists(gitDir)) {
       fs.rmSync(gitDir, { recursive: true, force: true });
@@ -174,10 +219,35 @@ function printBanner(): void {
   console.log('  ╚═══════════════════════════════════╝');
   console.log('');
   console.log('  Full-stack project scaffolder');
-  console.log('  Django (nimoh-be-django-base) + React (create-tast-app)');
+  console.log('  Django + React + (optional) Expo mobile');
 }
 
-function printSummary(projectName: string, portOffset: number, aiHelpers = false): void {
+function printHelp(): void {
+  console.log(`
+  create-nimoh-app v${__PACKAGE_VERSION__}
+
+  Usage: npx @nimoh-digital-solutions/create-nimoh-app [project-name] [options]
+
+  Options:
+    --yes, -y         Non-interactive mode with defaults
+    --mobile          Include Expo (React Native) mobile app
+    --ai-helpers      Sync AI helper assets
+    --help, -h        Show this help message
+    --version, -V     Show version number
+
+  Examples:
+    npx @nimoh-digital-solutions/create-nimoh-app my-app
+    npx @nimoh-digital-solutions/create-nimoh-app my-app --mobile
+    npx @nimoh-digital-solutions/create-nimoh-app my-app --mobile --ai-helpers --yes
+  `);
+}
+
+function printSummary(
+  projectName: string,
+  portOffset: number,
+  aiHelpers = false,
+  mobile = false,
+): void {
   const bePort = 8000 + portOffset;
   const feDevPort = 3000 + portOffset;
   const feProdPort = 8080 + portOffset;
@@ -196,6 +266,13 @@ function printSummary(projectName: string, portOffset: number, aiHelpers = false
   console.log('      backend/          Django API');
   console.log('        .venv/          Python virtual environment');
   console.log('      frontend/         React app');
+
+  if (mobile) {
+    console.log('      mobile/           Expo (React Native) mobile app');
+    console.log('      packages/');
+    console.log('        shared/         Shared types, schemas, i18n, utils');
+  }
+
   console.log('      .gitignore        Root ignore rules');
   console.log('      Makefile          Root dev commands');
   console.log('      .github/          GitHub config');
@@ -215,13 +292,16 @@ function printSummary(projectName: string, portOffset: number, aiHelpers = false
   console.log(`    React prod        http://localhost:${feProdPort}  (Docker)`);
   console.log(`    PostgreSQL        localhost:${pgPort}`);
   console.log(`    Redis             localhost:${redisPort}`);
+  if (mobile) {
+    console.log('    Expo dev          http://localhost:8081  (default)');
+  }
   console.log('');
   console.log('  Quick start:');
   console.log('');
-  console.log('    Both (from project root):');
+  console.log(`    All services${mobile ? ' (from project root)' : ' (from project root)'}:`);
   console.log(`      cd ${projectName}`);
-  console.log('      make start       # starts BE + FE in parallel');
-  console.log('      make stop        # stops both');
+  console.log(`      make start       # starts ${mobile ? 'BE + FE + mobile' : 'BE + FE'} in parallel`);
+  console.log('      make stop        # stops all');
   console.log('');
   console.log('    Backend:');
   console.log(`      cd ${projectName}/backend`);
@@ -233,6 +313,14 @@ function printSummary(projectName: string, portOffset: number, aiHelpers = false
   console.log(`      cd ${projectName}/frontend`);
   console.log('      yarn dev         # (or npm run dev)');
   console.log(`      # → http://localhost:${feDevPort}`);
+
+  if (mobile) {
+    console.log('');
+    console.log('    Mobile:');
+    console.log(`      cd ${projectName}/mobile`);
+    console.log('      npx expo start   # Scan QR or press i/a for simulators');
+  }
+
   console.log('');
 }
 
