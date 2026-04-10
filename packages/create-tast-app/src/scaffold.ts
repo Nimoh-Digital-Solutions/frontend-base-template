@@ -51,6 +51,8 @@ export interface ScaffoldOptions {
   brandPrimary?: string;
   brandSecondary?: string;
   brandTertiary?: string;
+  /** Skip git init + initial commit (useful when embedded in a monorepo scaffolder). */
+  noGit?: boolean;
 }
 
 // ─── Main entry ──────────────────────────────────────────────────────────────
@@ -159,7 +161,9 @@ async function scaffoldInner(opts: ScaffoldOptions): Promise<void> {
   patchWorkflowFiles(destDir);
 
   // 8. Initialise a fresh git repo + initial commit
-  initGitRepo(destDir, appName);
+  if (!opts.noGit) {
+    initGitRepo(destDir, appName);
+  }
 }
 
 // ─── Clone ───────────────────────────────────────────────────────────────────

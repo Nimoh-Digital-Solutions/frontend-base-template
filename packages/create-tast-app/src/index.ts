@@ -33,6 +33,7 @@ async function main(): Promise<void> {
   // Parse CLI flags
   const args = process.argv.slice(2);
   const yesFlag = args.includes('--yes') || args.includes('-y');
+  const noGitFlag = args.includes('--no-git');
   // --port-offset <n> — allows callers (e.g. create-nimoh-app) to pre-set the offset
   const argPortOffset = parseNumericFlag(args, '--port-offset');
   // First positional arg (not a flag) is the app name
@@ -57,6 +58,7 @@ async function main(): Promise<void> {
         enableDocker: true,
         enableHusky: true,
         portOffset: argPortOffset ?? 0,
+        noGit: noGitFlag,
       });
     } catch (err) {
       logError(err instanceof Error ? err.message : String(err));
@@ -209,6 +211,7 @@ async function main(): Promise<void> {
       brandPrimary: answers.brandPrimary?.trim() || undefined,
       brandSecondary: answers.brandSecondary?.trim() || undefined,
       brandTertiary: answers.brandTertiary?.trim() || undefined,
+      noGit: noGitFlag,
     });
   } catch (err) {
     logError(err instanceof Error ? err.message : String(err));

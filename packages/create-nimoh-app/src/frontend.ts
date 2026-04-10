@@ -27,6 +27,7 @@ export async function scaffoldFrontend(opts: FrontendOptions): Promise<void> {
     projectName,
     '--port-offset',
     String(portOffset),
+    '--no-git',
   ];
 
   if (nonInteractive) {
