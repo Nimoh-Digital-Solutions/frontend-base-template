@@ -1,6 +1,6 @@
 {
   "name": "@nimoh-digital-solutions/create-nimoh-app",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "description": "Scaffold a full-stack Nimoh project (Django BE + React FE) in one command",
   "type": "module",
   "bin": "./dist/index.cjs",

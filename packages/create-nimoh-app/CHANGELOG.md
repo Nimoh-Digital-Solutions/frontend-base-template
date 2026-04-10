@@ -1,5 +1,11 @@
 # @nimoh-digital-solutions/create-nimoh-app
 
+## 1.4.4
+
+### Patch Changes
+
+- 38f9433: Add --no-git flag to create-tast-app and pass it from create-nimoh-app so sub-scaffolders don't create .git directories — git init only happens at the monorepo root
+
 ## 1.4.3
 
 ### Patch Changes
