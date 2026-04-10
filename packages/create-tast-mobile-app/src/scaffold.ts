@@ -88,10 +88,13 @@ async function scaffoldInner(opts: ScaffoldOptions): Promise<void> {
     '{{PORT_OFFSET}}': String(portOffset),
   });
 
-  // 5. Clean up template artifacts
+  // 5. Create .env from .env.example so the app runs out of the box
+  createDotEnv(destDir, apiUrl);
+
+  // 6. Clean up template artifacts
   cleanupArtifacts(destDir);
 
-  // 6. Git init
+  // 7. Git init
   if (initGit) {
     initGitRepo(destDir);
   }
@@ -243,7 +246,24 @@ function replaceTokens(
   }
 }
 
-// ─── Step 5: Cleanup ─────────────────────────────────────────────────────────
+// ─── Step 5: Create .env ─────────────────────────────────────────────────────
+
+function createDotEnv(destDir: string, apiUrl: string): void {
+  const examplePath = path.join(destDir, '.env.example');
+  const envPath = path.join(destDir, '.env');
+
+  if (exists(examplePath)) {
+    let content = readText(examplePath);
+    content = content.replace(
+      /^EXPO_PUBLIC_API_URL=.*/m,
+      `EXPO_PUBLIC_API_URL=${apiUrl}`,
+    );
+    writeText(envPath, content);
+    logOk('.env created from .env.example');
+  }
+}
+
+// ─── Step 6: Cleanup ────────────────────────────────────────────────────────
 
 function cleanupArtifacts(destDir: string): void {
   // Remove .git from clone
@@ -268,7 +288,7 @@ function cleanupArtifacts(destDir: string): void {
   }
 }
 
-// ─── Step 6: Git init ────────────────────────────────────────────────────────
+// ─── Step 7: Git init ────────────────────────────────────────────────────────
 
 function initGitRepo(destDir: string): void {
   const gitResult = exec('git init', destDir);
