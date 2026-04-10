@@ -1,5 +1,11 @@
 # @nimoh-digital-solutions/create-nimoh-app
 
+## 1.4.2
+
+### Patch Changes
+
+- e1b6398: Clean up project directory on scaffold failure instead of leaving partial files behind
+
 ## 1.4.1
 
 ### Patch Changes
