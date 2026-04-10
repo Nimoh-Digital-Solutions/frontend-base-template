@@ -1,6 +1,6 @@
 {
   "name": "@nimoh-digital-solutions/create-tast-mobile-app",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Scaffold a React Native (Expo) mobile app from the nimoh base template",
   "type": "module",
   "bin": "./dist/index.cjs",
