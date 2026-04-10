@@ -144,14 +144,15 @@ export function commandExists(cmd: string): boolean {
 // ─── String helpers ───────────────────────────────────────────────────────────
 
 /**
- * Convert a string to a kebab-case slug.
- * e.g. "My Cool App" → "my-cool-app"
+ * Sanitise a project name into a filesystem-safe slug.
+ * Preserves both hyphens and underscores so the user's intent is kept.
+ * e.g. "My Cool App" → "my-cool-app", "my_app" → "my_app"
  */
 export function toKebab(name: string): string {
   return name
     .toLowerCase()
-    .replace(/[^a-z0-9-]/g, '-')
-    .replace(/--+/g, '-')
+    .replace(/[^a-z0-9_-]/g, '-')
+    .replace(/[-]+/g, '-')
     .replace(/^-|-$/g, '');
 }
 

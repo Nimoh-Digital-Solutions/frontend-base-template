@@ -56,7 +56,7 @@ async function main(): Promise<void> {
           message: 'Project name:',
           initial: 'my-nimoh-app',
           validate: (v: string) =>
-            /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(toKebab(v)) || 'Must be a valid kebab-case slug',
+            /^[a-z0-9]+(?:[-_][a-z0-9]+)*$/.test(toKebab(v)) || 'Must be a valid slug (lowercase, hyphens or underscores)',
         },
         {
           type: 'number',
